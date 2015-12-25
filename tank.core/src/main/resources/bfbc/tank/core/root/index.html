@@ -1,0 +1,250 @@
+<html>
+<head>
+	<script src="/js/tools.js"></script>
+
+	<title>Tanks proto</title>
+	<script>
+		var cellSize = 22;
+	
+		// Preloading
+		var tankCaterpillar1_Preload = new Image();
+		tankCaterpillar1_Preload.src = "img/tank_parts/tank-caterpillars-frame1.svg"; 
+		var tankCaterpillar2_Preload = new Image();
+		tankCaterpillar2_Preload.src = "img/tank_parts/tank-caterpillars-frame2.svg"; 
+		var tankBody_Preload = new Image();
+		tankBody_Preload.src = "img/tank_parts/tank-full-body.svg"; 
+		var concrete_Preload = new Image();
+		concrete_Preload.src = "img/concrete-full.svg"; 
+		
+	
+		var websocket;
+		var webSocketAddress;
+		function init()
+		{
+			webSocketAddress = buildWebSocketAddress("player");
+			openStatusSocket();
+		}
+			
+		function openStatusSocket() {
+		    websocket = new WebSocket(webSocketAddress);
+		    
+		    websocket.onopen = function(evt) {
+		    };
+		    
+		    websocket.onmessage = function(evt) {
+				var playerTankNode = document.getElementById("player-tank");
+				var playerCaterpillarsNode = document.getElementById("player-tank-caterpillars");
+
+		    	var gameState = JSON.parse(evt.data);
+				playerCaterpillarsNode.moving = gameState.player.moving;
+				playerTankNode.posX = gameState.player.posX;
+				playerTankNode.posY = gameState.player.posY;
+				playerTankNode.angle = gameState.player.angle;
+				
+				for (var j = 0; j < gameState.fieldHeight; j++) {
+					for (var i = 0; i < gameState.fieldWidth; i++) {
+						var cell = document.cells[j * gameState.fieldWidth + i];
+						
+						cell.classList.remove("concrete");
+						
+						if (gameState.field[j * gameState.fieldWidth + i].type == "CONCRETE") {
+							cell.classList.add("concrete");
+						}
+					}
+				}
+				
+				
+		    	//throw 'Invalid message from client: "' + evt.data + '"';
+		    };
+		    websocket.onerror = function(evt) {
+		    };
+		    websocket.onclose = function(evt) {
+		    };
+		}
+	
+		var fieldWidth = 28;
+		var fieldHeight = 26;
+	
+		function fieldInit(fieldNode) {
+			document.cells = [];
+		
+			fieldNode.style.width = (fieldWidth * cellSize) + "px";
+			fieldNode.style.height = (fieldHeight * cellSize) + "px";
+		
+			for (var j = 0; j < fieldHeight; j++) {
+				for (var i = 0; i < fieldWidth; i++) {
+					var cell = document.createElement("div");
+					cell.classList.add("field-cell");
+
+					cell.style.left = (cellSize * i + 1.25) + "px";
+					cell.style.top = (cellSize * j + 1.25) + "px";
+
+					fieldNode.appendChild(cell);
+					document.cells[j * fieldWidth + i] = cell;
+				}
+			}
+		}
+	
+		function caterpillarInit(tankNode) {
+			tankNode.caterpillarFrame = 0;
+		}
+		function caterpillarFrame(tankNode) {
+			if (tankNode.moving) {
+				tankNode.caterpillarFrame = (tankNode.caterpillarFrame + 1) % 2;
+			}
+			tankNode.style.backgroundImage = "url('img/tank_parts/tank-caterpillars-frame" + (tankNode.caterpillarFrame + 1) + ".svg')";
+		}
+		
+		function movementInit(tankNode) {
+			tankNode.posX = 20;
+			tankNode.posY = 40;
+			tankNode.angle = 0;
+			tankNode.moving = false;
+		}
+					
+		function movementFrame(tankNode) {
+			tankNode.style.transform = "rotate(" + (tankNode.angle) + "deg)";
+			tankNode.style.left = tankNode.posX + "px";
+			tankNode.style.top = tankNode.posY + "px";
+
+		}
+
+		// Setting events
+		
+		window.addEventListener("load", function() {
+			var playerTankNode = document.getElementById("player-tank");
+			var playerCaterpillarsNode = document.getElementById("player-tank-caterpillars");
+			var fieldNode = document.getElementById("field");
+			
+			init();
+			
+			window.frame = 0;
+			fieldInit(fieldNode);
+			caterpillarInit(playerCaterpillarsNode);
+			movementInit(playerTankNode);
+			window.setInterval(function() {
+				window.frame ++;
+				if (window.frame % 4 == 0) caterpillarFrame(playerCaterpillarsNode);
+				movementFrame(playerTankNode);
+			}, 15);
+			
+		});
+	
+		var keysDown = {
+			up: false,
+			down: false,
+			left: false,
+			right: false
+		};
+
+		function sendCommands() {
+			websocket.send(JSON.stringify(keysDown));
+		}
+		
+		window.addEventListener("keydown", function(e) {
+			var playerTankNode = document.getElementById("player");
+
+			e = e || window.event;
+
+			if (e.keyCode == '38') {
+				// up arrow
+				keysDown.up = true;
+			}
+			else if (e.keyCode == '40') {
+				// down arrow
+				keysDown.down = true;
+			}
+			else if (e.keyCode == '37') {
+				// left arrow
+				keysDown.left = true;
+			}
+			else if (e.keyCode == '39') {
+				// right arrow
+				keysDown.right = true;
+			}
+			
+			sendCommands();
+		});
+		
+		window.addEventListener("keyup", function(e) {
+			var playerTankNode = document.getElementById("player");
+
+			e = e || window.event;
+
+			if (e.keyCode == '38') {
+				// up arrow
+				keysDown.up = false;
+			}
+			else if (e.keyCode == '40') {
+				// down arrow
+				keysDown.down = false;
+			}
+			else if (e.keyCode == '37') {
+				// left arrow
+				keysDown.left = false;
+			}
+			else if (e.keyCode == '39') {
+				// right arrow
+				keysDown.right = false;
+			}
+			
+			sendCommands();
+		});
+
+	</script>
+	<style>
+		div.tank {
+			position: absolute;
+			left: 20px;
+			top: 40px;
+			width: 40px;
+			height: 40px;
+			background-repeat: no-repeat;
+			background-size: 100% 100%;
+		}
+		
+		div.tank-caterpillars {
+			position: absolute; left: 0; top: 0;
+			width: 40px;
+			height: 40px;
+			background-repeat: no-repeat;
+			background-size: 100% 100%;
+		}
+		
+		div.tank-body {
+			position: absolute; left: 0; top: 0;
+			width: 40px;
+			height: 40px;
+			background-repeat: no-repeat;
+			background-size: 100% 100%;
+			background-image: url('img/tank_parts/tank-full-body.svg');
+		}
+		
+		div.field-cell {
+			position: absolute;
+			width: 24px;
+			height: 24px;
+		}
+
+		div.concrete {
+			position: absolute; left: 0; top: 0;
+			width: 24px;
+			height: 24px;
+			background-image: url('img/concrete-full.svg');
+			background-repeat: no-repeat;
+			background-size: 100% 100%;
+		}
+		
+	</style>
+</head>
+<body>
+	<!-- 28x26 -->
+	<div id="field"></div>
+
+	<div id="player-tank" class="tank">
+		<div id="player-tank-caterpillars" class="tank-caterpillars"></div>
+		<div id="player-tank-body" class="tank-body"></div>
+	</div>
+
+</body>
+</html>
