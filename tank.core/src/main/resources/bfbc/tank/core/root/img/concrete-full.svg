@@ -1354,14 +1354,6 @@
     </mask>
     <filter
        inkscape:collect="always"
-       id="filter5327-3">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.55910543"
-         id="feGaussianBlur5329-0" />
-    </filter>
-    <filter
-       inkscape:collect="always"
        style="color-interpolation-filters:sRGB"
        id="filter5572"
        x="-0.02994614"
@@ -1386,6 +1378,19 @@
          stdDeviation="0.62053571"
          id="feGaussianBlur5574-5" />
     </filter>
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter9297"
+       x="-0.054"
+       width="1.108"
+       y="-0.054"
+       height="1.108">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.125"
+         id="feGaussianBlur9299" />
+    </filter>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -1394,9 +1399,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="7.919596"
-     inkscape:cx="4.3450997"
-     inkscape:cy="33.563695"
+     inkscape:zoom="8.7548659"
+     inkscape:cx="-7.1775834"
+     inkscape:cy="28.080928"
      inkscape:document-units="px"
      inkscape:current-layer="svg2"
      showgrid="false"
@@ -1456,7 +1461,7 @@
      mask="url(#mask5264-8)"
      transform="matrix(-0.00722171,-0.99997392,0.99997392,-0.00722171,160.76573,54.809982)" />
   <rect
-     style="fill:#000000;fill-opacity:1;stroke:#808080;filter:url(#filter5327-3)"
+     style="fill:#000000;fill-opacity:1;stroke:#808080;filter:url(#filter9297)"
      id="rect4415-9-4"
      width="50"
      height="50"
@@ -1475,7 +1480,7 @@
      ry="1.5101523" />
   <path
      style="fill:#000000;fill-opacity:0.4534884;stroke:none;filter:url(#filter5572)"
-     d="m 51.953813,2.4134223 c 0.571573,1.0637237 1.076649,0.9847137 1.076649,1.8213381 l 0,46.9796956 c 0,0.836624 -0.692958,1.510152 -1.553716,1.510152 l -46.892569,0 c -0.860758,0 -1.6646652,-0.869833 -1.6646652,-0.869833 C 16.066273,38.588687 37.670661,17.118232 51.953813,2.4134223 Z"
+     d="m 51.953813,2.4134223 c 0.571573,1.0637237 1.076649,0.9847137 1.076649,1.8213381 l 0,46.9796956 c 0,0.836624 -0.692958,1.510152 -1.553716,1.510152 l -46.892569,0 c -0.860758,0 -1.664665,-0.869833 -1.664665,-0.869833 C 16.066273,38.588687 37.670661,17.118232 51.953813,2.4134223 Z"
      id="rect4415-07-0"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="csssscc" />

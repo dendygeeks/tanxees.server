@@ -7,14 +7,13 @@
 		var cellSize = 22;
 	
 		// Preloading
-		var tankCaterpillar1_Preload = new Image();
-		tankCaterpillar1_Preload.src = "img/tank_parts/tank-caterpillars-frame1.svg"; 
-		var tankCaterpillar2_Preload = new Image();
-		tankCaterpillar2_Preload.src = "img/tank_parts/tank-caterpillars-frame2.svg"; 
-		var tankBody_Preload = new Image();
-		tankBody_Preload.src = "img/tank_parts/tank-full-body.svg"; 
-		var concrete_Preload = new Image();
-		concrete_Preload.src = "img/concrete-full.svg"; 
+		new Image().src = "img/tank_parts/tank-caterpillars-frame1.svg"; 
+		new Image().src = "img/tank_parts/tank-caterpillars-frame2.svg"; 
+		new Image().src = "img/tank_parts/green/tank-caterpillars-frame1-overlay.svg"; 
+		new Image().src = "img/tank_parts/green/tank-caterpillars-frame2-overlay.svg"; 
+		new Image().src = "img/tank_parts/tank-full-body.svg"; 
+		new Image().src = "img/tank_parts/green/tank-full-body-overlay.svg"; 
+		new Image().src = "img/concrete-full.svg"; 
 		
 	
 		var websocket;
@@ -85,14 +84,15 @@
 			}
 		}
 	
-		function caterpillarInit(tankNode) {
-			tankNode.caterpillarFrame = 0;
+		function caterpillarInit(caterpillarNode) {
+			caterpillarNode.caterpillarFrame = 0;
 		}
-		function caterpillarFrame(tankNode) {
-			if (tankNode.moving) {
-				tankNode.caterpillarFrame = (tankNode.caterpillarFrame + 1) % 2;
+		function caterpillarFrame(caterpillarNode, caterpillarOverlayNode) {
+			if (caterpillarNode.moving) {
+				caterpillarNode.caterpillarFrame = (caterpillarNode.caterpillarFrame + 1) % 2;
 			}
-			tankNode.style.backgroundImage = "url('img/tank_parts/tank-caterpillars-frame" + (tankNode.caterpillarFrame + 1) + ".svg')";
+			caterpillarNode.style.backgroundImage = "url('img/tank_parts/tank-caterpillars-frame" + (caterpillarNode.caterpillarFrame + 1) + ".svg')";
+			caterpillarOverlayNode.style.backgroundImage = "url('img/tank_parts/green/tank-caterpillars-frame" + (caterpillarNode.caterpillarFrame + 1) + "-overlay.svg')";
 		}
 		
 		function movementInit(tankNode) {
@@ -114,6 +114,7 @@
 		window.addEventListener("load", function() {
 			var playerTankNode = document.getElementById("player-tank");
 			var playerCaterpillarsNode = document.getElementById("player-tank-caterpillars");
+			var playerCaterpillarsOverlayNode = document.getElementById("player-tank-caterpillars-overlay");
 			var fieldNode = document.getElementById("field");
 			
 			init();
@@ -124,7 +125,7 @@
 			movementInit(playerTankNode);
 			window.setInterval(function() {
 				window.frame ++;
-				if (window.frame % 4 == 0) caterpillarFrame(playerCaterpillarsNode);
+				if (window.frame % 4 == 0) caterpillarFrame(playerCaterpillarsNode, playerCaterpillarsOverlayNode);
 				movementFrame(playerTankNode);
 			}, 15);
 			
@@ -211,6 +212,16 @@
 			background-size: 100% 100%;
 		}
 		
+		div.tank-caterpillars-overlay {
+			position: absolute; left: 0; top: 0;
+			width: 40px;
+			height: 40px;
+			background-repeat: no-repeat;
+			background-size: 100% 100%;
+			background-image: url('img/tank_parts/green/tank-caterpillars-frame1-overlay.svg');
+			mix-blend-mode: multiply;
+		}
+
 		div.tank-body {
 			position: absolute; left: 0; top: 0;
 			width: 40px;
@@ -218,6 +229,16 @@
 			background-repeat: no-repeat;
 			background-size: 100% 100%;
 			background-image: url('img/tank_parts/tank-full-body.svg');
+		}
+
+		div.tank-body-overlay {
+			position: absolute; left: 0; top: 0;
+			width: 40px;
+			height: 40px;
+			background-repeat: no-repeat;
+			background-size: 100% 100%;
+			background-image: url('img/tank_parts/green/tank-full-body-overlay.svg');
+			mix-blend-mode: multiply;
 		}
 		
 		div.field-cell {
@@ -235,15 +256,21 @@
 			background-size: 100% 100%;
 		}
 		
+		div.field {
+			background-color: #eeeeee;
+		}
+		
 	</style>
 </head>
 <body>
 	<!-- 28x26 -->
-	<div id="field"></div>
+	<div id="field" class="field"></div>
 
 	<div id="player-tank" class="tank">
 		<div id="player-tank-caterpillars" class="tank-caterpillars"></div>
+		<div id="player-tank-caterpillars-overlay" class="tank-caterpillars-overlay"></div>
 		<div id="player-tank-body" class="tank-body"></div>
+		<div id="player-tank-overlay" class="tank-body-overlay"></div>
 	</div>
 
 </body>
