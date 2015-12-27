@@ -1189,32 +1189,6 @@
          offset="1"
          id="stop3841-1-1-2-7-2-2-2-3-3" />
     </linearGradient>
-    <filter
-       style="color-interpolation-filters:sRGB"
-       inkscape:collect="always"
-       id="filter5515-1"
-       x="-0.036463022"
-       width="1.072926"
-       y="-0.12063829"
-       height="1.2412766">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="1.1932426"
-         id="feGaussianBlur5517-8" />
-    </filter>
-    <filter
-       style="color-interpolation-filters:sRGB"
-       inkscape:collect="always"
-       id="filter5515"
-       x="-0.036463022"
-       width="1.072926"
-       y="-0.12063829"
-       height="1.2412766">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="1.1932426"
-         id="feGaussianBlur5517" />
-    </filter>
     <radialGradient
        r="28.085661"
        fy="55.317032"
@@ -1731,6 +1705,32 @@
        y1="17.5"
        x2="82.5"
        y2="17.5" />
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter5526"
+       x="-0.078135048"
+       width="1.1562701"
+       y="-0.25851064"
+       height="1.5170213">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.5569486"
+         id="feGaussianBlur5528" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter5530"
+       x="-0.078135048"
+       width="1.1562701"
+       y="-0.25851064"
+       height="1.5170213">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.5569486"
+         id="feGaussianBlur5532" />
+    </filter>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -1740,10 +1740,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.959798"
-     inkscape:cx="60.894624"
+     inkscape:cx="23.51898"
      inkscape:cy="60.220425"
      inkscape:document-units="px"
-     inkscape:current-layer="layer5"
+     inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1366"
      inkscape:window-height="715"
@@ -1766,7 +1766,7 @@
      inkscape:groupmode="layer"
      id="layer6"
      inkscape:label="Body Shadow Back"
-     style="display:inline">
+     style="display:none">
     <rect
        style="opacity:0.5;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter5469)"
        id="rect4761-3-6"
@@ -1782,9 +1782,9 @@
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="Caterpillars Shadow"
-     style="display:inline">
+     style="display:none">
     <rect
-       style="display:inline;opacity:1;fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter5515-1)"
+       style="display:inline;opacity:1;fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter5526)"
        id="rect5473-6"
        width="78.53936"
        height="23.738585"
@@ -1793,7 +1793,7 @@
        rx="2.7441936"
        ry="2.6991174" />
     <rect
-       style="display:inline;opacity:1;fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter5515)"
+       style="display:inline;opacity:1;fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter5530)"
        id="rect5473"
        width="78.53936"
        height="23.738585"

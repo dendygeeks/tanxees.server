@@ -76,10 +76,7 @@ public class Player implements Box, BoxConstruction<Box>  {
 		this.angle = angle;
 	}
 	
-	public void frameStep(double dt) {
-		// Initiating boxes
-		//BoxConstructionCollider<Box>
-		
+	public void frameStep() {
 		moving = false;
 		if (activeCommand.isDown()) {
 			direction = Direction.DOWN;
@@ -94,7 +91,7 @@ public class Player implements Box, BoxConstruction<Box>  {
 			direction = Direction.UP;
 			moving = true;
 		}
-		
+
 		double angleDelta = DIRECTION_ANGLES.get(direction) - angle;
 		if (angleDelta < -180) angleDelta += 360;
 		if (angleDelta > 180) angleDelta -= 360;
@@ -103,33 +100,38 @@ public class Player implements Box, BoxConstruction<Box>  {
 		double angleVel = 500;
 		double angleSmall = angleVel / 50;
 		if (angleDelta > angleSmall) {
-			angle += angleVel * dt;
+			angle += angleVel * Game.TICK;
 			moving = true;
 		} else if (angleDelta < -angleSmall) {
-			angle -= angleVel * dt;
+			angle -= angleVel * Game.TICK;
 			moving = true;
 		} else {
 			angle = DIRECTION_ANGLES.get(direction);
 			notRotating = true;
 		}
 
-		double vel = 85d;
+		double displacement = 85d * Game.TICK;
 		
 		// If we are not rotating, we are moving
 		if (notRotating && moving) {
-			if (direction == Direction.LEFT) {
-				collider.tryMove(Player.this, new DeltaXY(-dt * vel, 0));
-				//posX -= dt * vel;
-			} else if (direction == Direction.RIGHT) {
-				collider.tryMove(Player.this, new DeltaXY(dt * vel, 0));
-				//posX += dt * vel;
-			} else if (direction == Direction.UP) {
-				collider.tryMove(Player.this, new DeltaXY(0, -dt * vel));
-				//posY -= dt * vel;
-			} else if (direction == Direction.DOWN) {
-				collider.tryMove(Player.this, new DeltaXY(0, dt * vel));
-				//posY += dt * vel;
+			DeltaXY dxy;
+			switch (direction) {
+			case LEFT:
+				dxy = new DeltaXY(-displacement, 0);
+				break;
+			case RIGHT:
+				dxy = new DeltaXY(displacement, 0);
+				break;
+			case UP:
+				dxy = new DeltaXY(0, -displacement);
+				break;
+			case DOWN:
+				dxy = new DeltaXY(0, displacement);
+				break;
+			default:
+				throw new RuntimeException("Strange direction case");
 			}
+			collider.tryMove(Player.this, dxy);
 		}
 		
 	}

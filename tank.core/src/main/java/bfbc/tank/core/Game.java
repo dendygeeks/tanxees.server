@@ -7,10 +7,14 @@ import bfbc.tank.core.mechanics.BoxConstructionCollider;
 
 public class Game extends Thread {
 	
+	public static double TICK = 1.0 / 120;	// 2 * 60FPS
+	public static double FRONTEND_TICK = 1.0 / 30;	// 30FPS
+	public static int FRONTEND_DELAY = (int)(1000 * FRONTEND_TICK);
+	
 	@Expose
-	public final int fieldWidth = 28;
+	public final int fieldWidth = 29;
 	@Expose
-	public final int fieldHeight = 26;
+	public final int fieldHeight = 27;
 	
 	public static interface StateUpdateHandler {
 		void update(Game state);
@@ -22,7 +26,7 @@ public class Game extends Thread {
 	private FieldBoxConstruction fieldBoxConstruction = new FieldBoxConstruction();
 	
 	@Expose
-	private volatile Player player;
+	private volatile Player[] players;
 	
 	@Expose
 	private volatile Cell[] field = new Cell[fieldWidth * fieldHeight];
@@ -31,8 +35,8 @@ public class Game extends Thread {
 	private double deltaTime() {
 		return (double)System.currentTimeMillis() / 1000 - time;
 	}
-	private void updateTime() {
-		time = (double)System.currentTimeMillis() / 1000;
+	private void updateTime(int ticks) {
+		time += ticks * TICK;
 	}
 	
 	public Game(StateUpdateHandler stateUpdateHandler) {
@@ -47,14 +51,21 @@ public class Game extends Thread {
 		collider.addAgent(fieldBoxConstruction);
 		
 		time = (double)System.currentTimeMillis() / 1000;
-		player = new Player(collider, Direction.RIGHT, 
+		players = new Player[2];
+		players[0] = new Player(collider, Direction.RIGHT, 
 		                    new PlayerCommand(false, false, false, false), 
 		                    false, 75, 25, 0);
-		collider.addAgent(player);
+		players[1] = new Player(collider, Direction.LEFT, 
+                new PlayerCommand(false, false, false, false), 
+                false, 200, 25, 0);
+		collider.addAgent(players[0]);
+		collider.addAgent(players[1]);
 	}
 	
-	public void frameStep(double dt) {
-		player.frameStep(dt);
+	public void frameStep() {
+		for (int i = 0; i < players.length; i++) {
+			players[i].frameStep();
+		}
 	}
 	
 	@Override
@@ -63,14 +74,18 @@ public class Game extends Thread {
 
 			double dt = deltaTime();
 
-			frameStep(dt);
+			int ticks = (int) (dt / TICK);
+			
+			for(int t = 0; t < ticks; t++) {
+				frameStep();
+			}
 			
 			stateUpdateHandler.update(this);
 			
-			updateTime();
+			updateTime(ticks);
 
 			try {
-				Thread.sleep(25);
+				Thread.sleep(FRONTEND_DELAY);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -78,8 +93,8 @@ public class Game extends Thread {
 
 	}
 	
-	public void setPlayerCommands(PlayerCommand playerCommand) {
-		this.player.setActiveCommand(playerCommand);
+	public void setPlayerCommands(int playerIndex, PlayerCommand playerCommand) {
+		this.players[playerIndex].setActiveCommand(playerCommand);
 	}
 	
 	public String toJson() {
@@ -93,6 +108,9 @@ public class Game extends Thread {
 	
 	public CellType getFieldCellType(int x, int y) {
 		return this.field[y * fieldWidth + x].getType();
+	}
+	public int getPlayersCount() {
+		return 2;
 	}
 
 }

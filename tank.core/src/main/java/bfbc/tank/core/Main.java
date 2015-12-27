@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 public class Main {
 	private static final String STATIC_ROOT = "/" + Main.class.getPackage().getName().replace('.', '/') + "/root";
 	
+	
+	
     public static void main(String[] args) {
     	port(9876);
     	staticFileLocation(STATIC_ROOT);

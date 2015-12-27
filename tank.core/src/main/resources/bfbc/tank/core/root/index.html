@@ -9,10 +9,14 @@
 		// Preloading
 		new Image().src = "img/tank_parts/tank-caterpillars-frame1.svg"; 
 		new Image().src = "img/tank_parts/tank-caterpillars-frame2.svg"; 
+		new Image().src = "img/tank_parts/tank-shadow.svg"; 
 		new Image().src = "img/tank_parts/green/tank-caterpillars-frame1-overlay.svg"; 
 		new Image().src = "img/tank_parts/green/tank-caterpillars-frame2-overlay.svg"; 
+		new Image().src = "img/tank_parts/yellow/tank-caterpillars-frame1-overlay.svg"; 
+		new Image().src = "img/tank_parts/yellow/tank-caterpillars-frame2-overlay.svg"; 
 		new Image().src = "img/tank_parts/tank-full-body.svg"; 
 		new Image().src = "img/tank_parts/green/tank-full-body-overlay.svg"; 
+		new Image().src = "img/tank_parts/yellow/tank-full-body-overlay.svg"; 
 		new Image().src = "img/concrete-full.svg"; 
 		
 	
@@ -31,14 +35,20 @@
 		    };
 		    
 		    websocket.onmessage = function(evt) {
-				var playerTankNode = document.getElementById("player-tank");
-				var playerCaterpillarsNode = document.getElementById("player-tank-caterpillars");
-
 		    	var gameState = JSON.parse(evt.data);
-				playerCaterpillarsNode.moving = gameState.player.moving;
-				playerTankNode.posX = gameState.player.posX;
-				playerTankNode.posY = gameState.player.posY;
-				playerTankNode.angle = gameState.player.angle;
+
+				var playerTankNode = {}
+				var playerCaterpillarsNode = {}
+				
+				for (var i = 0; i < 2; i++) {
+					playerTankNode[i] = document.getElementById("player" + (i+1) + "-tank");
+					playerCaterpillarsNode[i] = document.getElementById("player" + (i+1) + "-tank-caterpillars");
+
+					playerCaterpillarsNode[i].moving = gameState.players[i].moving;
+					playerTankNode[i].posX = gameState.players[i].posX;
+					playerTankNode[i].posY = gameState.players[i].posY;
+					playerTankNode[i].angle = gameState.players[i].angle;
+				}
 				
 				for (var j = 0; j < gameState.fieldHeight; j++) {
 					for (var i = 0; i < gameState.fieldWidth; i++) {
@@ -61,8 +71,8 @@
 		    };
 		}
 	
-		var fieldWidth = 28;
-		var fieldHeight = 26;
+		var fieldWidth = 29;
+		var fieldHeight = 27;
 	
 		function fieldInit(fieldNode) {
 			document.cells = [];
@@ -75,8 +85,8 @@
 					var cell = document.createElement("div");
 					cell.classList.add("field-cell");
 
-					cell.style.left = (cellSize * i + 1.25) + "px";
-					cell.style.top = (cellSize * j + 1.25) + "px";
+					cell.style.left = (cellSize * i - 1.5) + "px";
+					cell.style.top = (cellSize * j - 1.5) + "px";
 
 					fieldNode.appendChild(cell);
 					document.cells[j * fieldWidth + i] = cell;
@@ -92,7 +102,7 @@
 				caterpillarNode.caterpillarFrame = (caterpillarNode.caterpillarFrame + 1) % 2;
 			}
 			caterpillarNode.style.backgroundImage = "url('img/tank_parts/tank-caterpillars-frame" + (caterpillarNode.caterpillarFrame + 1) + ".svg')";
-			caterpillarOverlayNode.style.backgroundImage = "url('img/tank_parts/green/tank-caterpillars-frame" + (caterpillarNode.caterpillarFrame + 1) + "-overlay.svg')";
+			caterpillarOverlayNode.style.backgroundImage = "url('img/tank_parts/' + caterpillarOverlayNode.skin + '/tank-caterpillars-frame" + (caterpillarNode.caterpillarFrame + 1) + "-overlay.svg')";
 		}
 		
 		function movementInit(tankNode) {
@@ -112,21 +122,37 @@
 		// Setting events
 		
 		window.addEventListener("load", function() {
-			var playerTankNode = document.getElementById("player-tank");
-			var playerCaterpillarsNode = document.getElementById("player-tank-caterpillars");
-			var playerCaterpillarsOverlayNode = document.getElementById("player-tank-caterpillars-overlay");
+			var skins = [ "yellow", "green" ]
+			
+			var playerTankNode = []
+			var playerCaterpillarsNode = []
+			var playerCaterpillarsOverlayNode = []
+			
+			for (var i = 0; i < 2; i++) {
+				playerTankNode[i] = document.getElementById("player" + (i+1) + "-tank");
+				playerCaterpillarsNode[i] = document.getElementById("player" + (i+1) + "-tank-caterpillars");
+				playerCaterpillarsOverlayNode[i] = document.getElementById("player" + (i+1) + "-tank-caterpillars-overlay");
+
+				playerCaterpillarsNode[i].skin = skins[i]; 
+				
+				caterpillarInit(playerCaterpillarsNode[i]);
+				movementInit(playerTankNode[i]);
+			}
+
 			var fieldNode = document.getElementById("field");
 			
 			init();
 			
 			window.frame = 0;
 			fieldInit(fieldNode);
-			caterpillarInit(playerCaterpillarsNode);
-			movementInit(playerTankNode);
 			window.setInterval(function() {
 				window.frame ++;
-				if (window.frame % 4 == 0) caterpillarFrame(playerCaterpillarsNode, playerCaterpillarsOverlayNode);
-				movementFrame(playerTankNode);
+				for (var i = 0; i < 2; i++) {
+					if (window.frame % 4 == 0) {
+						caterpillarFrame(playerCaterpillarsNode[i], playerCaterpillarsOverlayNode[i]);
+					}
+					movementFrame(playerTankNode[i]);
+				}
 			}, 15);
 			
 		});
@@ -143,7 +169,6 @@
 		}
 		
 		window.addEventListener("keydown", function(e) {
-			var playerTankNode = document.getElementById("player");
 
 			e = e || window.event;
 
@@ -168,7 +193,6 @@
 		});
 		
 		window.addEventListener("keyup", function(e) {
-			var playerTankNode = document.getElementById("player");
 
 			e = e || window.event;
 
@@ -194,6 +218,11 @@
 
 	</script>
 	<style>
+		body {
+			margin: 0;
+			background-color: black;
+		}
+	
 		div.tank {
 			position: absolute;
 			left: 20px;
@@ -218,8 +247,13 @@
 			height: 40px;
 			background-repeat: no-repeat;
 			background-size: 100% 100%;
-			background-image: url('img/tank_parts/green/tank-caterpillars-frame1-overlay.svg');
 			mix-blend-mode: multiply;
+		}
+		div.tank-caterpillars-overlay.green {
+			background-image: url('img/tank_parts/green/tank-caterpillars-frame1-overlay.svg');
+		}
+		div.tank-caterpillars-overlay.yellow {
+			background-image: url('img/tank_parts/yellow/tank-caterpillars-frame1-overlay.svg');
 		}
 
 		div.tank-body {
@@ -231,33 +265,49 @@
 			background-image: url('img/tank_parts/tank-full-body.svg');
 		}
 
+		div.tank-shadow {
+			position: absolute; left: 0; top: 0;
+			width: 40px;
+			height: 40px;
+			background-repeat: no-repeat;
+			background-size: 100% 100%;
+			background-image: url('img/tank_parts/tank-shadow.svg');
+		}
+
 		div.tank-body-overlay {
 			position: absolute; left: 0; top: 0;
 			width: 40px;
 			height: 40px;
 			background-repeat: no-repeat;
 			background-size: 100% 100%;
-			background-image: url('img/tank_parts/green/tank-full-body-overlay.svg');
 			mix-blend-mode: multiply;
+		}
+		
+		div.tank-body-overlay.green {
+			background-image: url('img/tank_parts/green/tank-full-body-overlay.svg');
+		}
+		div.tank-body-overlay.yellow {
+			background-image: url('img/tank_parts/yellow/tank-full-body-overlay.svg');
 		}
 		
 		div.field-cell {
 			position: absolute;
-			width: 24px;
-			height: 24px;
+			width: 28px;
+			height: 28px;
 		}
 
 		div.concrete {
 			position: absolute; left: 0; top: 0;
-			width: 24px;
-			height: 24px;
+			width: 28px;
+			height: 28px;
 			background-image: url('img/concrete-full.svg');
 			background-repeat: no-repeat;
 			background-size: 100% 100%;
 		}
 		
 		div.field {
-			background-color: #eeeeee;
+			margin: 0;
+			background: linear-gradient(-170deg, #505850, #657065);
 		}
 		
 	</style>
@@ -266,11 +316,19 @@
 	<!-- 28x26 -->
 	<div id="field" class="field"></div>
 
-	<div id="player-tank" class="tank">
-		<div id="player-tank-caterpillars" class="tank-caterpillars"></div>
-		<div id="player-tank-caterpillars-overlay" class="tank-caterpillars-overlay"></div>
-		<div id="player-tank-body" class="tank-body"></div>
-		<div id="player-tank-overlay" class="tank-body-overlay"></div>
+	<div id="player1-tank" class="tank">
+		<div id="player1-tank-shadow" class="tank-shadow"></div>
+		<div id="player1-tank-caterpillars" class="tank-caterpillars"></div>
+		<div id="player1-tank-caterpillars-overlay" class="tank-caterpillars-overlay yellow"></div>
+		<div id="player1-tank-body" class="tank-body"></div>
+		<div id="player1-tank-overlay" class="tank-body-overlay yellow"></div>
+	</div>
+	<div id="player2-tank" class="tank">
+		<div id="player2-tank-shadow" class="tank-shadow"></div>
+		<div id="player2-tank-caterpillars" class="tank-caterpillars"></div>
+		<div id="player2-tank-caterpillars-overlay" class="tank-caterpillars-overlay green"></div>
+		<div id="player2-tank-body" class="tank-body"></div>
+		<div id="player2-tank-overlay" class="tank-body-overlay green"></div>
 	</div>
 
 </body>
