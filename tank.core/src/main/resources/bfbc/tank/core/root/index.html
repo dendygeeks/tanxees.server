@@ -62,6 +62,18 @@
 					}
 				}
 				
+				var missileNode = []
+				for (var i = 0; i < 2; i++) {
+					missileNode[i] = document.getElementById("missile" + (i+1));
+					if (gameState.missiles[i].length == 1) {
+						missileNode[i].style.visibility = 'visible';
+						missileNode[i].posX = gameState.missiles[i][0].posX;
+						missileNode[i].posY = gameState.missiles[i][0].posY;
+						missileNode[i].angle = gameState.missiles[i][0].angle;
+					} else {
+						missileNode[i].style.visibility = 'hidden';
+					}
+				}
 				
 		    	//throw 'Invalid message from client: "' + evt.data + '"';
 		    };
@@ -153,6 +165,13 @@
 					}
 					movementFrame(playerTankNode[i]);
 				}
+				
+				var missileNode = []
+				for (var i = 0; i < 2; i++) {
+					missileNode[i] = document.getElementById("missile" + (i+1));
+					movementFrame(missileNode[i]);
+				}
+				
 			}, 15);
 			
 		});
@@ -161,7 +180,8 @@
 			up: false,
 			down: false,
 			left: false,
-			right: false
+			right: false,
+			fire: false
 		};
 
 		function sendCommands() {
@@ -188,6 +208,10 @@
 				// right arrow
 				keysDown.right = true;
 			}
+			else if (e.keyCode == '32') {
+				// spacebar
+				keysDown.fire = true;
+			}
 			
 			sendCommands();
 		});
@@ -211,6 +235,10 @@
 			else if (e.keyCode == '39') {
 				// right arrow
 				keysDown.right = false;
+			}
+			else if (e.keyCode == '32') {
+				// spacebar
+				keysDown.fire = false;
 			}
 			
 			sendCommands();
@@ -310,6 +338,15 @@
 			background: linear-gradient(-170deg, #505850, #657065);
 		}
 		
+		div.missile {
+			position: absolute; left: 0; top: 0;
+			width: 20px;
+			height: 20px;
+			background-repeat: no-repeat;
+			background-size: 100% 100%;
+			background-image: url('img/missile.svg');
+		}
+		
 	</style>
 </head>
 <body>
@@ -330,6 +367,9 @@
 		<div id="player2-tank-body" class="tank-body"></div>
 		<div id="player2-tank-overlay" class="tank-body-overlay green"></div>
 	</div>
-
+	<div id="missile1" class="missile">
+	</div>
+	<div id="missile2" class="missile">
+	</div>
 </body>
 </html>

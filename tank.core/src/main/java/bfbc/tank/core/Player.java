@@ -10,7 +10,8 @@ import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.DeltaXY;
 
-public class Player implements Box, BoxConstruction<Box>  {
+public class Player implements Box, BoxConstruction<Box> {
+	
 	private static final double SIZE = 36;
 	
 	private static HashMap<Direction, Double> DIRECTION_ANGLES;
@@ -22,6 +23,8 @@ public class Player implements Box, BoxConstruction<Box>  {
 		DIRECTION_ANGLES.put(Direction.UP, 270d);
 	}
 	
+	private Game game;
+	
 	@Expose
 	private boolean moving;
 	@Expose
@@ -30,6 +33,8 @@ public class Player implements Box, BoxConstruction<Box>  {
 	private double posY;
 	@Expose
 	private double angle;
+	
+	private boolean wantToFire;
 
 	private BoxConstructionCollider<Box> collider;
 	
@@ -66,7 +71,8 @@ public class Player implements Box, BoxConstruction<Box>  {
 		this.activeCommand = activeCommand;
 	}
 	
-	public Player(BoxConstructionCollider<Box> collider, Direction direction, PlayerCommand activeCommand, boolean moving, double posX, double posY, double angle) {
+	public Player(Game game, BoxConstructionCollider<Box> collider, Direction direction, PlayerCommand activeCommand, boolean moving, double posX, double posY, double angle) {
+		this.game = game;
 		this.collider = collider;
 		this.activeCommand = activeCommand;
 		this.direction = direction;
@@ -91,6 +97,10 @@ public class Player implements Box, BoxConstruction<Box>  {
 			direction = Direction.UP;
 			moving = true;
 		}
+		
+		if (activeCommand.isFire()) {
+			wantToFire = true;
+		}
 
 		double angleDelta = DIRECTION_ANGLES.get(direction) - angle;
 		if (angleDelta < -180) angleDelta += 360;
@@ -110,7 +120,8 @@ public class Player implements Box, BoxConstruction<Box>  {
 			notRotating = true;
 		}
 
-		double displacement = 85d * Game.TICK;
+		double velocity = 85.0d;
+		double displacement = velocity * Game.TICK;
 		
 		// If we are not rotating, we are moving
 		if (notRotating && moving) {
@@ -134,6 +145,10 @@ public class Player implements Box, BoxConstruction<Box>  {
 			collider.tryMove(Player.this, dxy);
 		}
 		
+		if (notRotating && wantToFire) {
+			game.createMissile(this, posX, posY, angle, velocity);
+			wantToFire = false;
+		}
 	}
 	
 	@Override

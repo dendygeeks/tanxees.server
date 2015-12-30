@@ -11,6 +11,8 @@ class PlayerCommand {
 	private boolean left;
 	@Expose
 	private boolean down;
+	@Expose
+	private boolean fire;
 
 	public boolean isRight() {
 		return right;
@@ -24,13 +26,10 @@ class PlayerCommand {
 	public boolean isDown() {
 		return down;
 	}
-
-	public PlayerCommand(boolean right, boolean up, boolean left, boolean down) {
-		this.right = right;
-		this.up = up;
-		this.left = left;
-		this.down = down;
+	public boolean isFire() {
+		return fire;
 	}
+
 	public static PlayerCommand fromJson(String json) {
 		return GlobalServices.getGson().fromJson(json, PlayerCommand.class);
 	}
