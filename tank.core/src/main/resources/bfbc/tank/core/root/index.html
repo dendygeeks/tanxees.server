@@ -22,7 +22,10 @@
 		// Globals
 		var websocket;
 		var webSocketAddress;
+
+		var fieldNode;
 		var playersNode;
+		var missilesNode;
 		
 		var playerCaterpillarsNode = []
 		
@@ -31,6 +34,8 @@
 		function init()
 		{
 			playersNode = document.getElementById("players");
+			fieldNode = document.getElementById("field");
+			missilesNode = document.getElementById("missiles");
 		
 			webSocketAddress = buildWebSocketAddress("player");
 			openStatusSocket();
@@ -106,10 +111,12 @@
 							movementFrame(playerTankNode);
 						}
 						
-						var missileNode = []
-						for (var i = 0; i < 2; i++) {
-							missileNode[i] = document.getElementById("missile" + (i+1));
-							movementFrame(missileNode[i]);
+						var missilesNodeElements = missilesNode.childNodes;
+						for (var i = 0; i < missilesNodeElements.length; i++) {
+							
+							for (var j = 0; j < missilesNodeElements[i].childNodes.length; j++) {
+								movementFrame(missilesNodeElements[i].childNodes[j]);
+							}
 						}
 						
 					}, 15);
@@ -139,18 +146,51 @@
 						}
 					}
 				}
-				
-				var missileNode = []
-				for (var i = 0; i < 2; i++) {
-					missileNode[i] = document.getElementById("missile" + (i+1));
-					if (gameState.missiles[i].length == 1) {
-						missileNode[i].style.visibility = 'visible';
-						missileNode[i].posX = gameState.missiles[i][0].posX;
-						missileNode[i].posY = gameState.missiles[i][0].posY;
-						missileNode[i].angle = gameState.missiles[i][0].angle;
-					} else {
-						missileNode[i].style.visibility = 'hidden';
+
+				// Missiles
+
+				var recreateMissilesNode = false;
+				if (missilesNode.childNodes.length != gameState.missiles.length) {
+					recreateMissilesNode = true;
+					// Removing all missiles for all players
+					while (missilesNode.firstChild != null) {
+						missilesNode.removeChild(missilesNode.firstChild);
 					}
+				}
+				
+				for (var i = 0; i < playersNode.childNodes.length; i++) {
+					var playerMissilesNode;
+					if (recreateMissilesNode) {
+						playerMissilesNode = document.createElement("div");
+						missilesNode.appendChild(playerMissilesNode);
+					} else {
+						playerMissilesNode = missilesNode.childNodes[i];
+					}
+					
+					var recreatePlayerMissiles = false;
+					if (playerMissilesNode.childNodes.length != gameState.missiles[i].length) {
+						recreatePlayerMissiles = true;
+						// Removing all missiles for player
+						while (playerMissilesNode.firstChild != null) {
+							playerMissilesNode.removeChild(playerMissilesNode.firstChild);
+						}
+					}
+					
+					for (var j = 0; j < gameState.missiles[i].length; j++) {
+						if (recreatePlayerMissiles) {
+							var missileNode = document.createElement("div");
+							missileNode.classList.add("missile");
+						} else {
+							missileNode = playerMissilesNode.childNodes[j];
+						}
+						
+						missileNode.posX = gameState.missiles[i][j].posX;
+						missileNode.posY = gameState.missiles[i][j].posY;
+						missileNode.angle = gameState.missiles[i][j].angle;
+
+						playerMissilesNode.appendChild(missileNode);
+					}
+
 				}
 				
 		    	//throw 'Invalid message from client: "' + evt.data + '"';
@@ -213,7 +253,6 @@
 		
 		window.addEventListener("load", function() {
 
-			var fieldNode = document.getElementById("field");
 			
 			init();
 			
@@ -399,25 +438,7 @@
 	<!-- 28x26 -->
 	<div id="field" class="field"></div>
 
-	<div id="players">
-		<!--<div id="player1-tank" class="tank">
-			<div id="player1-tank-shadow" class="tank-shadow"></div>
-			<div id="player1-tank-caterpillars" class="tank-caterpillars"></div>
-			<div id="player1-tank-caterpillars-overlay" class="tank-caterpillars-overlay yellow"></div>
-			<div id="player1-tank-body" class="tank-body"></div>
-			<div id="player1-tank-overlay" class="tank-body-overlay yellow"></div>
-		</div>
-		<div id="player2-tank" class="tank">
-			<div id="player2-tank-shadow" class="tank-shadow"></div>
-			<div id="player2-tank-caterpillars" class="tank-caterpillars"></div>
-			<div id="player2-tank-caterpillars-overlay" class="tank-caterpillars-overlay green"></div>
-			<div id="player2-tank-body" class="tank-body"></div>
-			<div id="player2-tank-overlay" class="tank-body-overlay green"></div>
-		</div>-->
-	</div>
-	<div id="missile1" class="missile">
-	</div>
-	<div id="missile2" class="missile">
-	</div>
+	<div id="players"></div>
+	<div id="missiles"></div>
 </body>
 </html>
