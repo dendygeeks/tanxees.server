@@ -19,11 +19,19 @@
 		new Image().src = "img/tank_parts/yellow/tank-full-body-overlay.svg"; 
 		new Image().src = "img/concrete-full.svg"; 
 		
-	
+		// Globals
 		var websocket;
 		var webSocketAddress;
+		var playersNode;
+		
+		var playerCaterpillarsNode = []
+		
+		var skins = [ "yellow", "green" ]
+		
 		function init()
 		{
+			playersNode = document.getElementById("players");
+		
 			webSocketAddress = buildWebSocketAddress("player");
 			openStatusSocket();
 		}
@@ -37,17 +45,87 @@
 		    websocket.onmessage = function(evt) {
 		    	var gameState = JSON.parse(evt.data);
 
-				var playerTankNode = {}
-				var playerCaterpillarsNode = {}
-				
-				for (var i = 0; i < 2; i++) {
-					playerTankNode[i] = document.getElementById("player" + (i+1) + "-tank");
-					playerCaterpillarsNode[i] = document.getElementById("player" + (i+1) + "-tank-caterpillars");
+				if (playersNode.childNodes.length != gameState.players.length) {
+					
+					// Removing all tanks
+					while (playersNode.firstChild != null) {
+						playersNode.removeChild(playersNode.firstChild);
+					}
+					
+					for (var i = 0; i < gameState.players.length; i++) {
 
-					playerCaterpillarsNode[i].moving = gameState.players[i].moving;
-					playerTankNode[i].posX = gameState.players[i].posX;
-					playerTankNode[i].posY = gameState.players[i].posY;
-					playerTankNode[i].angle = gameState.players[i].angle;
+						var playerTankShadowNode = document.createElement("div");
+						playerTankShadowNode.setAttribute("id", "player" + (i+1) + "-tank-shadow");
+						playerTankShadowNode.classList.add("tank-shadow");
+						
+						var playerTankCaterpillarsNode = document.createElement("div");
+						playerTankCaterpillarsNode.setAttribute("id", "player" + (i+1) + "-tank-caterpillars");
+						playerTankCaterpillarsNode.classList.add("tank-caterpillars");
+
+						var playerTankCaterpillarsOverlayNode = document.createElement("div");
+						playerTankCaterpillarsOverlayNode.setAttribute("id", "player" + (i+1) + "-tank-caterpillars-overlay");
+						playerTankCaterpillarsOverlayNode.classList.add("tank-caterpillars-overlay");
+						playerTankCaterpillarsOverlayNode.classList.add(skins[i]);
+						
+						var playerTankBodyNode = document.createElement("div");
+						playerTankBodyNode.setAttribute("id", "player" + (i+1) + "-tank-body");
+						playerTankBodyNode.classList.add("tank-body");
+						
+						var playerTankBodyOverlayNode = document.createElement("div");
+						playerTankBodyOverlayNode.setAttribute("id", "player" + (i+1) + "-tank-overlay");
+						playerTankBodyOverlayNode.classList.add("tank-body-overlay");
+						playerTankBodyOverlayNode.classList.add(skins[i]);
+						
+						var playerTankNode = document.createElement("div");
+						playerTankNode.setAttribute("id", "player" + (i+1) + "-tank");
+						playerTankNode.classList.add("tank");
+						
+						playerTankNode.appendChild(playerTankShadowNode);
+						playerTankNode.appendChild(playerTankCaterpillarsNode);
+						playerTankNode.appendChild(playerTankCaterpillarsOverlayNode);
+						playerTankNode.appendChild(playerTankBodyNode);
+						playerTankNode.appendChild(playerTankBodyOverlayNode);
+						
+						playersNode.appendChild(playerTankNode);
+						
+						caterpillarInit(playerTankCaterpillarsNode);
+						movementInit(playerTankNode);
+
+					}
+					
+					window.setInterval(function() {
+						window.frame ++;
+						var playerTankNodeElements = playersNode.childNodes;
+						for (var i = 0; i < playerTankNodeElements.length; i++) {
+							var playerTankNode = document.getElementById("player" + (i+1) + "-tank");
+							var playerTankCaterpillarsNode = document.getElementById("player" + (i+1) + "-tank-caterpillars");
+							var playerTankCaterpillarsOverlayNode = document.getElementById("player" + (i+1) + "-tank-caterpillars-overlay");
+							if (window.frame % 4 == 0) {
+								caterpillarFrame(playerTankCaterpillarsNode, playerTankCaterpillarsOverlayNode);
+							}
+							movementFrame(playerTankNode);
+						}
+						
+						var missileNode = []
+						for (var i = 0; i < 2; i++) {
+							missileNode[i] = document.getElementById("missile" + (i+1));
+							movementFrame(missileNode[i]);
+						}
+						
+					}, 15);
+
+					
+				}
+				
+				var playerTankNodeElements = playersNode.childNodes;
+				for (var i = 0; i < playerTankNodeElements.length; i++) {
+					var playerTankNode = document.getElementById("player" + (i+1) + "-tank");
+					var playerCaterpillarsNode = document.getElementById("player" + (i+1) + "-tank-caterpillars");
+
+					playerCaterpillarsNode.moving = gameState.players[i].moving;
+					playerTankNode.posX = gameState.players[i].posX;
+					playerTankNode.posY = gameState.players[i].posY;
+					playerTankNode.angle = gameState.players[i].angle;
 				}
 				
 				for (var j = 0; j < gameState.fieldHeight; j++) {
@@ -134,22 +212,6 @@
 		// Setting events
 		
 		window.addEventListener("load", function() {
-			var skins = [ "yellow", "green" ]
-			
-			var playerTankNode = []
-			var playerCaterpillarsNode = []
-			var playerCaterpillarsOverlayNode = []
-			
-			for (var i = 0; i < 2; i++) {
-				playerTankNode[i] = document.getElementById("player" + (i+1) + "-tank");
-				playerCaterpillarsNode[i] = document.getElementById("player" + (i+1) + "-tank-caterpillars");
-				playerCaterpillarsOverlayNode[i] = document.getElementById("player" + (i+1) + "-tank-caterpillars-overlay");
-
-				playerCaterpillarsNode[i].skin = skins[i]; 
-				
-				caterpillarInit(playerCaterpillarsNode[i]);
-				movementInit(playerTankNode[i]);
-			}
 
 			var fieldNode = document.getElementById("field");
 			
@@ -157,22 +219,6 @@
 			
 			window.frame = 0;
 			fieldInit(fieldNode);
-			window.setInterval(function() {
-				window.frame ++;
-				for (var i = 0; i < 2; i++) {
-					if (window.frame % 4 == 0) {
-						caterpillarFrame(playerCaterpillarsNode[i], playerCaterpillarsOverlayNode[i]);
-					}
-					movementFrame(playerTankNode[i]);
-				}
-				
-				var missileNode = []
-				for (var i = 0; i < 2; i++) {
-					missileNode[i] = document.getElementById("missile" + (i+1));
-					movementFrame(missileNode[i]);
-				}
-				
-			}, 15);
 			
 		});
 	
@@ -353,19 +399,21 @@
 	<!-- 28x26 -->
 	<div id="field" class="field"></div>
 
-	<div id="player1-tank" class="tank">
-		<div id="player1-tank-shadow" class="tank-shadow"></div>
-		<div id="player1-tank-caterpillars" class="tank-caterpillars"></div>
-		<div id="player1-tank-caterpillars-overlay" class="tank-caterpillars-overlay yellow"></div>
-		<div id="player1-tank-body" class="tank-body"></div>
-		<div id="player1-tank-overlay" class="tank-body-overlay yellow"></div>
-	</div>
-	<div id="player2-tank" class="tank">
-		<div id="player2-tank-shadow" class="tank-shadow"></div>
-		<div id="player2-tank-caterpillars" class="tank-caterpillars"></div>
-		<div id="player2-tank-caterpillars-overlay" class="tank-caterpillars-overlay green"></div>
-		<div id="player2-tank-body" class="tank-body"></div>
-		<div id="player2-tank-overlay" class="tank-body-overlay green"></div>
+	<div id="players">
+		<!--<div id="player1-tank" class="tank">
+			<div id="player1-tank-shadow" class="tank-shadow"></div>
+			<div id="player1-tank-caterpillars" class="tank-caterpillars"></div>
+			<div id="player1-tank-caterpillars-overlay" class="tank-caterpillars-overlay yellow"></div>
+			<div id="player1-tank-body" class="tank-body"></div>
+			<div id="player1-tank-overlay" class="tank-body-overlay yellow"></div>
+		</div>
+		<div id="player2-tank" class="tank">
+			<div id="player2-tank-shadow" class="tank-shadow"></div>
+			<div id="player2-tank-caterpillars" class="tank-caterpillars"></div>
+			<div id="player2-tank-caterpillars-overlay" class="tank-caterpillars-overlay green"></div>
+			<div id="player2-tank-body" class="tank-body"></div>
+			<div id="player2-tank-overlay" class="tank-body-overlay green"></div>
+		</div>-->
 	</div>
 	<div id="missile1" class="missile">
 	</div>

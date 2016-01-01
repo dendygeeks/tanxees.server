@@ -110,10 +110,10 @@ public class Player implements Box, BoxConstruction<Box> {
 		double angleVel = 500;
 		double angleSmall = angleVel / 50;
 		if (angleDelta > angleSmall) {
-			angle += angleVel * Game.TICK;
+			angle += angleVel * Game.MODEL_TICK;
 			moving = true;
 		} else if (angleDelta < -angleSmall) {
-			angle -= angleVel * Game.TICK;
+			angle -= angleVel * Game.MODEL_TICK;
 			moving = true;
 		} else {
 			angle = DIRECTION_ANGLES.get(direction);
@@ -121,7 +121,7 @@ public class Player implements Box, BoxConstruction<Box> {
 		}
 
 		double velocity = 85.0d;
-		double displacement = velocity * Game.TICK;
+		double displacement = velocity * Game.MODEL_TICK;
 		
 		// If we are not rotating, we are moving
 		if (notRotating && moving) {

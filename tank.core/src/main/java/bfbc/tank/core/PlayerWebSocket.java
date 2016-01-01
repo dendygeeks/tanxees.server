@@ -2,6 +2,7 @@ package bfbc.tank.core;
 import java.io.IOException;
 import java.lang.Thread.State;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -19,7 +20,7 @@ public class PlayerWebSocket implements StateUpdateHandler {
 	// Store sessions if you want to, for example, broadcast a message to all users
     private static final Queue<Session> sessions = new ConcurrentLinkedQueue<>();
     
-    private HashMap<Integer, Session> controlledPlayers = new HashMap<>();
+    private Map<Integer, Session> controlledPlayers = new HashMap<>();
     
     private Game game = new Game(this);
     
@@ -59,13 +60,15 @@ public class PlayerWebSocket implements StateUpdateHandler {
 		game.putFieldCellType(6, 5, CellType.CONCRETE);
 		game.putFieldCellType(5, 6, CellType.CONCRETE);
 		
-		for (int i = 0; i < game.getPlayersCount(); i++) {
-			controlledPlayers.put(i, null);
+		synchronized (controlledPlayers) {
+			for (int i = 0; i < game.getPlayersCount(); i++) {
+				controlledPlayers.put(i, null);
+			}
 		}
 	}
     
     @Override
-    public void update(Game state) {
+    public void gameStateUpdated(Game state) {
     	broadcastString(state.toJson());
     }
     
@@ -86,33 +89,46 @@ public class PlayerWebSocket implements StateUpdateHandler {
         if (game.getState() == State.NEW) {
         	game.start();
         }
-        for (Integer playerIndex : controlledPlayers.keySet()) {
-        	if (controlledPlayers.get(playerIndex) == null) {
-        		controlledPlayers.put(playerIndex, session);
-        		break;
-        	}
-        }
+		synchronized (controlledPlayers) {
+	        for (Integer playerIndex : controlledPlayers.keySet()) {
+	        	if (controlledPlayers.get(playerIndex) == null) {
+	        		controlledPlayers.put(playerIndex, session);
+	        		break;
+	        	}
+	        }
+		}
+		
+		try {
+			session.getRemote().sendString(game.toJson());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     @OnWebSocketClose
     public void closed(Session session, int statusCode, String reason) {
     	System.out.println("Session disconnected: " + session.getRemoteAddress());
         sessions.remove(session);
-        for (Integer playerIndex : controlledPlayers.keySet()) {
-        	if (controlledPlayers.get(playerIndex) == session) {
-        		controlledPlayers.put(playerIndex, null);
-        		break;
-        	}
-        }
+		synchronized (controlledPlayers) {
+	        for (Integer playerIndex : controlledPlayers.keySet()) {
+	        	if (controlledPlayers.get(playerIndex) == session) {
+	        		controlledPlayers.put(playerIndex, null);
+	        		break;
+	        	}
+	        }
+		}
     }
 
     @OnWebSocketMessage
     public void message(Session session, String message) throws IOException {
-        for (Integer playerIndex : controlledPlayers.keySet()) {
-        	if (controlledPlayers.get(playerIndex) == session) {
-        		game.setPlayerCommands(playerIndex, PlayerCommand.fromJson(message));
-        	}
-        }
+		synchronized (controlledPlayers) {
+			for (Integer playerIndex : controlledPlayers.keySet()) {
+				if (controlledPlayers.get(playerIndex) == session) {
+	        		game.setPlayerCommands(playerIndex, PlayerCommand.fromJson(message));
+	        	}
+	        }
+		}
     }
 
 }

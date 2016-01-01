@@ -40,7 +40,7 @@ public class Missile implements Box, BoxConstruction<Box> {
 	}
 	
 	public void frameStep() {
-		DeltaXY delta = new DeltaXY(velX * Game.TICK, velY * Game.TICK);
+		DeltaXY delta = new DeltaXY(velX * Game.MODEL_TICK, velY * Game.MODEL_TICK);
 		BoxConstructionCollider<Box>.MoveResult mr = collider.tryMove(Missile.this, delta);
 		
 		if (mr.targets.length > 0) {

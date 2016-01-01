@@ -1,9 +1,7 @@
 package bfbc.tank.core;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gson.annotations.Expose;
 
@@ -14,7 +12,7 @@ import bfbc.tank.core.mechanics.BoxConstructionCollider.CollisionFriendship;
 
 public class Game extends Thread implements MissileCrashListener {
 	
-	public static double TICK = 1.0 / 120;	// 2 * 60FPS
+	public static double MODEL_TICK = 1.0 / 120;	// 2 * 60FPS
 	public static double FRONTEND_TICK = 1.0 / 30;	// 30FPS
 	public static int FRONTEND_DELAY = (int)(1000 * FRONTEND_TICK);
 	
@@ -24,7 +22,7 @@ public class Game extends Thread implements MissileCrashListener {
 	public final int fieldHeight = 27;
 	
 	public static interface StateUpdateHandler {
-		void update(Game state);
+		void gameStateUpdated(Game state);
 	}
 	
 	private StateUpdateHandler stateUpdateHandler;
@@ -46,7 +44,7 @@ public class Game extends Thread implements MissileCrashListener {
 		return (double)System.currentTimeMillis() / 1000 - time;
 	}
 	private void updateTime(int ticks) {
-		time += ticks * TICK;
+		time += ticks * MODEL_TICK;
 	}
 	
 	int findPlayerId(Player player) {
@@ -125,13 +123,13 @@ public class Game extends Thread implements MissileCrashListener {
 
 			double dt = deltaTime();
 
-			int ticks = (int) (dt / TICK);
+			int ticks = (int) (dt / MODEL_TICK);
 			
 			for(int t = 0; t < ticks; t++) {
 				frameStep();
 			}
 			
-			stateUpdateHandler.update(this);
+			stateUpdateHandler.gameStateUpdated(this);
 			
 			updateTime(ticks);
 
