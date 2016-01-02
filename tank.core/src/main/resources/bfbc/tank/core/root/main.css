@@ -1,0 +1,114 @@
+body {
+	margin: 0;
+	background-color: black;
+}
+
+div.tank {
+	position: absolute;
+	left: 20px;
+	top: 40px;
+	width: 40px;
+	height: 40px;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+div.tank-caterpillars {
+	position: absolute; left: 0; top: 0;
+	width: 40px;
+	height: 40px;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+div.tank-caterpillars.frame1 {
+	background-image: url('img/tank_parts/tank-caterpillars-frame1.svg');
+}
+div.tank-caterpillars.frame2 {
+	background-image: url('img/tank_parts/tank-caterpillars-frame2.svg');
+}
+
+
+div.tank-caterpillars-overlay {
+	position: absolute; left: 0; top: 0;
+	width: 40px;
+	height: 40px;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	mix-blend-mode: multiply;
+}
+div.tank-caterpillars-overlay.frame1.green {
+	background-image: url('img/tank_parts/green/tank-caterpillars-frame1-overlay.svg');
+}
+div.tank-caterpillars-overlay.frame2.green {
+	background-image: url('img/tank_parts/green/tank-caterpillars-frame2-overlay.svg');
+}		
+div.tank-caterpillars-overlay.frame1.yellow {
+	background-image: url('img/tank_parts/yellow/tank-caterpillars-frame1-overlay.svg');
+}
+div.tank-caterpillars-overlay.frame2.yellow {
+	background-image: url('img/tank_parts/yellow/tank-caterpillars-frame2-overlay.svg');
+}
+
+
+div.tank-body {
+	position: absolute; left: 0; top: 0;
+	width: 40px;
+	height: 40px;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	background-image: url('img/tank_parts/tank-full-body.svg');
+}
+
+div.tank-shadow {
+	position: absolute; left: 0; top: 0;
+	width: 40px;
+	height: 40px;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	background-image: url('img/tank_parts/tank-shadow.svg');
+}
+
+div.tank-body-overlay {
+	position: absolute; left: 0; top: 0;
+	width: 40px;
+	height: 40px;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	mix-blend-mode: multiply;
+}
+
+div.tank-body-overlay.green {
+	background-image: url('img/tank_parts/green/tank-full-body-overlay.svg');
+}
+div.tank-body-overlay.yellow {
+	background-image: url('img/tank_parts/yellow/tank-full-body-overlay.svg');
+}
+
+div.field-cell {
+	position: absolute;
+	width: 28px;
+	height: 28px;
+}
+
+div.concrete {
+	position: absolute; left: 0; top: 0;
+	width: 28px;
+	height: 28px;
+	background-image: url('img/concrete-full.svg');
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+div.field {
+	margin: 0;
+	background: linear-gradient(-170deg, #505850, #657065);
+}
+
+div.missile {
+	position: absolute; left: 0; top: 0;
+	width: 20px;
+	height: 20px;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	background-image: url('img/missile.svg');
+}

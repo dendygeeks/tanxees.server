@@ -1,8 +1,11 @@
 <html>
 <head>
+	<link rel="stylesheet" type="text/css" href="main.css" />
+
 	<script src="/js/tools.js"></script>
 
 	<title>Tanks proto</title>
+	
 	<script>
 	
 		// Preloading
@@ -25,6 +28,7 @@
 		var fieldNode;
 		var playersNode;
 		var missilesNode;
+		var cells = [];
 		
 		var firstUpdate = true;
 		
@@ -196,7 +200,7 @@
 		function updateField(gameState) {
 			
 			if (firstUpdate) {
-				document.cells = [];
+				cells = [];
 			
 				fieldNode.style.width = (gameState.fieldWidth * gameState.cellSize) + "px";
 				fieldNode.style.height = (gameState.fieldHeight * gameState.cellSize) + "px";
@@ -210,14 +214,14 @@
 						cell.style.top = (gameState.cellSize * j - 1.5) + "px";
 	
 						fieldNode.appendChild(cell);
-						document.cells[j * gameState.fieldWidth + i] = cell;
+						cells[j * gameState.fieldWidth + i] = cell;
 					}
 				}
 			}
 			
 			for (var j = 0; j < gameState.fieldHeight; j++) {
 				for (var i = 0; i < gameState.fieldWidth; i++) {
-					var cell = document.cells[j * gameState.fieldWidth + i];
+					var cell = cells[j * gameState.fieldWidth + i];
 					
 					cell.classList.remove("concrete");
 					
@@ -239,11 +243,6 @@
 				caterpillarNode.classList.add("frame" + (caterpillarNode.caterpillarFrame+1));
 				caterpillarOverlayNode.classList.add("frame" + (caterpillarNode.caterpillarFrame+1));
 			}
-			/*
-			caterpillarNode.style.backgroundImage = "url('img/tank_parts/tank-caterpillars-frame" + (caterpillarNode.caterpillarFrame + 1) + ".svg')";
-			caterpillarOverlayNode.style.backgroundImage = "url('img/tank_parts/' + caterpillarOverlayNode.skin + '/tank-caterpillars-frame" + (caterpillarNode.caterpillarFrame + 1) + "-overlay.svg')";
-			*/
-
 		}
 					
 		function movementFrame(tankNode) {
@@ -332,129 +331,11 @@
 		});
 
 	</script>
-	<style>
-		body {
-			margin: 0;
-			background-color: black;
-		}
-	
-		div.tank {
-			position: absolute;
-			left: 20px;
-			top: 40px;
-			width: 40px;
-			height: 40px;
-			background-repeat: no-repeat;
-			background-size: 100% 100%;
-		}
-		
-		div.tank-caterpillars {
-			position: absolute; left: 0; top: 0;
-			width: 40px;
-			height: 40px;
-			background-repeat: no-repeat;
-			background-size: 100% 100%;
-		}
-		div.tank-caterpillars.frame1 {
-			background-image: url('img/tank_parts/tank-caterpillars-frame1.svg');
-		}
-		div.tank-caterpillars.frame2 {
-			background-image: url('img/tank_parts/tank-caterpillars-frame2.svg');
-		}
-
-		
-		div.tank-caterpillars-overlay {
-			position: absolute; left: 0; top: 0;
-			width: 40px;
-			height: 40px;
-			background-repeat: no-repeat;
-			background-size: 100% 100%;
-			mix-blend-mode: multiply;
-		}
-		div.tank-caterpillars-overlay.frame1.green {
-			background-image: url('img/tank_parts/green/tank-caterpillars-frame1-overlay.svg');
-		}
-		div.tank-caterpillars-overlay.frame2.green {
-			background-image: url('img/tank_parts/green/tank-caterpillars-frame2-overlay.svg');
-		}		
-		div.tank-caterpillars-overlay.frame1.yellow {
-			background-image: url('img/tank_parts/yellow/tank-caterpillars-frame1-overlay.svg');
-		}
-		div.tank-caterpillars-overlay.frame2.yellow {
-			background-image: url('img/tank_parts/yellow/tank-caterpillars-frame2-overlay.svg');
-		}
-		
-
-		div.tank-body {
-			position: absolute; left: 0; top: 0;
-			width: 40px;
-			height: 40px;
-			background-repeat: no-repeat;
-			background-size: 100% 100%;
-			background-image: url('img/tank_parts/tank-full-body.svg');
-		}
-
-		div.tank-shadow {
-			position: absolute; left: 0; top: 0;
-			width: 40px;
-			height: 40px;
-			background-repeat: no-repeat;
-			background-size: 100% 100%;
-			background-image: url('img/tank_parts/tank-shadow.svg');
-		}
-
-		div.tank-body-overlay {
-			position: absolute; left: 0; top: 0;
-			width: 40px;
-			height: 40px;
-			background-repeat: no-repeat;
-			background-size: 100% 100%;
-			mix-blend-mode: multiply;
-		}
-		
-		div.tank-body-overlay.green {
-			background-image: url('img/tank_parts/green/tank-full-body-overlay.svg');
-		}
-		div.tank-body-overlay.yellow {
-			background-image: url('img/tank_parts/yellow/tank-full-body-overlay.svg');
-		}
-		
-		div.field-cell {
-			position: absolute;
-			width: 28px;
-			height: 28px;
-		}
-
-		div.concrete {
-			position: absolute; left: 0; top: 0;
-			width: 28px;
-			height: 28px;
-			background-image: url('img/concrete-full.svg');
-			background-repeat: no-repeat;
-			background-size: 100% 100%;
-		}
-		
-		div.field {
-			margin: 0;
-			background: linear-gradient(-170deg, #505850, #657065);
-		}
-		
-		div.missile {
-			position: absolute; left: 0; top: 0;
-			width: 20px;
-			height: 20px;
-			background-repeat: no-repeat;
-			background-size: 100% 100%;
-			background-image: url('img/missile.svg');
-		}
-		
-	</style>
 </head>
-<body>
-	<!-- 28x26 -->
-	<div id="field" class="field"></div>
 
+<body>
 	<div id="players"></div>
 	<div id="missiles"></div>
+	<div id="field" class="field"></div>
 </body>
 </html>
