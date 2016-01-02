@@ -73,10 +73,10 @@ public class Game extends Thread implements MissileCrashListener {
 		players = new Player[2];
 		players[0] = new Player(this, collider, Direction.RIGHT, 
 		                    new PlayerCommand(), 
-		                    false, 75, 25, 0);
+		                    false, 75, 250, 0);
 		players[1] = new Player(this, collider, Direction.LEFT, 
                 			new PlayerCommand(), 
-                			false, 200, 25, 180);
+                			false, 200, 250, 180);
 		collider.addAgent(players[0]);
 		collider.addAgent(players[1]);
 		
@@ -163,7 +163,7 @@ public class Game extends Thread implements MissileCrashListener {
 		return this.field[y * fieldWidth + x].getType();
 	}
 	public synchronized int getPlayersCount() {
-		return 2;
+		return playersCount;
 	}
 	
 	synchronized Missile createMissile(Player p, double posX, double posY, double angle, double velocity) {

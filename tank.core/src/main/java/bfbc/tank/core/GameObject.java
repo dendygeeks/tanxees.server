@@ -45,22 +45,22 @@ public class GameObject implements Box, BoxConstruction<Box> {
 	}
 	@Override
 	public double getBottom() {
-		return posY + sizeY;
+		return posY + sizeY / 2;
 	}
 	
 	@Override
 	public double getLeft() {
-		return posX;
+		return posX - sizeX / 2;
 	}
 	
 	@Override
 	public double getRight() {
-		return posX + sizeX;
+		return posX + sizeX / 2;
 	}
 	
 	@Override
 	public double getTop() {
-		return posY;
+		return posY - sizeY / 2;
 	}
 	
 	@Override

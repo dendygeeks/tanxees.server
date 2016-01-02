@@ -16,22 +16,22 @@ public class Cell implements Box {
 	
 	@Override
 	public double getLeft() {
-		return i * game.cellSize;
+		return (i - 0.5) * game.cellSize;
 	}
 
 	@Override
 	public double getTop() {
-		return j * game.cellSize;
+		return (j - 0.5) * game.cellSize;
 	}
 
 	@Override
 	public double getRight() {
-		return (i + 1) * game.cellSize;
+		return (i + 0.5) * game.cellSize;
 	}
 
 	@Override
 	public double getBottom() {
-		return (j + 1) * game.cellSize;
+		return (j + 0.5) * game.cellSize;
 	}
 
 	@Override

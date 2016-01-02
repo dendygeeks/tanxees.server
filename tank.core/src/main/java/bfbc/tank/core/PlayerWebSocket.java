@@ -73,12 +73,14 @@ public class PlayerWebSocket implements StateUpdateHandler {
     }
     
     private void broadcastString(String string) {
-    	for (Session s : sessions) {
-    		try {
-				s.getRemote().sendString(string);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+    	synchronized (this) {
+	    	for (Session s : sessions) {
+	    		try {
+					s.getRemote().sendString(string);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+	    	}
     	}
     }
     
@@ -98,12 +100,14 @@ public class PlayerWebSocket implements StateUpdateHandler {
 	        }
 		}
 		
-		try {
-			session.getRemote().sendString(game.toJson());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    	synchronized (this) {
+			try {
+				session.getRemote().sendString(game.toJson());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
     }
 
     @OnWebSocketClose

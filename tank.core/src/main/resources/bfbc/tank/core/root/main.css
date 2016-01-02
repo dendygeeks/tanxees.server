@@ -112,3 +112,9 @@ div.missile {
 	background-size: 100% 100%;
 	background-image: url('img/missile.svg');
 }
+
+div.root {
+	position: absolute;
+	left: 14px;
+	top: 14px;
+}

@@ -209,11 +209,13 @@
 					for (var i = 0; i < gameState.fieldWidth; i++) {
 						var cell = document.createElement("div");
 						cell.classList.add("field-cell");
-	
-						cell.style.left = (gameState.cellSize * i - 1.5) + "px";
-						cell.style.top = (gameState.cellSize * j - 1.5) + "px";
-	
 						fieldNode.appendChild(cell);
+	
+						var blockWidth = cell.clientWidth;
+						var blockHeight = cell.clientHeight;
+						cell.style.left = (gameState.cellSize * i - blockWidth / 2) + "px";
+						cell.style.top = (gameState.cellSize * j - blockHeight / 2) + "px";
+	
 						cells[j * gameState.fieldWidth + i] = cell;
 					}
 				}
@@ -247,8 +249,11 @@
 					
 		function movementFrame(tankNode) {
 			tankNode.style.transform = "rotate(" + (tankNode.angle) + "deg)";
-			tankNode.style.left = tankNode.posX + "px";
-			tankNode.style.top = tankNode.posY + "px";
+			//tankNode.style.left = tankNode.posX + "px";
+			//tankNode.style.top = tankNode.posY + "px";
+			
+			tankNode.style.left = (tankNode.posX - tankNode.clientWidth / 2) + "px";
+			tankNode.style.top = (tankNode.posY - tankNode.clientHeight / 2) + "px";
 		}
 
 		// Setting events
@@ -334,8 +339,10 @@
 </head>
 
 <body>
-	<div id="players"></div>
-	<div id="missiles"></div>
-	<div id="field" class="field"></div>
+	<div class="root">
+		<div id="players"></div>
+		<div id="missiles"></div>
+		<div id="field" class="field"></div>
+	</div>
 </body>
 </html>
