@@ -1,16 +1,14 @@
 package bfbc.tank.core;
 
 import java.util.HashMap;
-import java.util.Iterator;
 
 import com.google.gson.annotations.Expose;
 
 import bfbc.tank.core.mechanics.Box;
-import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.DeltaXY;
 
-public class Player implements Box, BoxConstruction<Box> {
+public class Player extends GameObject {
 	
 	private static final double SIZE = 36;
 	
@@ -23,16 +21,8 @@ public class Player implements Box, BoxConstruction<Box> {
 		DIRECTION_ANGLES.put(Direction.UP, 270d);
 	}
 	
-	private Game game;
-	
 	@Expose
 	private boolean moving;
-	@Expose
-	private double posX;
-	@Expose
-	private double posY;
-	@Expose
-	private double angle;
 	
 	private boolean wantToFire;
 
@@ -40,19 +30,6 @@ public class Player implements Box, BoxConstruction<Box> {
 	
 	public boolean isMoving() {
 		return moving;
-	}
-	public double getPosX() {
-		return posX;
-	}
-	public double getPosY() {
-		return posY;
-	}
-	public double getAngle() {
-		return angle;
-	}
-	
-	public String toJson() {
-		return GlobalServices.getGson().toJson(this);
 	}
 
 	private PlayerCommand activeCommand;
@@ -72,14 +49,11 @@ public class Player implements Box, BoxConstruction<Box> {
 	}
 	
 	public Player(Game game, BoxConstructionCollider<Box> collider, Direction direction, PlayerCommand activeCommand, boolean moving, double posX, double posY, double angle) {
-		this.game = game;
+		super(game, SIZE, SIZE, posX, posY, angle);
 		this.collider = collider;
 		this.activeCommand = activeCommand;
 		this.direction = direction;
 		this.moving = moving;
-		this.posX = posX;
-		this.posY = posY;
-		this.angle = angle;
 	}
 	
 	public void frameStep() {
@@ -102,7 +76,7 @@ public class Player implements Box, BoxConstruction<Box> {
 			wantToFire = true;
 		}
 
-		double angleDelta = DIRECTION_ANGLES.get(direction) - angle;
+		double angleDelta = DIRECTION_ANGLES.get(direction) - getAngle();
 		if (angleDelta < -180) angleDelta += 360;
 		if (angleDelta > 180) angleDelta -= 360;
 		
@@ -146,59 +120,9 @@ public class Player implements Box, BoxConstruction<Box> {
 		}
 		
 		if (notRotating && wantToFire) {
-			game.createMissile(this, posX, posY, angle, velocity);
+			getGame().createMissile(this, getPosX(), getPosY(), getAngle(), velocity);
 			wantToFire = false;
 		}
 	}
 	
-	@Override
-	public double getBottom() {
-		return posY + SIZE;
-	}
-	
-	@Override
-	public double getLeft() {
-		return posX;
-	}
-	
-	@Override
-	public double getRight() {
-		return posX + SIZE;
-	}
-	
-	@Override
-	public double getTop() {
-		return posY;
-	}
-	
-	@Override
-	public void move(DeltaXY delta) {
-		posX += delta.x;
-		posY += delta.y;
-	}
-	
-	@Override
-	public Iterator<Box> iterator() {
-		Iterator<Box> res = new Iterator<Box>() {
-			
-			private boolean hasNext = true;
-			
-			@Override
-			public Box next() {
-				hasNext = false;
-				return Player.this;
-			}
-			
-			@Override
-			public boolean hasNext() {
-				return hasNext;
-			}
-		};
-		return res;
-	}
-	
-	@Override
-	public boolean isActive() {
-		return true;
-	}
 }

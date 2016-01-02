@@ -169,7 +169,7 @@ public class Game extends Thread implements MissileCrashListener {
 	synchronized Missile createMissile(Player p, double posX, double posY, double angle, double velocity) {
 		int index = findPlayerId(p);
 		if (missiles.get(index).isEmpty()) {
-			Missile newMissile = new Missile(this, collider, p, posX, posY, angle, velocity);
+			Missile newMissile = new Missile(this, this, collider, p, posX, posY, angle, velocity);
 			missiles.get(index).add(newMissile);
 			collider.addAgent(newMissile);
 			return newMissile;
