@@ -7,31 +7,31 @@ import bfbc.tank.core.mechanics.DeltaXY;
 
 public class Cell implements Box {
 
+	private Game game;
+	
 	@Expose
 	private CellType type;
-	
-	private static final double SIZE = 22;
 
 	private int i, j;
 	
 	@Override
 	public double getLeft() {
-		return i * SIZE;
+		return i * game.cellSize;
 	}
 
 	@Override
 	public double getTop() {
-		return j * SIZE;
+		return j * game.cellSize;
 	}
 
 	@Override
 	public double getRight() {
-		return (i + 1) * SIZE;
+		return (i + 1) * game.cellSize;
 	}
 
 	@Override
 	public double getBottom() {
-		return (j + 1) * SIZE;
+		return (j + 1) * game.cellSize;
 	}
 
 	@Override
@@ -40,7 +40,8 @@ public class Cell implements Box {
 
 	}
 	
-	public Cell(int i, int j) {
+	public Cell(Game game, int i, int j) {
+		this.game = game;
 		this.i = i;
 		this.j = j;
 		type = CellType.EMPTY;

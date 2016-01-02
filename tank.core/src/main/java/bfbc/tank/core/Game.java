@@ -17,9 +17,13 @@ public class Game extends Thread implements MissileCrashListener {
 	public static int FRONTEND_DELAY = (int)(1000 * FRONTEND_TICK);
 	
 	@Expose
+	public final int playersCount = 2;
+	@Expose
 	public final int fieldWidth = 29;
 	@Expose
 	public final int fieldHeight = 27;
+	@Expose
+	public final double cellSize = 22;
 	
 	public static interface StateUpdateHandler {
 		void gameStateUpdated(Game state);
@@ -58,7 +62,7 @@ public class Game extends Thread implements MissileCrashListener {
 		this.stateUpdateHandler = stateUpdateHandler;
 		for (int j = 0; j < fieldHeight; j++) {
 			for (int i = 0; i < fieldWidth; i++) {
-				field[j * fieldWidth + i] = new Cell(i, j);
+				field[j * fieldWidth + i] = new Cell(this, i, j);
 				fieldBoxConstruction.add(field[j * fieldWidth + i]);
 			}
 		}

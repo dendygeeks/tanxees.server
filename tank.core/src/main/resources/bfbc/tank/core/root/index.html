@@ -4,7 +4,6 @@
 
 	<title>Tanks proto</title>
 	<script>
-		var cellSize = 22;
 	
 		// Preloading
 		new Image().src = "img/tank_parts/tank-caterpillars-frame1.svg"; 
@@ -31,17 +30,7 @@
 		
 		var skins = [ "yellow", "green" ]
 		
-		function init()
-		{
-			playersNode = document.getElementById("players");
-			fieldNode = document.getElementById("field");
-			missilesNode = document.getElementById("missiles");
-		
-			webSocketAddress = buildWebSocketAddress("player");
-			openStatusSocket();
-		}
-		
-		function updateTanks(gameStatePlayers) {
+		function updateTanks(players) {
 		
 			if (firstUpdate) {
 				// Removing all tanks
@@ -49,7 +38,7 @@
 					playersNode.removeChild(playersNode.firstChild);
 				}
 				
-				for (var i = 0; i < gameStatePlayers.length; i++) {
+				for (var i = 0; i < players.length; i++) {
 	
 					var playerTankShadowNode = document.createElement("div");
 					playerTankShadowNode.setAttribute("id", "player" + (i+1) + "-tank-shadow");
@@ -58,11 +47,13 @@
 					var playerTankCaterpillarsNode = document.createElement("div");
 					playerTankCaterpillarsNode.setAttribute("id", "player" + (i+1) + "-tank-caterpillars");
 					playerTankCaterpillarsNode.classList.add("tank-caterpillars");
-	
+					playerTankCaterpillarsNode.classList.add("frame1");
+
 					var playerTankCaterpillarsOverlayNode = document.createElement("div");
 					playerTankCaterpillarsOverlayNode.setAttribute("id", "player" + (i+1) + "-tank-caterpillars-overlay");
 					playerTankCaterpillarsOverlayNode.classList.add("tank-caterpillars-overlay");
 					playerTankCaterpillarsOverlayNode.classList.add(skins[i]);
+					playerTankCaterpillarsOverlayNode.classList.add("frame1");
 					
 					var playerTankBodyNode = document.createElement("div");
 					playerTankBodyNode.setAttribute("id", "player" + (i+1) + "-tank-body");
@@ -85,9 +76,7 @@
 					
 					playersNode.appendChild(playerTankNode);
 					
-					caterpillarInit(playerTankCaterpillarsNode);
-					movementInit(playerTankNode);
-	
+					playerTankCaterpillarsNode.caterpillarFrame = 0;
 				}
 			}
 			
@@ -96,10 +85,10 @@
 				var playerTankNode = document.getElementById("player" + (i+1) + "-tank");
 				var playerCaterpillarsNode = document.getElementById("player" + (i+1) + "-tank-caterpillars");
 
-				playerCaterpillarsNode.moving = gameStatePlayers[i].moving;
-				playerTankNode.posX = gameStatePlayers[i].posX;
-				playerTankNode.posY = gameStatePlayers[i].posY;
-				playerTankNode.angle = gameStatePlayers[i].angle;
+				playerCaterpillarsNode.moving = players[i].moving;
+				playerTankNode.posX = players[i].posX;
+				playerTankNode.posY = players[i].posY;
+				playerTankNode.angle = players[i].angle;
 			}
 			
 		}
@@ -159,24 +148,17 @@
 		    websocket.onmessage = function(evt) {
 		    	var gameState = JSON.parse(evt.data);
 
+				// Players
 				updateTanks(gameState.players);
-				
-				for (var j = 0; j < gameState.fieldHeight; j++) {
-					for (var i = 0; i < gameState.fieldWidth; i++) {
-						var cell = document.cells[j * gameState.fieldWidth + i];
-						
-						cell.classList.remove("concrete");
-						
-						if (gameState.field[j * gameState.fieldWidth + i].type == "CONCRETE") {
-							cell.classList.add("concrete");
-						}
-					}
-				}
+
+				// Field
+				updateField(gameState);
 
 				// Missiles
 				updateMissiles(gameState.missiles);
 				
 				if (firstUpdate) {
+					window.frame = 0;
 					window.setInterval(function() {
 						window.frame ++;
 						var playerTankNodeElements = playersNode.childNodes;
@@ -211,62 +193,74 @@
 		    };
 		}
 	
-		var fieldWidth = 29;
-		var fieldHeight = 27;
+		function updateField(gameState) {
+			
+			if (firstUpdate) {
+				document.cells = [];
+			
+				fieldNode.style.width = (gameState.fieldWidth * gameState.cellSize) + "px";
+				fieldNode.style.height = (gameState.fieldHeight * gameState.cellSize) + "px";
+			
+				for (var j = 0; j < gameState.fieldHeight; j++) {
+					for (var i = 0; i < gameState.fieldWidth; i++) {
+						var cell = document.createElement("div");
+						cell.classList.add("field-cell");
 	
-		function fieldInit(fieldNode) {
-			document.cells = [];
-		
-			fieldNode.style.width = (fieldWidth * cellSize) + "px";
-			fieldNode.style.height = (fieldHeight * cellSize) + "px";
-		
-			for (var j = 0; j < fieldHeight; j++) {
-				for (var i = 0; i < fieldWidth; i++) {
-					var cell = document.createElement("div");
-					cell.classList.add("field-cell");
-
-					cell.style.left = (cellSize * i - 1.5) + "px";
-					cell.style.top = (cellSize * j - 1.5) + "px";
-
-					fieldNode.appendChild(cell);
-					document.cells[j * fieldWidth + i] = cell;
+						cell.style.left = (gameState.cellSize * i - 1.5) + "px";
+						cell.style.top = (gameState.cellSize * j - 1.5) + "px";
+	
+						fieldNode.appendChild(cell);
+						document.cells[j * gameState.fieldWidth + i] = cell;
+					}
 				}
 			}
-		}
-	
-		function caterpillarInit(caterpillarNode) {
-			caterpillarNode.caterpillarFrame = 0;
-		}
-		function caterpillarFrame(caterpillarNode, caterpillarOverlayNode) {
-			if (caterpillarNode.moving) {
-				caterpillarNode.caterpillarFrame = (caterpillarNode.caterpillarFrame + 1) % 2;
+			
+			for (var j = 0; j < gameState.fieldHeight; j++) {
+				for (var i = 0; i < gameState.fieldWidth; i++) {
+					var cell = document.cells[j * gameState.fieldWidth + i];
+					
+					cell.classList.remove("concrete");
+					
+					if (gameState.field[j * gameState.fieldWidth + i].type == "CONCRETE") {
+						cell.classList.add("concrete");
+					}
+				}
 			}
-			caterpillarNode.style.backgroundImage = "url('img/tank_parts/tank-caterpillars-frame" + (caterpillarNode.caterpillarFrame + 1) + ".svg')";
-			caterpillarOverlayNode.style.backgroundImage = "url('img/tank_parts/' + caterpillarOverlayNode.skin + '/tank-caterpillars-frame" + (caterpillarNode.caterpillarFrame + 1) + "-overlay.svg')";
+			
 		}
 		
-		function movementInit(tankNode) {
-			tankNode.posX = 20;
-			tankNode.posY = 40;
-			tankNode.angle = 0;
-			tankNode.moving = false;
+		function caterpillarFrame(caterpillarNode, caterpillarOverlayNode) {
+			if (caterpillarNode.moving) {
+				caterpillarNode.classList.remove("frame" + (caterpillarNode.caterpillarFrame+1));
+				caterpillarOverlayNode.classList.remove("frame" + (caterpillarNode.caterpillarFrame+1));
+
+				caterpillarNode.caterpillarFrame = (caterpillarNode.caterpillarFrame + 1) % 2;
+
+				caterpillarNode.classList.add("frame" + (caterpillarNode.caterpillarFrame+1));
+				caterpillarOverlayNode.classList.add("frame" + (caterpillarNode.caterpillarFrame+1));
+			}
+			/*
+			caterpillarNode.style.backgroundImage = "url('img/tank_parts/tank-caterpillars-frame" + (caterpillarNode.caterpillarFrame + 1) + ".svg')";
+			caterpillarOverlayNode.style.backgroundImage = "url('img/tank_parts/' + caterpillarOverlayNode.skin + '/tank-caterpillars-frame" + (caterpillarNode.caterpillarFrame + 1) + "-overlay.svg')";
+			*/
+
 		}
 					
 		function movementFrame(tankNode) {
 			tankNode.style.transform = "rotate(" + (tankNode.angle) + "deg)";
 			tankNode.style.left = tankNode.posX + "px";
 			tankNode.style.top = tankNode.posY + "px";
-
 		}
 
 		// Setting events
 		
 		window.addEventListener("load", function() {
-			init();
-			
-			window.frame = 0;
-			fieldInit(fieldNode);
-			
+			playersNode = document.getElementById("players");
+			fieldNode = document.getElementById("field");
+			missilesNode = document.getElementById("missiles");
+		
+			webSocketAddress = buildWebSocketAddress("player");
+			openStatusSocket();
 		});
 	
 		var keysDown = {
@@ -361,6 +355,13 @@
 			background-repeat: no-repeat;
 			background-size: 100% 100%;
 		}
+		div.tank-caterpillars.frame1 {
+			background-image: url('img/tank_parts/tank-caterpillars-frame1.svg');
+		}
+		div.tank-caterpillars.frame2 {
+			background-image: url('img/tank_parts/tank-caterpillars-frame2.svg');
+		}
+
 		
 		div.tank-caterpillars-overlay {
 			position: absolute; left: 0; top: 0;
@@ -370,12 +371,19 @@
 			background-size: 100% 100%;
 			mix-blend-mode: multiply;
 		}
-		div.tank-caterpillars-overlay.green {
+		div.tank-caterpillars-overlay.frame1.green {
 			background-image: url('img/tank_parts/green/tank-caterpillars-frame1-overlay.svg');
 		}
-		div.tank-caterpillars-overlay.yellow {
+		div.tank-caterpillars-overlay.frame2.green {
+			background-image: url('img/tank_parts/green/tank-caterpillars-frame2-overlay.svg');
+		}		
+		div.tank-caterpillars-overlay.frame1.yellow {
 			background-image: url('img/tank_parts/yellow/tank-caterpillars-frame1-overlay.svg');
 		}
+		div.tank-caterpillars-overlay.frame2.yellow {
+			background-image: url('img/tank_parts/yellow/tank-caterpillars-frame2-overlay.svg');
+		}
+		
 
 		div.tank-body {
 			position: absolute; left: 0; top: 0;
