@@ -27,7 +27,7 @@
 		var playersNode;
 		var missilesNode;
 		
-		var playerCaterpillarsNode = []
+		var firstUpdate = true;
 		
 		var skins = [ "yellow", "green" ]
 		
@@ -40,7 +40,116 @@
 			webSocketAddress = buildWebSocketAddress("player");
 			openStatusSocket();
 		}
+		
+		function updateTanks(gameStatePlayers) {
+		
+			if (firstUpdate) {
+				// Removing all tanks
+				while (playersNode.firstChild != null) {
+					playersNode.removeChild(playersNode.firstChild);
+				}
+				
+				for (var i = 0; i < gameStatePlayers.length; i++) {
+	
+					var playerTankShadowNode = document.createElement("div");
+					playerTankShadowNode.setAttribute("id", "player" + (i+1) + "-tank-shadow");
+					playerTankShadowNode.classList.add("tank-shadow");
+					
+					var playerTankCaterpillarsNode = document.createElement("div");
+					playerTankCaterpillarsNode.setAttribute("id", "player" + (i+1) + "-tank-caterpillars");
+					playerTankCaterpillarsNode.classList.add("tank-caterpillars");
+	
+					var playerTankCaterpillarsOverlayNode = document.createElement("div");
+					playerTankCaterpillarsOverlayNode.setAttribute("id", "player" + (i+1) + "-tank-caterpillars-overlay");
+					playerTankCaterpillarsOverlayNode.classList.add("tank-caterpillars-overlay");
+					playerTankCaterpillarsOverlayNode.classList.add(skins[i]);
+					
+					var playerTankBodyNode = document.createElement("div");
+					playerTankBodyNode.setAttribute("id", "player" + (i+1) + "-tank-body");
+					playerTankBodyNode.classList.add("tank-body");
+					
+					var playerTankBodyOverlayNode = document.createElement("div");
+					playerTankBodyOverlayNode.setAttribute("id", "player" + (i+1) + "-tank-overlay");
+					playerTankBodyOverlayNode.classList.add("tank-body-overlay");
+					playerTankBodyOverlayNode.classList.add(skins[i]);
+					
+					var playerTankNode = document.createElement("div");
+					playerTankNode.setAttribute("id", "player" + (i+1) + "-tank");
+					playerTankNode.classList.add("tank");
+					
+					playerTankNode.appendChild(playerTankShadowNode);
+					playerTankNode.appendChild(playerTankCaterpillarsNode);
+					playerTankNode.appendChild(playerTankCaterpillarsOverlayNode);
+					playerTankNode.appendChild(playerTankBodyNode);
+					playerTankNode.appendChild(playerTankBodyOverlayNode);
+					
+					playersNode.appendChild(playerTankNode);
+					
+					caterpillarInit(playerTankCaterpillarsNode);
+					movementInit(playerTankNode);
+	
+				}
+			}
 			
+			var playerTankNodeElements = playersNode.childNodes;
+			for (var i = 0; i < playerTankNodeElements.length; i++) {
+				var playerTankNode = document.getElementById("player" + (i+1) + "-tank");
+				var playerCaterpillarsNode = document.getElementById("player" + (i+1) + "-tank-caterpillars");
+
+				playerCaterpillarsNode.moving = gameStatePlayers[i].moving;
+				playerTankNode.posX = gameStatePlayers[i].posX;
+				playerTankNode.posY = gameStatePlayers[i].posY;
+				playerTankNode.angle = gameStatePlayers[i].angle;
+			}
+			
+		}
+		
+		function updateMissiles(missiles) {
+			var recreateMissilesNode = false;
+			if (missilesNode.childNodes.length != missiles.length) {
+				recreateMissilesNode = true;
+				// Removing all missiles for all players
+				while (missilesNode.firstChild != null) {
+					missilesNode.removeChild(missilesNode.firstChild);
+				}
+			}
+			
+			for (var i = 0; i < playersNode.childNodes.length; i++) {
+				var playerMissilesNode;
+				if (recreateMissilesNode) {
+					playerMissilesNode = document.createElement("div");
+					missilesNode.appendChild(playerMissilesNode);
+				} else {
+					playerMissilesNode = missilesNode.childNodes[i];
+				}
+				
+				var recreatePlayerMissiles = false;
+				if (playerMissilesNode.childNodes.length != missiles[i].length) {
+					recreatePlayerMissiles = true;
+					// Removing all missiles for player
+					while (playerMissilesNode.firstChild != null) {
+						playerMissilesNode.removeChild(playerMissilesNode.firstChild);
+					}
+				}
+				
+				for (var j = 0; j < missiles[i].length; j++) {
+					if (recreatePlayerMissiles) {
+						var missileNode = document.createElement("div");
+						missileNode.classList.add("missile");
+					} else {
+						missileNode = playerMissilesNode.childNodes[j];
+					}
+					
+					missileNode.posX = missiles[i][j].posX;
+					missileNode.posY = missiles[i][j].posY;
+					missileNode.angle = missiles[i][j].angle;
+
+					playerMissilesNode.appendChild(missileNode);
+				}
+
+			}
+		}
+		
 		function openStatusSocket() {
 		    websocket = new WebSocket(webSocketAddress);
 		    
@@ -50,54 +159,24 @@
 		    websocket.onmessage = function(evt) {
 		    	var gameState = JSON.parse(evt.data);
 
-				if (playersNode.childNodes.length != gameState.players.length) {
-					
-					// Removing all tanks
-					while (playersNode.firstChild != null) {
-						playersNode.removeChild(playersNode.firstChild);
+				updateTanks(gameState.players);
+				
+				for (var j = 0; j < gameState.fieldHeight; j++) {
+					for (var i = 0; i < gameState.fieldWidth; i++) {
+						var cell = document.cells[j * gameState.fieldWidth + i];
+						
+						cell.classList.remove("concrete");
+						
+						if (gameState.field[j * gameState.fieldWidth + i].type == "CONCRETE") {
+							cell.classList.add("concrete");
+						}
 					}
-					
-					for (var i = 0; i < gameState.players.length; i++) {
+				}
 
-						var playerTankShadowNode = document.createElement("div");
-						playerTankShadowNode.setAttribute("id", "player" + (i+1) + "-tank-shadow");
-						playerTankShadowNode.classList.add("tank-shadow");
-						
-						var playerTankCaterpillarsNode = document.createElement("div");
-						playerTankCaterpillarsNode.setAttribute("id", "player" + (i+1) + "-tank-caterpillars");
-						playerTankCaterpillarsNode.classList.add("tank-caterpillars");
-
-						var playerTankCaterpillarsOverlayNode = document.createElement("div");
-						playerTankCaterpillarsOverlayNode.setAttribute("id", "player" + (i+1) + "-tank-caterpillars-overlay");
-						playerTankCaterpillarsOverlayNode.classList.add("tank-caterpillars-overlay");
-						playerTankCaterpillarsOverlayNode.classList.add(skins[i]);
-						
-						var playerTankBodyNode = document.createElement("div");
-						playerTankBodyNode.setAttribute("id", "player" + (i+1) + "-tank-body");
-						playerTankBodyNode.classList.add("tank-body");
-						
-						var playerTankBodyOverlayNode = document.createElement("div");
-						playerTankBodyOverlayNode.setAttribute("id", "player" + (i+1) + "-tank-overlay");
-						playerTankBodyOverlayNode.classList.add("tank-body-overlay");
-						playerTankBodyOverlayNode.classList.add(skins[i]);
-						
-						var playerTankNode = document.createElement("div");
-						playerTankNode.setAttribute("id", "player" + (i+1) + "-tank");
-						playerTankNode.classList.add("tank");
-						
-						playerTankNode.appendChild(playerTankShadowNode);
-						playerTankNode.appendChild(playerTankCaterpillarsNode);
-						playerTankNode.appendChild(playerTankCaterpillarsOverlayNode);
-						playerTankNode.appendChild(playerTankBodyNode);
-						playerTankNode.appendChild(playerTankBodyOverlayNode);
-						
-						playersNode.appendChild(playerTankNode);
-						
-						caterpillarInit(playerTankCaterpillarsNode);
-						movementInit(playerTankNode);
-
-					}
-					
+				// Missiles
+				updateMissiles(gameState.missiles);
+				
+				if (firstUpdate) {
 					window.setInterval(function() {
 						window.frame ++;
 						var playerTankNodeElements = playersNode.childNodes;
@@ -120,78 +199,9 @@
 						}
 						
 					}, 15);
-
-					
 				}
 				
-				var playerTankNodeElements = playersNode.childNodes;
-				for (var i = 0; i < playerTankNodeElements.length; i++) {
-					var playerTankNode = document.getElementById("player" + (i+1) + "-tank");
-					var playerCaterpillarsNode = document.getElementById("player" + (i+1) + "-tank-caterpillars");
-
-					playerCaterpillarsNode.moving = gameState.players[i].moving;
-					playerTankNode.posX = gameState.players[i].posX;
-					playerTankNode.posY = gameState.players[i].posY;
-					playerTankNode.angle = gameState.players[i].angle;
-				}
-				
-				for (var j = 0; j < gameState.fieldHeight; j++) {
-					for (var i = 0; i < gameState.fieldWidth; i++) {
-						var cell = document.cells[j * gameState.fieldWidth + i];
-						
-						cell.classList.remove("concrete");
-						
-						if (gameState.field[j * gameState.fieldWidth + i].type == "CONCRETE") {
-							cell.classList.add("concrete");
-						}
-					}
-				}
-
-				// Missiles
-
-				var recreateMissilesNode = false;
-				if (missilesNode.childNodes.length != gameState.missiles.length) {
-					recreateMissilesNode = true;
-					// Removing all missiles for all players
-					while (missilesNode.firstChild != null) {
-						missilesNode.removeChild(missilesNode.firstChild);
-					}
-				}
-				
-				for (var i = 0; i < playersNode.childNodes.length; i++) {
-					var playerMissilesNode;
-					if (recreateMissilesNode) {
-						playerMissilesNode = document.createElement("div");
-						missilesNode.appendChild(playerMissilesNode);
-					} else {
-						playerMissilesNode = missilesNode.childNodes[i];
-					}
-					
-					var recreatePlayerMissiles = false;
-					if (playerMissilesNode.childNodes.length != gameState.missiles[i].length) {
-						recreatePlayerMissiles = true;
-						// Removing all missiles for player
-						while (playerMissilesNode.firstChild != null) {
-							playerMissilesNode.removeChild(playerMissilesNode.firstChild);
-						}
-					}
-					
-					for (var j = 0; j < gameState.missiles[i].length; j++) {
-						if (recreatePlayerMissiles) {
-							var missileNode = document.createElement("div");
-							missileNode.classList.add("missile");
-						} else {
-							missileNode = playerMissilesNode.childNodes[j];
-						}
-						
-						missileNode.posX = gameState.missiles[i][j].posX;
-						missileNode.posY = gameState.missiles[i][j].posY;
-						missileNode.angle = gameState.missiles[i][j].angle;
-
-						playerMissilesNode.appendChild(missileNode);
-					}
-
-				}
+				firstUpdate = false;
 				
 		    	//throw 'Invalid message from client: "' + evt.data + '"';
 		    };
@@ -252,8 +262,6 @@
 		// Setting events
 		
 		window.addEventListener("load", function() {
-
-			
 			init();
 			
 			window.frame = 0;
