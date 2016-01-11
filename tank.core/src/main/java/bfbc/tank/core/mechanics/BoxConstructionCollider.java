@@ -39,13 +39,18 @@ public class BoxConstructionCollider<T extends Box> {
 		agents.clear();
 	}
 	
+	public boolean containsAgent(BoxConstruction<? extends T> agent) {
+		return agents.contains(agent);
+	}
+	
 	public synchronized void addAgent(BoxConstruction<? extends T> agent) {
 		agents.add(agent);
 	}
 	
-	public void removeAgent(Missile missile) {
-		agents.remove(missile);
+	public void removeAgent(BoxConstruction<? extends T> agent) {
+		agents.remove(agent);
 	}
+	
 	@SuppressWarnings("unchecked")
 	public synchronized CollisionResult getIntersectionDepth(BoxConstruction<T> con) {
 		DepthXY res = null; 

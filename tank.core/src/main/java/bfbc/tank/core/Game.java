@@ -19,9 +19,9 @@ public class Game extends Thread implements MissileCrashListener {
 	@Expose
 	public final int playersCount = 2;
 	@Expose
-	public final int fieldWidth = 29;
+	public final int fieldWidth = 28;
 	@Expose
-	public final int fieldHeight = 27;
+	public final int fieldHeight = 26;
 	@Expose
 	public final double cellSize = 22;
 	
@@ -58,6 +58,30 @@ public class Game extends Thread implements MissileCrashListener {
 		return -1;
 	}
 	
+	private void createPlayer(int index) {
+		switch (index) {
+		case 0:
+			if (players[0] != null) {
+				collider.removeAgent(players[0]);
+			}
+			players[0] = new Player(this, collider, Direction.DOWN, 
+                    new PlayerCommand(), 
+                    false, cellSize * (fieldWidth - 1) / 2, cellSize * 3.0/2);
+			collider.addAgent(players[0]);
+			break;
+		case 1:
+			if (players[1] != null) {
+				collider.removeAgent(players[1]);
+			}
+			players[1] = new Player(this, collider, Direction.UP, 
+        			new PlayerCommand(), 
+        			false, cellSize * (fieldWidth - 1) / 2, cellSize * (fieldHeight - 1 - 3.0/2));
+			collider.addAgent(players[1]);
+			break;
+			
+		}
+	}
+	
 	public Game(StateUpdateHandler stateUpdateHandler) {
 		this.stateUpdateHandler = stateUpdateHandler;
 		for (int j = 0; j < fieldHeight; j++) {
@@ -71,14 +95,8 @@ public class Game extends Thread implements MissileCrashListener {
 		
 		time = (double)System.currentTimeMillis() / 1000;
 		players = new Player[2];
-		players[0] = new Player(this, collider, Direction.RIGHT, 
-		                    new PlayerCommand(), 
-		                    false, 75, 250, 0);
-		players[1] = new Player(this, collider, Direction.LEFT, 
-                			new PlayerCommand(), 
-                			false, 200, 250, 180);
-		collider.addAgent(players[0]);
-		collider.addAgent(players[1]);
+		createPlayer(0);
+		createPlayer(1);
 		
 		collider.setFriendship(new CollisionFriendship<Box>() {
 			@Override
@@ -180,10 +198,13 @@ public class Game extends Thread implements MissileCrashListener {
 	
 	@Override
 	public void missileCrashed(Missile missile, BoxConstruction<?> target) {
-		if (target == players[0]) {
-			System.out.println("Player 1 eliminated");
-		} else if (target == players[1]) {
-			System.out.println("Player 2 eliminated");
+		if (target instanceof Player) {
+			Player p = (Player)target;
+			if (missile.getOwnerPlayer() != p) {
+				int id = findPlayerId(p);
+				System.out.println("Player " + (id+1) + " eliminated");
+				createPlayer(id);
+			}
 		}
 		
 		missiles.get(findPlayerId(missile.getOwnerPlayer())).remove(missile);

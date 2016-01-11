@@ -1,6 +1,9 @@
 body {
-	margin: 0;
-	background-color: black;
+	font-family: sans-serif;
+	margin: 20pt;
+	background: linear-gradient(-170deg, #404040, #353635);
+	position: relative;
+	overflow: hidden;
 }
 
 div.tank {
@@ -101,7 +104,6 @@ div.concrete {
 
 div.field {
 	margin: 0;
-	background: linear-gradient(-170deg, #505850, #657065);
 }
 
 div.missile {
@@ -113,8 +115,35 @@ div.missile {
 	background-image: url('img/missile.svg');
 }
 
-div.root {
-	position: absolute;
+div.game {
+	background: linear-gradient(-170deg, #707070, #656665);
+	position: relative;
 	left: 14px;
 	top: 14px;
+}
+
+div.root {
+	width: 600px;
+	margin: auto;
+}
+
+div.frags-player {
+	margin: 5px;
+}
+
+div.frags-pane {
+	background: linear-gradient(-170deg, #d0d0d0, #b5b7b5);
+	padding: 15px;
+    position: relative;
+    left: 650px;
+    top: -500px;
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: #202020;
+    width: 200px;
+}
+
+h2 {
+	margin: 0;
+	font-weight: normal;
 }

@@ -12,7 +12,7 @@ public class Player extends GameObject {
 	
 	private static final double SIZE = 36;
 	
-	private static HashMap<Direction, Double> DIRECTION_ANGLES;
+	private static final HashMap<Direction, Double> DIRECTION_ANGLES;
 	static {
 		DIRECTION_ANGLES = new HashMap<>();
 		DIRECTION_ANGLES.put(Direction.RIGHT, 0d);
@@ -48,14 +48,18 @@ public class Player extends GameObject {
 		this.activeCommand = activeCommand;
 	}
 	
-	public Player(Game game, BoxConstructionCollider<Box> collider, Direction direction, PlayerCommand activeCommand, boolean moving, double posX, double posY, double angle) {
-		super(game, SIZE, SIZE, posX, posY, angle);
+	public Player(Game game, BoxConstructionCollider<Box> collider, Direction direction, PlayerCommand activeCommand, boolean moving, double posX, double posY, Double angle) {
+		super(game, SIZE, SIZE, posX, posY, angle != null ? angle : DIRECTION_ANGLES.get(direction));
 		this.collider = collider;
 		this.activeCommand = activeCommand;
 		this.direction = direction;
 		this.moving = moving;
 	}
-	
+
+	public Player(Game game, BoxConstructionCollider<Box> collider, Direction direction, PlayerCommand activeCommand, boolean moving, double posX, double posY) {
+		this(game, collider, direction, activeCommand, moving, posX, posY, null);
+	}
+
 	public void frameStep() {
 		moving = false;
 		if (activeCommand.isDown()) {
