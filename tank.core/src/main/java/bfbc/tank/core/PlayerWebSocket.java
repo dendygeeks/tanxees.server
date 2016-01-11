@@ -1,7 +1,9 @@
 package bfbc.tank.core;
 import java.io.IOException;
 import java.lang.Thread.State;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -11,6 +13,8 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+
+import com.google.gson.annotations.Expose;
 
 import bfbc.tank.core.Game.StateUpdateHandler;
 
@@ -23,6 +27,8 @@ public class PlayerWebSocket implements StateUpdateHandler {
     private Map<Integer, Session> controlledPlayers = new HashMap<>();
     
     private Game game = new Game(this);
+    
+    
     
     public PlayerWebSocket() {
     	for (int i = 0; i < game.fieldHeight - 1; i++) {
@@ -66,21 +72,45 @@ public class PlayerWebSocket implements StateUpdateHandler {
 			}
 		}
 	}
+
+    private static class TheState {
+    	@Expose
+    	private final Game game;
+    	@Expose
+    	private final int activePlayerIndex;
+
+    	public TheState(Game game, int activePlayerIndex) {
+			this.game = game;
+			this.activePlayerIndex = activePlayerIndex;
+		}
+    	
+    	public synchronized String toJson() {
+    		return GlobalServices.getGson().toJson(this);
+    	}
+    }
     
     @Override
     public void gameStateUpdated(Game state) {
-    	broadcastString(state.toJson());
-    }
-    
-    private void broadcastString(String string) {
     	synchronized (this) {
-	    	for (Session s : sessions) {
+    		List<Session> sessionsToRemove = new ArrayList<>();
+
+    		for (Session s : sessions) {
+    			int playerIndex = -1;
+    			for (int i = 0; i < game.getPlayersCount(); i++) {
+    	    		if (s == controlledPlayers.get(i)) playerIndex = i;
+    	    	}
+    			
 	    		try {
-					s.getRemote().sendString(string);
+					s.getRemote().sendString(new TheState(game, playerIndex).toJson());
 				} catch (IOException e) {
+					sessionsToRemove.add(s);
 					e.printStackTrace();
 				}
-	    	}
+    			
+    		}
+    		
+	    	
+    		sessions.removeAll(sessionsToRemove);
     	}
     }
     
@@ -91,10 +121,13 @@ public class PlayerWebSocket implements StateUpdateHandler {
         if (game.getState() == State.NEW) {
         	game.start();
         }
+        
+        int selectedPlayer = -1;
 		synchronized (controlledPlayers) {
 	        for (Integer playerIndex : controlledPlayers.keySet()) {
 	        	if (controlledPlayers.get(playerIndex) == null) {
 	        		controlledPlayers.put(playerIndex, session);
+	        		selectedPlayer = playerIndex;
 	        		break;
 	        	}
 	        }
@@ -102,7 +135,7 @@ public class PlayerWebSocket implements StateUpdateHandler {
 		
     	synchronized (this) {
 			try {
-				session.getRemote().sendString(game.toJson());
+				session.getRemote().sendString(new TheState(game, selectedPlayer).toJson());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -129,7 +162,9 @@ public class PlayerWebSocket implements StateUpdateHandler {
 		synchronized (controlledPlayers) {
 			for (Integer playerIndex : controlledPlayers.keySet()) {
 				if (controlledPlayers.get(playerIndex) == session) {
-	        		game.setPlayerCommands(playerIndex, PlayerCommand.fromJson(message));
+					ClientState cs = ClientState.fromJson(message);
+					game.setDebugData(playerIndex, cs.getDebugData());
+	        		game.setPlayerKeys(playerIndex, cs.getKeys());
 	        	}
 	        }
 		}

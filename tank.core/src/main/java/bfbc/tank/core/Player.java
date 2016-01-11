@@ -32,7 +32,7 @@ public class Player extends GameObject {
 		return moving;
 	}
 
-	private PlayerCommand activeCommand;
+	private PlayerKeys activeCommand;
 	
 	private Direction direction;
 
@@ -40,15 +40,15 @@ public class Player extends GameObject {
 		return direction;
 	}
 	
-	public PlayerCommand getActiveCommand() {
+	public PlayerKeys getActiveCommand() {
 		return activeCommand;
 	}
 	
-	public void setActiveCommand(PlayerCommand activeCommand) {
+	public void setActiveCommand(PlayerKeys activeCommand) {
 		this.activeCommand = activeCommand;
 	}
 	
-	public Player(Game game, BoxConstructionCollider<Box> collider, Direction direction, PlayerCommand activeCommand, boolean moving, double posX, double posY, Double angle) {
+	public Player(Game game, BoxConstructionCollider<Box> collider, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY, Double angle) {
 		super(game, SIZE, SIZE, posX, posY, angle != null ? angle : DIRECTION_ANGLES.get(direction));
 		this.collider = collider;
 		this.activeCommand = activeCommand;
@@ -56,7 +56,7 @@ public class Player extends GameObject {
 		this.moving = moving;
 	}
 
-	public Player(Game game, BoxConstructionCollider<Box> collider, Direction direction, PlayerCommand activeCommand, boolean moving, double posX, double posY) {
+	public Player(Game game, BoxConstructionCollider<Box> collider, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY) {
 		this(game, collider, direction, activeCommand, moving, posX, posY, null);
 	}
 

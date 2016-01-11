@@ -24,10 +24,12 @@
 		// Globals
 		var websocket;
 		var webSocketAddress;
+		var activePlayerIndex;
 
 		var fieldNode;
 		var playersNode;
 		var missilesNode;
+		var debugSvgNode;
 		var cells = [];
 		
 		var firstUpdate = true;
@@ -143,6 +145,13 @@
 			}
 		}
 		
+		function updateScore(frags) {
+			for (var i = 0; i < frags.length; i++) {
+				var playerFragsNode = document.getElementById("player" + (i+1) + "-frags");
+				playerFragsNode.innerHTML = frags[i];
+			}
+		}
+		
 		function openStatusSocket() {
 		    websocket = new WebSocket(webSocketAddress);
 		    
@@ -150,7 +159,12 @@
 		    };
 		    
 		    websocket.onmessage = function(evt) {
-		    	var gameState = JSON.parse(evt.data);
+		    	var state = JSON.parse(evt.data);
+		    	var gameState = state.game;
+		    	
+
+				// Active player index
+				activePlayerIndex = state.activePlayerIndex;
 
 				// Players
 				updateTanks(gameState.players);
@@ -160,6 +174,18 @@
 
 				// Missiles
 				updateMissiles(gameState.missiles);
+				
+				// Score
+				updateScore(gameState.frags);
+				
+				// Debug SVG
+				
+				debugSvgNode.innerHTML = "";
+				for (var i = 0; i < playersNode.childNodes.length; i++) {
+					if (gameState.debugData[i] != null) {
+						debugSvgNode.innerHTML += gameState.debugData[i].svg;
+					}
+				}
 				
 				if (firstUpdate) {
 					window.frame = 0;
@@ -262,6 +288,7 @@
 			playersNode = document.getElementById("players");
 			fieldNode = document.getElementById("field");
 			missilesNode = document.getElementById("missiles");
+			debugSvgNode = document.getElementById("debug-svg");
 		
 			webSocketAddress = buildWebSocketAddress("player");
 			openStatusSocket();
@@ -276,7 +303,58 @@
 		};
 
 		function sendCommands() {
-			websocket.send(JSON.stringify(keysDown));
+			var clientState = {};
+			clientState.keys = keysDown;
+			
+			// <DEMO> Demonstrating debug SVG feature. Remove this ASAP
+			if (activePlayerIndex > -1) {
+				clientState.debugData = {};
+				clientState.debugData.svg = `
+					<?xml version="1.0" encoding="utf-8"?>
+					<!DOCTYPE svg PUBLIC 
+					        "-//W3C//DTD SVG 1.1//EN" 
+					        "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+					<svg style="opacity: 0.2; position: absolute; ` + 'left: ' + playersNode.childNodes[activePlayerIndex].posX + 'px; top: ' + playersNode.childNodes[activePlayerIndex].posY + 'px' + `" version="1.1" 
+					        id="Layer_1" 
+					        xmlns="http://www.w3.org/2000/svg" 
+					        xmlns:xlink="http://www.w3.org/1999/xlink" width="80px" height="60px" 
+					        viewBox="0 0 800 600" 
+					        enable-background="new 0 0 800 600" 
+					        xml:space="preserve">
+					
+					    <!-- face -->
+					    <circle fill="#FFFF00" 
+					            stroke="#000000" 
+					            stroke-width="10" 
+					            stroke-miterlimit="10" 
+					            cx="382.553" 
+					            cy="306.786" 
+					            r="217.961"/>
+					
+					    <!-- mouth -->
+					    <path fill="#FFFF00"
+					            stroke="#000000"
+					            stroke-width="10"
+					            stroke-miterlimit="10"
+					            d="M244.689,329.602 C315.563,498.534,484.495,479.116,531.583,333"/>
+					
+					    <!-- eyes -->
+					    <ellipse
+					            cx="337.592"
+					            cy="233.485"
+					            rx="21.359"
+					            ry="49.272"/>
+					    <ellipse
+					            cx="422.592"
+					            cy="232.485"
+					            rx="21.359"
+					            ry="49.272"/>
+					</svg>
+				`;
+			}
+			// </DEMO>
+			
+			websocket.send(JSON.stringify(clientState));
 		}
 		
 		window.addEventListener("keydown", function(e) {
@@ -345,14 +423,15 @@
 			<div id="players"></div>
 			<div id="missiles"></div>
 			<div id="field" class="field"></div>
+			<div id="debug-svg" style="position: absolute; left: 0; top: 0;"></div>
 		</div>
 		<div class="frags-pane">
 			<h2>Frags</h2>
 			<div class="frags-player">
-				Player 1: <span id="player1_frags">0</span>
+				Player 1: <span id="player1-frags">0</span>
 			</div>
 			<div class="frags-player">
-				Player 2: <span id="player2_frags">0</span>
+				Player 2: <span id="player2-frags">0</span>
 			</div>
 		</div>
 	</div>

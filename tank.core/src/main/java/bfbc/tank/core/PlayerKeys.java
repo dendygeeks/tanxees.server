@@ -2,7 +2,7 @@ package bfbc.tank.core;
 
 import com.google.gson.annotations.Expose;
 
-class PlayerCommand {
+class PlayerKeys {
 	@Expose
 	private boolean right;
 	@Expose
@@ -30,7 +30,7 @@ class PlayerCommand {
 		return fire;
 	}
 
-	public static PlayerCommand fromJson(String json) {
-		return GlobalServices.getGson().fromJson(json, PlayerCommand.class);
+	public static PlayerKeys fromJson(String json) {
+		return GlobalServices.getGson().fromJson(json, PlayerKeys.class);
 	}
 }

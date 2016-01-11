@@ -38,6 +38,12 @@ public class Game extends Thread implements MissileCrashListener {
 	private volatile Player[] players;
 	
 	@Expose
+	private volatile int[] frags;
+	
+	@Expose
+	private volatile DebugData[] debugData;
+	
+	@Expose
 	private List<List<Missile>> missiles = new ArrayList<>();
 
 	@Expose
@@ -65,7 +71,7 @@ public class Game extends Thread implements MissileCrashListener {
 				collider.removeAgent(players[0]);
 			}
 			players[0] = new Player(this, collider, Direction.DOWN, 
-                    new PlayerCommand(), 
+                    new PlayerKeys(), 
                     false, cellSize * (fieldWidth - 1) / 2, cellSize * 3.0/2);
 			collider.addAgent(players[0]);
 			break;
@@ -74,7 +80,7 @@ public class Game extends Thread implements MissileCrashListener {
 				collider.removeAgent(players[1]);
 			}
 			players[1] = new Player(this, collider, Direction.UP, 
-        			new PlayerCommand(), 
+        			new PlayerKeys(), 
         			false, cellSize * (fieldWidth - 1) / 2, cellSize * (fieldHeight - 1 - 3.0/2));
 			collider.addAgent(players[1]);
 			break;
@@ -84,17 +90,23 @@ public class Game extends Thread implements MissileCrashListener {
 	
 	public Game(StateUpdateHandler stateUpdateHandler) {
 		this.stateUpdateHandler = stateUpdateHandler;
+
+		// Saving the current time
+		time = (double)System.currentTimeMillis() / 1000;
+
+		// Initializing the field
 		for (int j = 0; j < fieldHeight; j++) {
 			for (int i = 0; i < fieldWidth; i++) {
 				field[j * fieldWidth + i] = new Cell(this, i, j);
 				fieldBoxConstruction.add(field[j * fieldWidth + i]);
 			}
 		}
-		
 		collider.addAgent(fieldBoxConstruction);
 		
-		time = (double)System.currentTimeMillis() / 1000;
-		players = new Player[2];
+		players = new Player[playersCount];
+		frags = new int[playersCount];
+		debugData = new DebugData[playersCount];
+		
 		createPlayer(0);
 		createPlayer(1);
 		
@@ -164,7 +176,11 @@ public class Game extends Thread implements MissileCrashListener {
 
 	}
 	
-	public synchronized void setPlayerCommands(int playerIndex, PlayerCommand playerCommand) {
+	public void setDebugData(int playerIndex, DebugData debugData) {
+		this.debugData[playerIndex] = debugData;
+	}
+	
+	public synchronized void setPlayerKeys(int playerIndex, PlayerKeys playerCommand) {
 		this.players[playerIndex].setActiveCommand(playerCommand);
 	}
 	
@@ -202,7 +218,9 @@ public class Game extends Thread implements MissileCrashListener {
 			Player p = (Player)target;
 			if (missile.getOwnerPlayer() != p) {
 				int id = findPlayerId(p);
-				System.out.println("Player " + (id+1) + " eliminated");
+				int myId = findPlayerId(missile.getOwnerPlayer());
+				System.out.println("Player " + (id + 1) + " is killed by player " + (myId + 1));
+				frags[myId] ++;
 				createPlayer(id);
 			}
 		}
