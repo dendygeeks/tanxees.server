@@ -89,14 +89,14 @@ div.tank-body-overlay.yellow {
 
 div.field-cell {
 	position: absolute;
-	width: 28px;
-	height: 28px;
+	width: 14px;
+	height: 14px;
 }
 
 div.concrete {
 	position: absolute; left: 0; top: 0;
-	width: 28px;
-	height: 28px;
+	width: 14px;
+	height: 14px;
 	background-image: url('img/concrete-full.svg');
 	background-repeat: no-repeat;
 	background-size: 100% 100%;

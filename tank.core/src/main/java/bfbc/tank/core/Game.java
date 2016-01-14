@@ -19,11 +19,11 @@ public class Game extends Thread implements MissileCrashListener {
 	@Expose
 	public final int playersCount = 2;
 	@Expose
-	public final int fieldWidth = 28;
+	public final int fieldWidth = 56;
 	@Expose
-	public final int fieldHeight = 26;
+	public final int fieldHeight = 52;
 	@Expose
-	public final double cellSize = 22;
+	public final double cellSize = 11;
 	
 	public static interface StateUpdateHandler {
 		void gameStateUpdated(Game state);
@@ -72,7 +72,7 @@ public class Game extends Thread implements MissileCrashListener {
 			}
 			players[0] = new Player(this, collider, Direction.DOWN, 
                     new PlayerKeys(), 
-                    false, cellSize * (fieldWidth - 1) / 2, cellSize * 3.0/2);
+                    false, cellSize * (fieldWidth - 1) / 2, cellSize * 3.0);
 			collider.addAgent(players[0]);
 			break;
 		case 1:
@@ -81,7 +81,7 @@ public class Game extends Thread implements MissileCrashListener {
 			}
 			players[1] = new Player(this, collider, Direction.UP, 
         			new PlayerKeys(), 
-        			false, cellSize * (fieldWidth - 1) / 2, cellSize * (fieldHeight - 1 - 3.0/2));
+        			false, cellSize * (fieldWidth - 1) / 2, cellSize * (fieldHeight - 1 - 3.0));
 			collider.addAgent(players[1]);
 			break;
 			
