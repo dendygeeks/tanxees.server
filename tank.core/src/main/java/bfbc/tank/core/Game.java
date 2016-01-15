@@ -70,7 +70,7 @@ public class Game extends Thread implements MissileCrashListener {
 			if (players[0] != null) {
 				collider.removeAgent(players[0]);
 			}
-			players[0] = new Player(this, collider, Direction.DOWN, 
+			players[0] = new Player(this, collider, this, Direction.DOWN, 
                     new PlayerKeys(), 
                     false, cellSize * (fieldWidth - 1) / 2, cellSize * 3.0);
 			collider.addAgent(players[0]);
@@ -79,7 +79,7 @@ public class Game extends Thread implements MissileCrashListener {
 			if (players[1] != null) {
 				collider.removeAgent(players[1]);
 			}
-			players[1] = new Player(this, collider, Direction.UP, 
+			players[1] = new Player(this, collider, this, Direction.UP, 
         			new PlayerKeys(), 
         			false, cellSize * (fieldWidth - 1) / 2, cellSize * (fieldHeight - 1 - 3.0));
 			collider.addAgent(players[1]);

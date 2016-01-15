@@ -102,7 +102,7 @@ public class PlayerWebSocket implements StateUpdateHandler {
     			
 	    		try {
 					s.getRemote().sendString(new TheState(game, playerIndex).toJson());
-				} catch (IOException e) {
+				} catch (Exception e) {
 					sessionsToRemove.add(s);
 					e.printStackTrace();
 				}

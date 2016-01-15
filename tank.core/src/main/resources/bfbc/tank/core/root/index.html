@@ -251,10 +251,10 @@
 				for (var i = 0; i < gameState.fieldWidth; i++) {
 					var cell = cells[j * gameState.fieldWidth + i];
 					
-					cell.classList.remove("concrete");
-					
 					if (gameState.field[j * gameState.fieldWidth + i].type == "CONCRETE") {
 						cell.classList.add("concrete");
+					} else {
+						cell.classList.remove("concrete");
 					}
 				}
 			}

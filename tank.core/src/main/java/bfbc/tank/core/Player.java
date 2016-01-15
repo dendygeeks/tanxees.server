@@ -5,7 +5,9 @@ import java.util.HashMap;
 import com.google.gson.annotations.Expose;
 
 import bfbc.tank.core.mechanics.Box;
+import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
+import bfbc.tank.core.mechanics.BoxConstructionCollider.MoveResult;
 import bfbc.tank.core.mechanics.DeltaXY;
 
 public class Player extends GameObject {
@@ -27,6 +29,7 @@ public class Player extends GameObject {
 	private boolean wantToFire;
 
 	private BoxConstructionCollider<Box> collider;
+	private MissileCrashListener crashListener;
 	
 	public boolean isMoving() {
 		return moving;
@@ -48,16 +51,17 @@ public class Player extends GameObject {
 		this.activeCommand = activeCommand;
 	}
 	
-	public Player(Game game, BoxConstructionCollider<Box> collider, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY, Double angle) {
+	public Player(Game game, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY, Double angle) {
 		super(game, SIZE, SIZE, posX, posY, angle != null ? angle : DIRECTION_ANGLES.get(direction));
 		this.collider = collider;
+		this.crashListener = crashListener;
 		this.activeCommand = activeCommand;
 		this.direction = direction;
 		this.moving = moving;
 	}
 
-	public Player(Game game, BoxConstructionCollider<Box> collider, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY) {
-		this(game, collider, direction, activeCommand, moving, posX, posY, null);
+	public Player(Game game, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY) {
+		this(game, collider, crashListener, direction, activeCommand, moving, posX, posY, null);
 	}
 
 	public void frameStep() {
@@ -120,7 +124,13 @@ public class Player extends GameObject {
 			default:
 				throw new RuntimeException("Strange direction case");
 			}
-			collider.tryMove(Player.this, dxy);
+			
+			BoxConstructionCollider<Box>.MoveResult mr = collider.tryMove(this, dxy);
+			for (BoxConstruction<Box> t : mr.targets) {
+				if (t instanceof Missile) {
+					crashListener.missileCrashed((Missile)t, this);
+				}
+			}
 		}
 		
 		if (notRotating && wantToFire) {
