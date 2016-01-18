@@ -181,12 +181,13 @@
 				
 				// Debug SVG
 				
-				debugSvgNode.innerHTML = "";
+				var svgCollect = "";
 				for (var i = 0; i < playersNode.childNodes.length; i++) {
 					if (gameState.debugData[i] != null) {
-						debugSvgNode.innerHTML += gameState.debugData[i].svg;
+						svgCollect += gameState.debugData[i].svg;
 					}
 				}
+				debugSvgNode.innerHTML = svgCollect;
 				
 				if (firstUpdate) {
 					window.frame = 0;
@@ -203,7 +204,7 @@
 								else if (node.id == "player" + (i+1) + "-tank-caterpillars-overlay") playerTankCaterpillarsOverlayNode = node;
 							}
 							
-							if (window.frame % 4 == 0) {
+							if (window.frame % 2 == 0) {
 								caterpillarFrame(playerTankCaterpillarsNode, playerTankCaterpillarsOverlayNode);
 							}
 							movementFrame(playerTankNode);
@@ -217,7 +218,7 @@
 							}
 						}
 						
-					}, 15);
+					}, 40);
 				}
 				
 				firstUpdate = false;
@@ -258,13 +259,13 @@
 				for (var i = 0; i < gameState.fieldWidth; i++) {
 					var cell = cells[j * gameState.fieldWidth + i];
 					
-					if (gameState.field[j * gameState.fieldWidth + i].type == "C") {
+					if (gameState.field[j * gameState.fieldWidth + i] == "C") {
 						cell.classList.add("concrete");
 					} else {
 						cell.classList.remove("concrete");
 					}
 
-					if (gameState.field[j * gameState.fieldWidth + i].type == "B") {
+					if (gameState.field[j * gameState.fieldWidth + i] == "B") {
 						cell.classList.add("brick");
 					} else {
 						cell.classList.remove("brick");
