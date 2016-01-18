@@ -125,7 +125,7 @@ public class Game extends Thread implements MissileCrashListener {
 				
 				if (p != null && m != null) {
 					// Missile can't hit the player who has launched it
-					return m.getOwnerPlayer() != p;
+					return players[m.getOwnerPlayerId()] != p;
 				} else {
 					// Everything else can collide
 					return true;
@@ -203,7 +203,7 @@ public class Game extends Thread implements MissileCrashListener {
 	synchronized Missile createMissile(Player p, double posX, double posY, double angle, double velocity) {
 		int index = findPlayerId(p);
 		if (missiles.get(index).isEmpty()) {
-			Missile newMissile = new Missile(this, this, collider, p, posX, posY, angle, velocity);
+			Missile newMissile = new Missile(this, this, collider, findPlayerId(p), posX, posY, angle, velocity);
 			missiles.get(index).add(newMissile);
 			collider.addAgent(newMissile);
 			return newMissile;
@@ -216,16 +216,16 @@ public class Game extends Thread implements MissileCrashListener {
 	public void missileCrashed(Missile missile, BoxConstruction<?> target) {
 		if (target instanceof Player) {
 			Player p = (Player)target;
-			if (missile.getOwnerPlayer() != p) {
+			if (players[missile.getOwnerPlayerId()] != p) {
 				int id = findPlayerId(p);
-				int myId = findPlayerId(missile.getOwnerPlayer());
+				int myId = missile.getOwnerPlayerId();
 				System.out.println("Player " + (id + 1) + " is killed by player " + (myId + 1));
 				frags[myId] ++;
 				createPlayer(id);
 			}
 		}
 		
-		missiles.get(findPlayerId(missile.getOwnerPlayer())).remove(missile);
+		missiles.get(missile.getOwnerPlayerId()).remove(missile);
 		collider.removeAgent(missile);
 	}
 }

@@ -11,18 +11,18 @@ public class Missile extends GameObject {
 	
 	private BoxConstructionCollider<Box> collider;
 	
-	private Player ownerPlayer;
+	private int ownerPlayerId;
 	
 	private MissileCrashListener crashListener;
 
-	Missile(Game game, MissileCrashListener crashListener, BoxConstructionCollider<Box> collider, Player ownerPlayer, double posX, double posY, double angle, double velocity)
+	Missile(Game game, MissileCrashListener crashListener, BoxConstructionCollider<Box> collider, int ownerPlayerId, double posX, double posY, double angle, double velocity)
 	{
 		super(game, SIZE, SIZE, posX, posY, angle);
 		this.crashListener = crashListener;
 		this.collider = collider;
 		this.velX = velocity * Math.cos(angle * Math.PI / 180.0);
 		this.velY = velocity * Math.sin(angle * Math.PI / 180.0);
-		this.ownerPlayer = ownerPlayer;
+		this.ownerPlayerId = ownerPlayerId;
 	}
 	
 	public void frameStep() {
@@ -34,8 +34,8 @@ public class Missile extends GameObject {
 		}
 	}
 	
-	public Player getOwnerPlayer() {
-		return ownerPlayer;
+	public int getOwnerPlayerId() {
+		return ownerPlayerId;
 	}
 	
 }
