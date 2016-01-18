@@ -105,6 +105,11 @@ public class Player extends GameObject {
 		double velocity = 85.0d;
 		double displacement = velocity * Game.MODEL_TICK;
 		
+		if (notRotating && wantToFire) {
+			getGame().createMissile(this, getPosX(), getPosY(), getAngle(), velocity);
+			wantToFire = false;
+		}
+
 		// If we are not rotating, we are moving
 		if (notRotating && moving) {
 			DeltaXY dxy;
@@ -131,11 +136,6 @@ public class Player extends GameObject {
 					crashListener.missileCrashed((Missile)t, this);
 				}
 			}
-		}
-		
-		if (notRotating && wantToFire) {
-			getGame().createMissile(this, getPosX(), getPosY(), getAngle(), velocity);
-			wantToFire = false;
 		}
 	}
 	

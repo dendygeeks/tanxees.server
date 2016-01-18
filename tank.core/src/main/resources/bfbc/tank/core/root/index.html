@@ -252,13 +252,13 @@
 				for (var i = 0; i < gameState.fieldWidth; i++) {
 					var cell = cells[j * gameState.fieldWidth + i];
 					
-					if (gameState.field[j * gameState.fieldWidth + i].type == "CONCRETE") {
+					if (gameState.field[j * gameState.fieldWidth + i].type == "C") {
 						cell.classList.add("concrete");
 					} else {
 						cell.classList.remove("concrete");
 					}
 
-					if (gameState.field[j * gameState.fieldWidth + i].type == "BRICK") {
+					if (gameState.field[j * gameState.fieldWidth + i].type == "B") {
 						cell.classList.add("brick");
 					} else {
 						cell.classList.remove("brick");

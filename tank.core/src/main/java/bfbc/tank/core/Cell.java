@@ -44,7 +44,7 @@ public class Cell implements Box {
 		this.game = game;
 		this.i = i;
 		this.j = j;
-		type = CellType.EMPTY;
+		type = CellType.E;
 	}
 	
 	public void setType(CellType type) {
@@ -57,7 +57,7 @@ public class Cell implements Box {
 
 	@Override
 	public boolean isActive() {
-		return type == CellType.CONCRETE ||
-		       type == CellType.BRICK;
+		return type == CellType.C ||
+		       type == CellType.B;
 	}
 }

@@ -1,5 +1,5 @@
 package bfbc.tank.core;
 
 public enum CellType {
-	EMPTY, CONCRETE, BRICK
+	E, C, B
 }

@@ -32,50 +32,50 @@ public class PlayerWebSocket implements StateUpdateHandler {
     
     public PlayerWebSocket() {
     	for (int i = 0; i < game.fieldHeight - 1; i++) {
-    		game.putFieldCellType(0, i, CellType.CONCRETE);
+    		game.putFieldCellType(0, i, CellType.C);
     	}
     	for (int i = 1; i < game.fieldHeight; i++) {
-    		game.putFieldCellType(game.fieldWidth - 1, i, CellType.CONCRETE);
+    		game.putFieldCellType(game.fieldWidth - 1, i, CellType.C);
     	}
     	for (int i = 1; i < game.fieldWidth; i++) {
-    		game.putFieldCellType(i, 0, CellType.CONCRETE);
+    		game.putFieldCellType(i, 0, CellType.C);
     	}
     	for (int i = 0; i < game.fieldWidth - 1; i++) {
-    		game.putFieldCellType(i, game.fieldHeight - 1, CellType.CONCRETE);
+    		game.putFieldCellType(i, game.fieldHeight - 1, CellType.C);
     	}
-		game.putFieldCellType(1, 1, CellType.CONCRETE);
-		game.putFieldCellType(1, 2, CellType.CONCRETE);
-		game.putFieldCellType(1, 3, CellType.CONCRETE);
-		game.putFieldCellType(1, 4, CellType.CONCRETE);
-		game.putFieldCellType(1, 5, CellType.CONCRETE);
-		game.putFieldCellType(1, 6, CellType.CONCRETE);
-		game.putFieldCellType(1, 7, CellType.CONCRETE);
-		game.putFieldCellType(1, 8, CellType.CONCRETE);
-		game.putFieldCellType(2, 8, CellType.CONCRETE);
-		game.putFieldCellType(3, 9, CellType.CONCRETE);
-		game.putFieldCellType(4, 9, CellType.CONCRETE);
-		game.putFieldCellType(5, 9, CellType.CONCRETE);
-		game.putFieldCellType(6, 9, CellType.CONCRETE);
-		game.putFieldCellType(7, 9, CellType.CONCRETE);
-		game.putFieldCellType(8, 8, CellType.CONCRETE);
+		game.putFieldCellType(1, 1, CellType.C);
+		game.putFieldCellType(1, 2, CellType.C);
+		game.putFieldCellType(1, 3, CellType.C);
+		game.putFieldCellType(1, 4, CellType.C);
+		game.putFieldCellType(1, 5, CellType.C);
+		game.putFieldCellType(1, 6, CellType.C);
+		game.putFieldCellType(1, 7, CellType.C);
+		game.putFieldCellType(1, 8, CellType.C);
+		game.putFieldCellType(2, 8, CellType.C);
+		game.putFieldCellType(3, 9, CellType.C);
+		game.putFieldCellType(4, 9, CellType.C);
+		game.putFieldCellType(5, 9, CellType.C);
+		game.putFieldCellType(6, 9, CellType.C);
+		game.putFieldCellType(7, 9, CellType.C);
+		game.putFieldCellType(8, 8, CellType.C);
 
-    	game.putFieldCellType(4, 4, CellType.CONCRETE);
-		game.putFieldCellType(4, 5, CellType.CONCRETE);
-		game.putFieldCellType(5, 4, CellType.CONCRETE);
-		game.putFieldCellType(5, 5, CellType.CONCRETE);
-		game.putFieldCellType(6, 5, CellType.CONCRETE);
-		game.putFieldCellType(5, 6, CellType.CONCRETE);
+    	game.putFieldCellType(4, 4, CellType.C);
+		game.putFieldCellType(4, 5, CellType.C);
+		game.putFieldCellType(5, 4, CellType.C);
+		game.putFieldCellType(5, 5, CellType.C);
+		game.putFieldCellType(6, 5, CellType.C);
+		game.putFieldCellType(5, 6, CellType.C);
 
-		game.putFieldCellType(25, 29, CellType.BRICK);
-		game.putFieldCellType(25, 30, CellType.BRICK);
-		game.putFieldCellType(26, 29, CellType.BRICK);
-		game.putFieldCellType(26, 30, CellType.BRICK);
-		game.putFieldCellType(27, 29, CellType.BRICK);
-		game.putFieldCellType(27, 30, CellType.BRICK);
-		game.putFieldCellType(28, 29, CellType.BRICK);
-		game.putFieldCellType(28, 30, CellType.BRICK);
-		game.putFieldCellType(29, 29, CellType.BRICK);
-		game.putFieldCellType(29, 30, CellType.BRICK);
+		game.putFieldCellType(25, 29, CellType.B);
+		game.putFieldCellType(25, 30, CellType.B);
+		game.putFieldCellType(26, 29, CellType.B);
+		game.putFieldCellType(26, 30, CellType.B);
+		game.putFieldCellType(27, 29, CellType.B);
+		game.putFieldCellType(27, 30, CellType.B);
+		game.putFieldCellType(28, 29, CellType.B);
+		game.putFieldCellType(28, 30, CellType.B);
+		game.putFieldCellType(29, 29, CellType.B);
+		game.putFieldCellType(29, 30, CellType.B);
 
 		
 		synchronized (controlledPlayers) {
