@@ -194,9 +194,15 @@
 						window.frame ++;
 						var playerTankNodeElements = playersNode.childNodes;
 						for (var i = 0; i < playerTankNodeElements.length; i++) {
-							var playerTankNode = document.getElementById("player" + (i+1) + "-tank");
-							var playerTankCaterpillarsNode = document.getElementById("player" + (i+1) + "-tank-caterpillars");
-							var playerTankCaterpillarsOverlayNode = document.getElementById("player" + (i+1) + "-tank-caterpillars-overlay");
+							var playerTankNode = playerTankNodeElements[i];
+							var playerTankCaterpillarsNode;
+							var playerTankCaterpillarsOverlayNode;
+							for (var j = 0; j < playerTankNode.childNodes.length; j++) {
+								var node = playerTankNode.childNodes[j];
+								if (node.id == "player" + (i+1) + "-tank-caterpillars") playerTankCaterpillarsNode = node;
+								else if (node.id == "player" + (i+1) + "-tank-caterpillars-overlay") playerTankCaterpillarsOverlayNode = node;
+							}
+							
 							if (window.frame % 4 == 0) {
 								caterpillarFrame(playerTankCaterpillarsNode, playerTankCaterpillarsOverlayNode);
 							}
