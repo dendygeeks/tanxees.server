@@ -20,6 +20,7 @@
 		new Image().src = "img/tank_parts/green/tank-full-body-overlay.svg"; 
 		new Image().src = "img/tank_parts/yellow/tank-full-body-overlay.svg"; 
 		new Image().src = "img/concrete-full.svg"; 
+		new Image().src = "img/brick-full.svg"; 
 		
 		// Globals
 		var websocket;
@@ -256,6 +257,13 @@
 					} else {
 						cell.classList.remove("concrete");
 					}
+
+					if (gameState.field[j * gameState.fieldWidth + i].type == "BRICK") {
+						cell.classList.add("brick");
+					} else {
+						cell.classList.remove("brick");
+					}
+
 				}
 			}
 			

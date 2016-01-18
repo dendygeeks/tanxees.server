@@ -102,6 +102,16 @@ div.concrete {
 	background-size: 100% 100%;
 }
 
+div.brick {
+	position: absolute; left: 0; top: 0;
+	width: 14px;
+	height: 14px;
+	background-image: url('img/brick-full.svg');
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+
 div.field {
 	margin: 0;
 }

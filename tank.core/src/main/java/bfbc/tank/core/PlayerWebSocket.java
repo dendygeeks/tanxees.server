@@ -65,6 +65,18 @@ public class PlayerWebSocket implements StateUpdateHandler {
 		game.putFieldCellType(5, 5, CellType.CONCRETE);
 		game.putFieldCellType(6, 5, CellType.CONCRETE);
 		game.putFieldCellType(5, 6, CellType.CONCRETE);
+
+		game.putFieldCellType(25, 29, CellType.BRICK);
+		game.putFieldCellType(25, 30, CellType.BRICK);
+		game.putFieldCellType(26, 29, CellType.BRICK);
+		game.putFieldCellType(26, 30, CellType.BRICK);
+		game.putFieldCellType(27, 29, CellType.BRICK);
+		game.putFieldCellType(27, 30, CellType.BRICK);
+		game.putFieldCellType(28, 29, CellType.BRICK);
+		game.putFieldCellType(28, 30, CellType.BRICK);
+		game.putFieldCellType(29, 29, CellType.BRICK);
+		game.putFieldCellType(29, 30, CellType.BRICK);
+
 		
 		synchronized (controlledPlayers) {
 			for (int i = 0; i < game.getPlayersCount(); i++) {

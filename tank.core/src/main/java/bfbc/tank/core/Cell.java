@@ -57,6 +57,7 @@ public class Cell implements Box {
 
 	@Override
 	public boolean isActive() {
-		return type == CellType.CONCRETE;
+		return type == CellType.CONCRETE ||
+		       type == CellType.BRICK;
 	}
 }
