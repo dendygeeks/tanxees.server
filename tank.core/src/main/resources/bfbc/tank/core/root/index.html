@@ -2,7 +2,11 @@
 <head>
 	<link rel="stylesheet" type="text/css" href="main.css" />
 
-	<script src="/js/tools.js"></script>
+	<script type="text/javascript" src="/js/tools.js"></script>
+
+	<script type="text/javascript" src="http://gabelerner.github.io/canvg/rgbcolor.js"></script> 
+	<script type="text/javascript" src="http://gabelerner.github.io/canvg/StackBlur.js"></script>
+	<script type="text/javascript" src="http://gabelerner.github.io/canvg/canvg.js"></script>
 
 	<title>Tanks proto</title>
 	
@@ -19,9 +23,14 @@
 		new Image().src = "img/tank_parts/tank-full-body.svg"; 
 		new Image().src = "img/tank_parts/green/tank-full-body-overlay.svg"; 
 		new Image().src = "img/tank_parts/yellow/tank-full-body-overlay.svg"; 
-		new Image().src = "img/concrete-full.svg"; 
-		new Image().src = "img/brick-full.svg"; 
 		
+		var cellImages = [];
+		cellImages["E"] = new Image();
+		cellImages["C"] = new Image();
+		cellImages["C"].src = "img/concrete-full.svg";
+		cellImages["B"] = new Image();
+		cellImages["B"].src = "img/brick-full.svg";
+				
 		// Globals
 		var websocket;
 		var webSocketAddress;
@@ -204,7 +213,7 @@
 								else if (node.id == "player" + (i+1) + "-tank-caterpillars-overlay") playerTankCaterpillarsOverlayNode = node;
 							}
 							
-							if (window.frame % 2 == 0) {
+							if (window.frame % 4 == 0) {
 								caterpillarFrame(playerTankCaterpillarsNode, playerTankCaterpillarsOverlayNode);
 							}
 							movementFrame(playerTankNode);
@@ -218,7 +227,7 @@
 							}
 						}
 						
-					}, 40);
+					}, 1000 / 50/*fps*/);
 				}
 				
 				firstUpdate = false;
@@ -233,7 +242,7 @@
 	
 		function updateField(gameState) {
 			
-			if (firstUpdate) {
+			/*if (firstUpdate) {
 				cells = [];
 			
 				fieldNode.style.width = (gameState.fieldWidth * gameState.cellSize) + "px";
@@ -253,13 +262,25 @@
 						cells[j * gameState.fieldWidth + i] = cell;
 					}
 				}
-			}
+			}*/
+			
+			if (firstUpdate) {
+			var fieldCanvas = document.getElementById("field-canvas");
+			fieldCanvas.width = gameState.fieldWidth * 11;
+			fieldCanvas.height = gameState.fieldHeight * 11;
+			var ctx = fieldCanvas.getContext('2d');
+			//var i = 0, j = 0;
+			
 			
 			for (var j = 0; j < gameState.fieldHeight; j++) {
 				for (var i = 0; i < gameState.fieldWidth; i++) {
 					var cell = cells[j * gameState.fieldWidth + i];
 					
-					if (gameState.field[j * gameState.fieldWidth + i] == "C") {
+					var fieldCell = gameState.field[j * gameState.fieldWidth + i];
+					var x = 11 * i, y = 11 * j;
+					ctx.drawImage(cellImages[fieldCell], x, y, 14, 14);
+					
+					/*if (gameState.field[j * gameState.fieldWidth + i] == "C") {
 						cell.classList.add("concrete");
 					} else {
 						cell.classList.remove("concrete");
@@ -269,9 +290,10 @@
 						cell.classList.add("brick");
 					} else {
 						cell.classList.remove("brick");
-					}
+					}*/
 
 				}
+			}
 			}
 			
 		}
@@ -300,6 +322,7 @@
 		// Setting events
 		
 		window.addEventListener("load", function() {
+		
 			playersNode = document.getElementById("players");
 			fieldNode = document.getElementById("field");
 			missilesNode = document.getElementById("missiles");
@@ -437,7 +460,8 @@
 		<div class="game">
 			<div id="players"></div>
 			<div id="missiles"></div>
-			<div id="field" class="field"></div>
+			<!--<div id="field" class="field"></div>-->
+			<canvas id="field-canvas" class="field" style="position: relative; left: -7px; top: -7px;" width="300px" height="300px"></canvas>
 			<div id="debug-svg" style="position: absolute; left: 0; top: 0;"></div>
 		</div>
 		<div class="frags-pane">
