@@ -26,10 +26,27 @@
 		
 		var cellImages = [];
 		cellImages["E"] = new Image();
+		cellImages["E"].src = "img/empty.svg";
 		cellImages["C"] = new Image();
 		cellImages["C"].src = "img/concrete-full.svg";
 		cellImages["B"] = new Image();
 		cellImages["B"].src = "img/brick-full.svg";
+
+		var cellCanvases = [];
+		for (var k in cellImages) {
+			cellImages[k].tag = k;
+			cellImages[k].addEventListener("load", function() {
+				var kk = this.tag;
+				cellCanvases[kk] = document.createElement('canvas');
+				cellCanvases[kk].width = 14;
+				cellCanvases[kk].height = 14;
+				var m_context = cellCanvases[kk].getContext('2d');
+				m_context.drawImage(cellImages[kk], 0, 0, 14, 14);
+			});
+		}
+		
+		var backCanvas = document.createElement('canvas');
+		
 				
 		// Globals
 		var websocket;
@@ -264,11 +281,9 @@
 				}
 			}*/
 			
-			if (firstUpdate) {
-			var fieldCanvas = document.getElementById("field-canvas");
-			fieldCanvas.width = gameState.fieldWidth * 11;
-			fieldCanvas.height = gameState.fieldHeight * 11;
-			var ctx = fieldCanvas.getContext('2d');
+			backCanvas.width = gameState.fieldWidth * 11;
+			backCanvas.height = gameState.fieldHeight * 11;
+			var ctx = backCanvas.getContext('2d');
 			//var i = 0, j = 0;
 			
 			
@@ -278,7 +293,7 @@
 					
 					var fieldCell = gameState.field[j * gameState.fieldWidth + i];
 					var x = 11 * i, y = 11 * j;
-					ctx.drawImage(cellImages[fieldCell], x, y, 14, 14);
+					ctx.drawImage(cellCanvases[fieldCell], x, y, 14, 14);
 					
 					/*if (gameState.field[j * gameState.fieldWidth + i] == "C") {
 						cell.classList.add("concrete");
@@ -294,8 +309,17 @@
 
 				}
 			}
+			
+			var fieldCanvas = document.getElementById("field-canvas");
+			if (fieldCanvas.width != gameState.fieldWidth * 11) {
+				fieldCanvas.width = gameState.fieldWidth * 11;
+			}	
+			if (fieldCanvas.height != gameState.fieldHeight * 11) {
+				fieldCanvas.height = gameState.fieldHeight * 11;
 			}
 			
+			var fctx = fieldCanvas.getContext('2d');
+			fctx.drawImage(backCanvas, 0, 0);
 		}
 		
 		function caterpillarFrame(caterpillarNode, caterpillarOverlayNode) {
@@ -458,10 +482,10 @@
 	
 	<div class="root">
 		<div class="game">
+			<canvas id="field-canvas" class="field" style="position: relative; left: -7px; top: -7px;" width="300px" height="300px"></canvas>
 			<div id="players"></div>
 			<div id="missiles"></div>
 			<!--<div id="field" class="field"></div>-->
-			<canvas id="field-canvas" class="field" style="position: relative; left: -7px; top: -7px;" width="300px" height="300px"></canvas>
 			<div id="debug-svg" style="position: absolute; left: 0; top: 0;"></div>
 		</div>
 		<div class="frags-pane">
