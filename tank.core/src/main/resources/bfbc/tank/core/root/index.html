@@ -3,15 +3,18 @@
 	<link rel="stylesheet" type="text/css" href="main.css" />
 
 	<script type="text/javascript" src="/js/tools.js"></script>
+	<script type="text/javascript" src="/js/pixi.js"></script>
 
 	<script type="text/javascript" src="http://gabelerner.github.io/canvg/rgbcolor.js"></script> 
-	<script type="text/javascript" src="http://gabelerner.github.io/canvg/StackBlur.js"></script>
+		<script type="text/javascript" src="http://gabelerner.github.io/canvg/StackBlur.js"></script>
 	<script type="text/javascript" src="http://gabelerner.github.io/canvg/canvg.js"></script>
 
 	<title>Tanks proto</title>
 	
 	<script>
 	
+		var renderer, fieldStage;
+
 		// Preloading
 		new Image().src = "img/tank_parts/tank-caterpillars-frame1.svg"; 
 		new Image().src = "img/tank_parts/tank-caterpillars-frame2.svg"; 
@@ -32,6 +35,7 @@
 		cellImages["B"] = new Image();
 		cellImages["B"].src = "img/brick-full.svg";
 
+		var cellTextures = [];
 		var cellCanvases = [];
 		for (var k in cellImages) {
 			cellImages[k].tag = k;
@@ -42,6 +46,8 @@
 				cellCanvases[kk].height = 14;
 				var m_context = cellCanvases[kk].getContext('2d');
 				m_context.drawImage(cellImages[kk], 0, 0, 14, 14);
+				
+				cellTextures[kk] = PIXI.Texture.fromCanvas(cellCanvases[kk]);
 			});
 		}
 		
@@ -244,6 +250,7 @@
 							}
 						}
 						
+						renderer.render(fieldStage);
 					}, 1000 / 50/*fps*/);
 				}
 				
@@ -258,14 +265,33 @@
 		}
 	
 		function updateField(gameState) {
-			
-			/*if (firstUpdate) {
+
+		
+			if (firstUpdate) {
 				cells = [];
 			
-				fieldNode.style.width = (gameState.fieldWidth * gameState.cellSize) + "px";
-				fieldNode.style.height = (gameState.fieldHeight * gameState.cellSize) + "px";
-			
+				/*fieldNode.style.width = (gameState.fieldWidth * gameState.cellSize) + "px";
+				fieldNode.style.height = (gameState.fieldHeight * gameState.cellSize) + "px";*/
+				
+
+				var container = new PIXI.Container();
 				for (var j = 0; j < gameState.fieldHeight; j++) {
+					for (var i = 0; i < gameState.fieldWidth; i++) {
+						var fieldCell = gameState.field[j * gameState.fieldWidth + i];
+						var cell = new PIXI.Sprite(cellTextures[fieldCell]);
+						
+						var blockWidth = 14;
+						var blockHeight = 14;
+						
+						cell.x = (gameState.cellSize * i - blockWidth / 2);
+						cell.y = (gameState.cellSize * j - blockHeight / 2);
+						container.addChild(cell);
+						cells[j * gameState.fieldWidth + i] = cell;
+					};
+				};
+				fieldStage.addChild(container);
+			
+				/*for (var j = 0; j < gameState.fieldHeight; j++) {
 					for (var i = 0; i < gameState.fieldWidth; i++) {
 						var cell = document.createElement("div");
 						cell.classList.add("field-cell");
@@ -278,8 +304,8 @@
 	
 						cells[j * gameState.fieldWidth + i] = cell;
 					}
-				}
-			}*/
+				}*/
+			}
 			
 			backCanvas.width = gameState.fieldWidth * 11;
 			backCanvas.height = gameState.fieldHeight * 11;
@@ -292,8 +318,13 @@
 					var cell = cells[j * gameState.fieldWidth + i];
 					
 					var fieldCell = gameState.field[j * gameState.fieldWidth + i];
+					cell.texture = cellTextures[fieldCell];
+
+					
+					/*var fieldCell = gameState.field[j * gameState.fieldWidth + i];
 					var x = 11 * i, y = 11 * j;
-					ctx.drawImage(cellCanvases[fieldCell], x, y, 14, 14);
+					ctx.drawImage(cellCanvases[fieldCell], x, y, 14, 14);*/
+					
 					
 					/*if (gameState.field[j * gameState.fieldWidth + i] == "C") {
 						cell.classList.add("concrete");
@@ -310,7 +341,7 @@
 				}
 			}
 			
-			var fieldCanvas = document.getElementById("field-canvas");
+			/*var fieldCanvas = document.getElementById("field-canvas");
 			if (fieldCanvas.width != gameState.fieldWidth * 11) {
 				fieldCanvas.width = gameState.fieldWidth * 11;
 			}	
@@ -319,7 +350,7 @@
 			}
 			
 			var fctx = fieldCanvas.getContext('2d');
-			fctx.drawImage(backCanvas, 0, 0);
+			fctx.drawImage(backCanvas, 0, 0);*/
 		}
 		
 		function caterpillarFrame(caterpillarNode, caterpillarOverlayNode) {
@@ -354,6 +385,10 @@
 		
 			webSocketAddress = buildWebSocketAddress("player");
 			openStatusSocket();
+			
+			renderer = PIXI.autoDetectRenderer(800, 600, { transparent: true });
+			fieldNode.appendChild(renderer.view);
+			fieldStage = new PIXI.Container();
 		});
 	
 		var keysDown = {
@@ -371,48 +406,7 @@
 			// <DEMO> Demonstrating debug SVG feature. Remove this ASAP
 			if (activePlayerIndex > -1) {
 				clientState.debugData = {};
-				clientState.debugData.svg = `
-					<?xml version="1.0" encoding="utf-8"?>
-					<!DOCTYPE svg PUBLIC 
-					        "-//W3C//DTD SVG 1.1//EN" 
-					        "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-					<svg style="opacity: 0.2; position: absolute; ` + 'left: ' + playersNode.childNodes[activePlayerIndex].posX + 'px; top: ' + playersNode.childNodes[activePlayerIndex].posY + 'px' + `" version="1.1" 
-					        id="Layer_1" 
-					        xmlns="http://www.w3.org/2000/svg" 
-					        xmlns:xlink="http://www.w3.org/1999/xlink" width="80px" height="60px" 
-					        viewBox="0 0 800 600" 
-					        enable-background="new 0 0 800 600" 
-					        xml:space="preserve">
-					
-					    <!-- face -->
-					    <circle fill="#FFFF00" 
-					            stroke="#000000" 
-					            stroke-width="10" 
-					            stroke-miterlimit="10" 
-					            cx="382.553" 
-					            cy="306.786" 
-					            r="217.961"/>
-					
-					    <!-- mouth -->
-					    <path fill="#FFFF00"
-					            stroke="#000000"
-					            stroke-width="10"
-					            stroke-miterlimit="10"
-					            d="M244.689,329.602 C315.563,498.534,484.495,479.116,531.583,333"/>
-					
-					    <!-- eyes -->
-					    <ellipse
-					            cx="337.592"
-					            cy="233.485"
-					            rx="21.359"
-					            ry="49.272"/>
-					    <ellipse
-					            cx="422.592"
-					            cy="232.485"
-					            rx="21.359"
-					            ry="49.272"/>
-					</svg>
-				`;
+				clientState.debugData.svg = "";
 			}
 			// </DEMO>
 			
@@ -482,10 +476,10 @@
 	
 	<div class="root">
 		<div class="game">
-			<canvas id="field-canvas" class="field" style="position: relative; left: -7px; top: -7px;" width="300px" height="300px"></canvas>
+			<!--<canvas id="field-canvas" class="field" style="position: relative; left: -7px; top: -7px;" width="300px" height="300px"></canvas>-->
 			<div id="players"></div>
 			<div id="missiles"></div>
-			<!--<div id="field" class="field"></div>-->
+			<div id="field" class="field"></div>
 			<div id="debug-svg" style="position: absolute; left: 0; top: 0;"></div>
 		</div>
 		<div class="frags-pane">
