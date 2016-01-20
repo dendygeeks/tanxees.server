@@ -8,7 +8,10 @@ import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.DeltaXY;
 
-public class GameObject implements Box, BoxConstruction<Box> {
+/**
+ * Something that can move and rotate
+ */
+public class Unit implements Box, BoxConstruction<Box> {
 
 	private Game game;
 	
@@ -21,7 +24,7 @@ public class GameObject implements Box, BoxConstruction<Box> {
 	@Expose
 	protected double angle;
 	
-	public GameObject(Game game, double sizeX, double sizeY, double posX, double posY, double angle) {
+	public Unit(Game game, double sizeX, double sizeY, double posX, double posY, double angle) {
 		this.game = game;
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
@@ -84,7 +87,7 @@ public class GameObject implements Box, BoxConstruction<Box> {
 			@Override
 			public Box next() {
 				hasNext = false;
-				return GameObject.this;
+				return Unit.this;
 			}
 			
 			@Override

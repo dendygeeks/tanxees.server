@@ -31,6 +31,7 @@ public class PlayerWebSocket implements StateUpdateHandler {
     
     
     public PlayerWebSocket() {
+    	// Walls
     	for (int i = 0; i < game.fieldHeight - 1; i++) {
     		game.putFieldCellType(0, i, CellType.C);
     	}
@@ -43,40 +44,29 @@ public class PlayerWebSocket implements StateUpdateHandler {
     	for (int i = 0; i < game.fieldWidth - 1; i++) {
     		game.putFieldCellType(i, game.fieldHeight - 1, CellType.C);
     	}
-		game.putFieldCellType(1, 1, CellType.C);
-		game.putFieldCellType(1, 2, CellType.C);
-		game.putFieldCellType(1, 3, CellType.C);
-		game.putFieldCellType(1, 4, CellType.C);
-		game.putFieldCellType(1, 5, CellType.C);
-		game.putFieldCellType(1, 6, CellType.C);
-		game.putFieldCellType(1, 7, CellType.C);
-		game.putFieldCellType(1, 8, CellType.C);
-		game.putFieldCellType(2, 8, CellType.C);
-		game.putFieldCellType(3, 9, CellType.C);
-		game.putFieldCellType(4, 9, CellType.C);
-		game.putFieldCellType(5, 9, CellType.C);
-		game.putFieldCellType(6, 9, CellType.C);
-		game.putFieldCellType(7, 9, CellType.C);
-		game.putFieldCellType(8, 8, CellType.C);
 
-    	game.putFieldCellType(4, 4, CellType.C);
-		game.putFieldCellType(4, 5, CellType.C);
-		game.putFieldCellType(5, 4, CellType.C);
-		game.putFieldCellType(5, 5, CellType.C);
-		game.putFieldCellType(6, 5, CellType.C);
-		game.putFieldCellType(5, 6, CellType.C);
+    	// Cells
+		for (int i = 1; i < game.fieldWidth - 1; i++) {
+			game.putFieldCellType(i, game.fieldHeight / 3 - 1, CellType.B);
+			game.putFieldCellType(i, game.fieldHeight / 3, CellType.B);
+			game.putFieldCellType(i, 2 * game.fieldHeight / 3 - 1, CellType.B);
+			game.putFieldCellType(i, 2 * game.fieldHeight / 3, CellType.B);
+		}
+		for (int j = 1; j < game.fieldHeight - 1; j++) {
+			game.putFieldCellType(game.fieldWidth / 3, j, CellType.B);
+			game.putFieldCellType(game.fieldWidth / 3 + 1, j, CellType.B);
+			game.putFieldCellType(2 * game.fieldWidth / 3, j, CellType.B);
+			game.putFieldCellType(2 * game.fieldWidth / 3 + 1, j, CellType.B);
+		}
 
-		game.putFieldCellType(25, 29, CellType.B);
-		game.putFieldCellType(25, 30, CellType.B);
-		game.putFieldCellType(26, 29, CellType.B);
-		game.putFieldCellType(26, 30, CellType.B);
-		game.putFieldCellType(27, 29, CellType.B);
-		game.putFieldCellType(27, 30, CellType.B);
-		game.putFieldCellType(28, 29, CellType.B);
-		game.putFieldCellType(28, 30, CellType.B);
-		game.putFieldCellType(29, 29, CellType.B);
-		game.putFieldCellType(29, 30, CellType.B);
-
+		for (int m = 1; m < 3; m++) {
+			for (int n = 1; n < 3; n++) {
+				game.putFieldCellType(m * game.fieldWidth / 3 + 1, n * game.fieldHeight / 3, CellType.C);
+				game.putFieldCellType(m * game.fieldWidth / 3, n * game.fieldHeight / 3 - 1, CellType.C);
+				game.putFieldCellType(m * game.fieldWidth / 3, n * game.fieldHeight / 3, CellType.C);
+				game.putFieldCellType(m * game.fieldWidth / 3 + 1, n * game.fieldHeight / 3 - 1, CellType.C);
+			}
+		}
 		
 		synchronized (controlledPlayers) {
 			for (int i = 0; i < game.getPlayersCount(); i++) {

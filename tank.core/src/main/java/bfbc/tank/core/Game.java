@@ -32,7 +32,7 @@ public class Game extends Thread implements MissileCrashListener {
 	private StateUpdateHandler stateUpdateHandler;
 	
 	private BoxConstructionCollider<Box> collider = new BoxConstructionCollider<>();
-	private FieldBoxConstruction fieldBoxConstruction = new FieldBoxConstruction();
+	//private ArrayList<CellBoxConstruction> cells = new ArrayList<>();
 	
 	@Expose
 	private volatile Player[] players;
@@ -98,10 +98,10 @@ public class Game extends Thread implements MissileCrashListener {
 		for (int j = 0; j < fieldHeight; j++) {
 			for (int i = 0; i < fieldWidth; i++) {
 				field[j * fieldWidth + i] = new Cell(this, i, j);
-				fieldBoxConstruction.add(field[j * fieldWidth + i]);
+				//cells.add(field[j * fieldWidth + i]);
+				collider.addAgent(field[j * fieldWidth + i]);
 			}
 		}
-		collider.addAgent(fieldBoxConstruction);
 		
 		players = new Player[playersCount];
 		frags = new int[playersCount];
@@ -222,6 +222,11 @@ public class Game extends Thread implements MissileCrashListener {
 				System.out.println("Player " + (id + 1) + " is killed by player " + (myId + 1));
 				frags[myId] ++;
 				createPlayer(id);
+			}
+		} else if (target instanceof Cell) {
+			Cell c = (Cell)target;
+			if (c.getType() == CellType.B) {
+				c.setType(CellType.E);
 			}
 		}
 		

@@ -4,7 +4,7 @@ import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.DeltaXY;
 
-public class Missile extends GameObject {
+public class Missile extends Unit {
 	private static final double SIZE = 10;
 	
 	private double velX, velY;

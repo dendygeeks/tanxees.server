@@ -7,10 +7,9 @@ import com.google.gson.annotations.Expose;
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
-import bfbc.tank.core.mechanics.BoxConstructionCollider.MoveResult;
 import bfbc.tank.core.mechanics.DeltaXY;
 
-public class Player extends GameObject {
+public class Player extends Unit {
 	
 	private static final double SIZE = 36;
 	

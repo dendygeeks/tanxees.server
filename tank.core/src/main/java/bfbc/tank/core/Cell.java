@@ -1,11 +1,14 @@
 package bfbc.tank.core;
 
+import java.util.Iterator;
+
 import com.google.gson.annotations.Expose;
 
 import bfbc.tank.core.mechanics.Box;
+import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.DeltaXY;
 
-public class Cell implements Box {
+public class Cell implements Box, BoxConstruction<Cell> {
 
 	private Game game;
 	
@@ -59,5 +62,25 @@ public class Cell implements Box {
 	public boolean isActive() {
 		return type == CellType.C ||
 		       type == CellType.B;
+	}
+	
+	@Override
+	public Iterator<Cell> iterator() {
+		Iterator<Cell> res = new Iterator<Cell>() {
+			
+			private boolean hasNext = true;
+			
+			@Override
+			public Cell next() {
+				hasNext = false;
+				return Cell.this;
+			}
+			
+			@Override
+			public boolean hasNext() {
+				return hasNext;
+			}
+		};
+		return res;
 	}
 }
