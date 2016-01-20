@@ -106,7 +106,11 @@ public class Player extends GameObject {
 		double displacement = velocity * Game.MODEL_TICK;
 		
 		if (notRotating && wantToFire) {
-			getGame().createMissile(this, getPosX(), getPosY(), getAngle(), velocity);
+			double missileVelocity = velocity;
+			if (moving) {
+				missileVelocity *= 2;
+			}
+			getGame().createMissile(this, getPosX(), getPosY(), getAngle(), missileVelocity);
 			wantToFire = false;
 		}
 
