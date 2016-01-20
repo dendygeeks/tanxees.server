@@ -1,7 +1,7 @@
 body {
 	font-family: sans-serif;
 	margin: 20pt;
-	background: linear-gradient(-170deg, #404040, #353635);
+	background: linear-gradient(-170deg, #605040, #353635);
 	position: relative;
 	overflow: hidden;
 }
@@ -114,6 +114,8 @@ div.brick {
 
 div.field {
 	margin: 0;
+	background: linear-gradient(-170deg, #756655, #606540);
+	
 }
 
 div.missile {
@@ -126,34 +128,39 @@ div.missile {
 }
 
 div.game {
-	background: linear-gradient(-170deg, #707070, #656665);
 	position: relative;
-	left: 14px;
-	top: 14px;
+	display: inline-block;
 }
 
 div.root {
-	width: 600px;
+	width: 860px;
 	margin: auto;
 }
 
 div.frags-player {
 	margin: 5px;
+	color: #000000;
+    text-shadow: 0 0 5px #f0c0a0;
+	
 }
 
 div.frags-pane {
-	background: linear-gradient(-170deg, #d0d0d0, #b5b7b5);
+	background: linear-gradient(-170deg, #d0c0b0, #b59785);
 	padding: 15px;
     position: relative;
-    left: 650px;
-    top: -500px;
     border-radius: 5px;
     border-width: 1px;
     border-color: #202020;
     width: 200px;
+    
+    display: inline-block;
+    vertical-align: top;
+    
 }
 
-h2 {
+h2.frags {
+	color: #000000;
+    text-shadow: 0 0 5px #f0c0a0;
 	margin: 0;
 	font-weight: normal;
 }

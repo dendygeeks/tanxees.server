@@ -14,7 +14,7 @@
    height="65"
    id="svg2"
    version="1.1"
-   inkscape:version="0.91 r13725"
+   inkscape:version="0.48.2 r9819"
    sodipodi:docname="empty.svg"
    inkscape:export-filename="/Users/il/tank2.png"
    inkscape:export-xdpi="90"
@@ -1307,16 +1307,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.0953125"
+     inkscape:zoom="6.190625"
      inkscape:cx="-24.960413"
      inkscape:cy="28.080928"
      inkscape:document-units="px"
      inkscape:current-layer="svg2"
      showgrid="false"
-     inkscape:window-width="1366"
-     inkscape:window-height="715"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
+     inkscape:window-width="1280"
+     inkscape:window-height="752"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata7">
@@ -1326,7 +1326,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -1336,13 +1336,4 @@
      inkscape:label="Слой"
      style="display:inline"
      transform="translate(0,-35)" />
-  <rect
-     style="fill:#666666;fill-opacity:1;stroke:none"
-     id="rect3664"
-     width="65.259972"
-     height="65.259972"
-     x="0"
-     y="0.063099444"
-     rx="0"
-     ry="0" />
 </svg>

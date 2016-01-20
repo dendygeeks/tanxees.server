@@ -283,8 +283,8 @@
 						var blockWidth = 14;
 						var blockHeight = 14;
 						
-						cell.x = (gameState.cellSize * i - blockWidth / 2);
-						cell.y = (gameState.cellSize * j - blockHeight / 2);
+						cell.x = gameState.cellSize * i;
+						cell.y = gameState.cellSize * j;
 						container.addChild(cell);
 						cells[j * gameState.fieldWidth + i] = cell;
 					};
@@ -477,13 +477,13 @@
 	<div class="root">
 		<div class="game">
 			<!--<canvas id="field-canvas" class="field" style="position: relative; left: -7px; top: -7px;" width="300px" height="300px"></canvas>-->
+			<div id="field" class="field" style="position: relative; left: -7px; top: -7px; width: 620px; height: 570px;"></div>
 			<div id="players"></div>
 			<div id="missiles"></div>
-			<div id="field" class="field"></div>
 			<div id="debug-svg" style="position: absolute; left: 0; top: 0;"></div>
 		</div>
 		<div class="frags-pane">
-			<h2>Frags</h2>
+			<h2 class="frags">Frags</h2>
 			<div class="frags-player">
 				Player 1: <span id="player1-frags">0</span>
 			</div>
