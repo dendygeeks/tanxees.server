@@ -106,9 +106,9 @@ public class Player extends GameObject {
 		double displacement = velocity * Game.MODEL_TICK;
 		
 		if (notRotating && wantToFire) {
-			double missileVelocity = velocity;
+			double missileVelocity = velocity * 1.2; // Missile is a bit faster than tank
 			if (moving) {
-				missileVelocity *= 2;
+				missileVelocity += velocity;
 			}
 			getGame().createMissile(this, getPosX(), getPosY(), getAngle(), missileVelocity);
 			wantToFire = false;
