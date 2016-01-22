@@ -36,6 +36,13 @@ public class Cell implements Box, BoxConstruction<Cell> {
 	public double getBottom() {
 		return (j + 0.5) * game.cellSize;
 	}
+	
+	public double getX() {
+		return i * game.cellSize;
+	}
+	public double getY() {
+		return j * game.cellSize;
+	}
 
 	@Override
 	public void move(DeltaXY delta) {
@@ -82,5 +89,13 @@ public class Cell implements Box, BoxConstruction<Cell> {
 			}
 		};
 		return res;
+	}
+	
+	public int getI() {
+		return i;
+	}
+	
+	public int getJ() {
+		return j;
 	}
 }

@@ -212,6 +212,25 @@ public class Game extends Thread implements MissileCrashListener {
 		}
 	}
 	
+	private boolean removeBricksAfterCrash(double i, double j, double upI, double upJ, double rightI, double rightJ) {
+		// Checking boundaries
+		if (i < 0 || i >= fieldWidth || j < 0 || j >= fieldHeight) return false;
+		// Checking if this cell is occupied by a brick
+		if (field[(int)i + (int)j * fieldWidth].getType() != CellType.B) return false;
+		
+		// Checking the closer cell
+		double i2 = i - rightI, j2 = j - rightJ;
+		// Checking boundaries for the closer cell
+		if (i2 < 0 || i2 >= fieldWidth || j2 < 0 || j2 >= fieldHeight) return false;
+		// Checking if this cell is empty
+		if (field[(int)i2 + (int)j2 * fieldWidth].getType().isOccupied()) return false;
+		
+		// If we are still here, destroying the brick in (x, y)
+		field[(int)i + (int)j * fieldWidth].setType(CellType.E);
+		
+		return true;
+	}
+	
 	@Override
 	public void missileCrashed(Missile missile, BoxConstruction<?> target) {
 		if (target instanceof Player) {
@@ -224,10 +243,41 @@ public class Game extends Thread implements MissileCrashListener {
 				createPlayer(id);
 			}
 		} else if (target instanceof Cell) {
+			// A missile hit a brick wall
 			Cell c = (Cell)target;
 			if (c.getType() == CellType.B) {
+				
+				// Destroying the brick instantly ^_^
 				c.setType(CellType.E);
+			
+				// Searching for adjacent bricks to destroy
+	
+				// Assuming the missile is moving "right", calculting "up" vector
+				double rightI = Math.cos(missile.angle * Math.PI / 180), rightJ = Math.sin(missile.angle * Math.PI / 180);
+				double upI = rightJ, upJ = -rightI;
+				
+				// Checking if the missile did hit "above" or "below" the brick center
+				double fromBrickToMissileX = missile.posX - c.getX(),
+				       fromBrickToMissileY = missile.posY - c.getY();
+				boolean missileHitsAboveCenter = (upJ * fromBrickToMissileY + upI * fromBrickToMissileX) > 0;
+				
+				if (!missileHitsAboveCenter) { upJ *= -1; upI *= -1; }	// Now it is above ;)
+				
+				// walking up
+				double i = c.getI(), j = c.getJ();
+				for (int k = 1; k < 3; k++) {
+					i += upI; j += upJ;
+					if (!removeBricksAfterCrash(i, j, upI, upJ, rightI, rightJ)) break;
+				}
+	
+				// walking down
+				i = c.getI(); j = c.getJ();
+				for (int k = 1; k < 2; k++) {
+					i -= upI; j -= upJ;
+					if (!removeBricksAfterCrash(i, j, upI, upJ, rightI, rightJ)) break;
+				}
 			}
+
 		}
 		
 		missiles.get(missile.getOwnerPlayerId()).remove(missile);
