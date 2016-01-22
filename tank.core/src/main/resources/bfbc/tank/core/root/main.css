@@ -8,18 +8,16 @@ body {
 
 div.tank {
 	position: absolute;
-	left: 20px;
-	top: 40px;
-	width: 40px;
-	height: 40px;
+	width: 42px;
+	height: 42px;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 }
 
 div.tank-caterpillars {
 	position: absolute; left: 0; top: 0;
-	width: 40px;
-	height: 40px;
+	width: 42px;
+	height: 42px;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 }
@@ -33,8 +31,8 @@ div.tank-caterpillars.frame2 {
 
 div.tank-caterpillars-overlay {
 	position: absolute; left: 0; top: 0;
-	width: 40px;
-	height: 40px;
+	width: 42px;
+	height: 42px;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 	mix-blend-mode: multiply;
@@ -55,8 +53,8 @@ div.tank-caterpillars-overlay.frame2.yellow {
 
 div.tank-body {
 	position: absolute; left: 0; top: 0;
-	width: 40px;
-	height: 40px;
+	width: 42px;
+	height: 42px;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 	background-image: url('img/tank_parts/tank-full-body.svg');
@@ -64,8 +62,8 @@ div.tank-body {
 
 div.tank-shadow {
 	position: absolute; left: 0; top: 0;
-	width: 40px;
-	height: 40px;
+	width: 42px;
+	height: 42px;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 	background-image: url('img/tank_parts/tank-shadow.svg');
@@ -73,8 +71,8 @@ div.tank-shadow {
 
 div.tank-body-overlay {
 	position: absolute; left: 0; top: 0;
-	width: 40px;
-	height: 40px;
+	width: 42px;
+	height: 42px;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 	mix-blend-mode: multiply;
@@ -114,8 +112,6 @@ div.brick {
 
 div.field {
 	margin: 0;
-	background: linear-gradient(-170deg, #756655, #606540);
-	
 }
 
 div.missile {
@@ -130,6 +126,7 @@ div.missile {
 div.game {
 	position: relative;
 	display: inline-block;
+	background: linear-gradient(-170deg, #756655, #606540);
 }
 
 div.root {

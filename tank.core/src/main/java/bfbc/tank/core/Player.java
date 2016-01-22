@@ -11,7 +11,7 @@ import bfbc.tank.core.mechanics.DeltaXY;
 
 public class Player extends Unit {
 	
-	private static final double SIZE = 36;
+	private static final double SIZE = 34;
 	
 	private static final HashMap<Direction, Double> DIRECTION_ANGLES;
 	static {
