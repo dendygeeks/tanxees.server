@@ -10,7 +10,7 @@ public interface Box {
 	
 	void move(DeltaXY delta);
 	
-	public static DepthXY getIntersectionDepth(Box box1, Box box2) {
+	public static IntersectionResult getIntersectionDepth(Box box1, Box box2) {
 		if (!box1.isActive() || !box2.isActive()) return null;
 		
 		double c1x = (box1.getLeft() + box1.getRight()) / 2;
@@ -26,7 +26,12 @@ public interface Box {
 		if ((Math.abs(c2x - c1x) > d1x + d2x) || (Math.abs(c2y - c1y) > d1y + d2y)) {
 			return null;
 		} else {
-			return new DepthXY(d1x + d2x - Math.abs(c2x - c1x), d1y + d2y - Math.abs(c2y - c1y));
+			double xOverlap = Math.max(0, Math.min(box1.getRight(), box2.getRight()) - Math.max(box1.getLeft(), box2.getLeft())),
+		           yOverlap = Math.max(0, Math.min(box1.getBottom(), box2.getBottom()) - Math.max(box1.getTop(), box2.getTop()));
+			
+			double area = xOverlap * yOverlap;
+			
+			return new IntersectionResult(d1x + d2x - Math.abs(c2x - c1x), d1y + d2y - Math.abs(c2y - c1y), area);
 		}
 	}
 

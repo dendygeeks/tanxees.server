@@ -134,7 +134,7 @@ public class Player extends Unit {
 			}
 			
 			BoxConstructionCollider<Box>.MoveResult mr = collider.tryMove(this, dxy);
-			for (BoxConstruction<Box> t : mr.targets) {
+			for (BoxConstruction<Box> t : mr.targets.keySet()) {
 				if (t instanceof Missile) {
 					crashListener.missileCrashed((Missile)t, this);
 				}

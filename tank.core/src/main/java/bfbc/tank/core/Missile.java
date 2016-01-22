@@ -29,8 +29,8 @@ public class Missile extends Unit {
 		DeltaXY delta = new DeltaXY(velX * Game.MODEL_TICK, velY * Game.MODEL_TICK);
 		BoxConstructionCollider<Box>.MoveResult mr = collider.tryMove(this, delta);
 		
-		if (mr.targets.length > 0) {
-			crashListener.missileCrashed(this, mr.targets[0]);	// TODO Choose which one to destroy here
+		if (!mr.targets.isEmpty()) {
+			crashListener.missileCrashed(this, mr.mostAggressiveIntersectionTarget());
 		}
 	}
 	

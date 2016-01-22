@@ -1,9 +1,12 @@
 package bfbc.tank.core.mechanics;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-
-import bfbc.tank.core.Missile;
+import java.util.Map;
 
 public class BoxConstructionCollider<T extends Box> {
 
@@ -12,19 +15,27 @@ public class BoxConstructionCollider<T extends Box> {
 	}
 	
 	public class CollisionResult {
-		public final DepthXY depth;
-		public final BoxConstruction<T>[] targets;
-		public CollisionResult(DepthXY depth, BoxConstruction<T>[] targets) {
-			this.depth = depth;
-			this.targets = targets;
+		public final Map<BoxConstruction<T>, IntersectionResult> targets;
+		public CollisionResult(Map<BoxConstruction<T>, IntersectionResult> targets) {
+			this.targets = Collections.unmodifiableMap(new LinkedHashMap<BoxConstruction<T>, IntersectionResult>(targets));
+		}
+		
+		public IntersectionResult mostAggressiveIntersection() {
+			if (targets.isEmpty()) return null;
+			return targets.get(targets.keySet().iterator().next());
 		}
 	}
 	public class MoveResult {
 		public final DeltaXY delta;
-		public final BoxConstruction<T>[] targets;
-		public MoveResult(DeltaXY delta, BoxConstruction<T>[] targets) {
+		public final Map<BoxConstruction<T>, IntersectionResult> targets;
+		public MoveResult(DeltaXY delta, Map<BoxConstruction<T>, IntersectionResult> targets) {
 			this.delta = delta;
-			this.targets = targets;
+			this.targets = Collections.unmodifiableMap(new LinkedHashMap<BoxConstruction<T>, IntersectionResult>(targets));
+		}
+
+		public BoxConstruction<T> mostAggressiveIntersectionTarget() {
+			if (targets.isEmpty()) return null;
+			return targets.keySet().iterator().next();
 		}
 	}
 	
@@ -53,36 +64,56 @@ public class BoxConstructionCollider<T extends Box> {
 	
 	@SuppressWarnings("unchecked")
 	public synchronized CollisionResult getIntersectionDepth(BoxConstruction<T> con) {
-		DepthXY res = null; 
+		//IntersectionResult res = null; 
 		BoxConstruction<T>[] agArr = agents.toArray(new BoxConstruction[] { });
-		List<BoxConstruction<T>> targets = new ArrayList<>();
+		
+		HashMap<BoxConstruction<T>, IntersectionResult> targets = new HashMap<>();
 		for (int i = 0; i < agArr.length; i++) {
 			if (agArr[i] != con && (friendship == null || friendship.canCollide(agArr[i], con))) {
-				DepthXY d = BoxConstruction.getIntersectionDepth(agArr[i], con);
+				IntersectionResult d = BoxConstruction.getIntersectionDepth(agArr[i], con);
 				if (d != null) {
-					targets.add(agArr[i]);
-					if (res == null) {
+					targets.put(agArr[i], d);
+				}
+				/*	if (res == null) {
 						res = d;
 					} else {
-						res = DepthXY.max(res, d);
+						res = IntersectionResult.max(res, d);
 					}
-				}
+				}*/
 			}
 		}
-		return new CollisionResult(res, targets.toArray(new BoxConstruction[] {}));
+		
+		// Sorting targets by area lowering criteria
+		List<BoxConstruction<T>> boxCons = new ArrayList<>(targets.keySet());
+		
+		boxCons.sort(new Comparator<BoxConstruction<T>>() {
+			@Override
+			public int compare(BoxConstruction<T> o1, BoxConstruction<T> o2) {
+				return targets.get(o1).area < targets.get(o2).area ? 1 : -1; 
+			}
+		});
+		
+		LinkedHashMap<BoxConstruction<T>, IntersectionResult> sortedTargets = new LinkedHashMap<>();
+		for (BoxConstruction<T> boxCon : boxCons) {
+			sortedTargets.put(boxCon, targets.get(boxCon));
+		}
+		
+		return new CollisionResult(sortedTargets);
 	}
 	
 	public synchronized MoveResult tryMove(BoxConstruction<T> con, DeltaXY delta) {
 		CollisionResult before = getIntersectionDepth(con);
-		if (before.targets.length > 0) throw new RuntimeException("Invalid state before movement");
+		if (before.targets.size() > 0) throw new RuntimeException("Invalid state before movement");
 		con.move(delta);
 		CollisionResult after = getIntersectionDepth(con);
 		DeltaXY deltaRes;
-		if (after.targets.length == 0) {
+		if (after.targets.size() == 0) {
 			deltaRes = delta;
 		} else {
-			double lenY = (Math.abs(delta.y) - after.depth.y) / Math.abs(delta.y);
-			double lenX = (Math.abs(delta.x) - after.depth.x) / Math.abs(delta.x);
+			IntersectionResult mostAggressive = after.mostAggressiveIntersection();
+			
+			double lenY = (Math.abs(delta.y) - mostAggressive.depthY) / Math.abs(delta.y);
+			double lenX = (Math.abs(delta.x) - mostAggressive.depthX) / Math.abs(delta.x);
 			double len = Math.max(lenX, lenY);
 			DeltaXY dNew = delta.mul(len - 0.0001);
 			con.move(delta.inv());
