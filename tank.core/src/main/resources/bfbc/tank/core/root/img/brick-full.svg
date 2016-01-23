@@ -24,11 +24,11 @@
     <linearGradient
        id="linearGradient4173">
       <stop
-         style="stop-color:#b21616;stop-opacity:1;"
+         style="stop-color:#b23a16;stop-opacity:1;"
          offset="0"
          id="stop4175" />
       <stop
-         style="stop-color:#a00000;stop-opacity:1;"
+         style="stop-color:#a04b00;stop-opacity:1;"
          offset="1"
          id="stop4177" />
     </linearGradient>
@@ -1360,7 +1360,7 @@
        x2="28.753155"
        y2="54.661785"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.49124162,0,0,0.49138629,-4.4572103,-4.5626012)" />
+       gradientTransform="matrix(0.49124162,0,0,0.49138629,-4.45721,-4.5626012)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient4173-1"
@@ -1373,11 +1373,11 @@
     <linearGradient
        id="linearGradient4173-1">
       <stop
-         style="stop-color:#b21616;stop-opacity:1;"
+         style="stop-color:#b23a16;stop-opacity:1;"
          offset="0"
          id="stop4175-4" />
       <stop
-         style="stop-color:#a00000;stop-opacity:1;"
+         style="stop-color:#a04b00;stop-opacity:1;"
          offset="1"
          id="stop4177-1" />
     </linearGradient>
@@ -1390,7 +1390,7 @@
        id="linearGradient4196"
        xlink:href="#linearGradient4173-1"
        inkscape:collect="always"
-       gradientTransform="matrix(0.49124162,0,0,0.47497326,-4.4572103,-15.641016)" />
+       gradientTransform="matrix(0.49124162,0,0,0.47497326,-4.45721,-15.641016)" />
     <filter
        color-interpolation-filters="sRGB"
        inkscape:collect="always"
@@ -1638,9 +1638,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="12.38125"
-     inkscape:cx="32.885684"
-     inkscape:cy="17.888107"
+     inkscape:zoom="8.7548658"
+     inkscape:cx="14.753427"
+     inkscape:cy="13.319219"
      inkscape:document-units="px"
      inkscape:current-layer="svg2"
      showgrid="true"
@@ -1689,12 +1689,12 @@
      ry="1.5101523" />
   <path
      style="fill:url(#linearGradient4196);fill-opacity:1;stroke:none"
-     d="m -0.45052119,0.08076729 0,11.85634871 24.56208419,0 0,-11.85634871 -24.56208419,0 z"
+     d="m -0.450521,0.08076729 0,11.85634871 24.562084,0 0,-11.85634871 -24.562084,0 z"
      id="rect4415-07-6-4"
      inkscape:connector-curvature="0" />
   <path
      style="fill:url(#linearGradient4179);fill-opacity:1;stroke:none"
-     d="m -0.45052019,11.702462 0,12.266053 24.56208319,0 0,-12.266053 -24.56208319,0 z"
+     d="m -0.45052,11.702462 0,12.266053 24.562083,0 0,-12.266053 -24.562083,0 z"
      id="rect4415-07-6"
      inkscape:connector-curvature="0" />
   <path

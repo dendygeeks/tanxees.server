@@ -26,49 +26,43 @@ public class PlayerWebSocket implements StateUpdateHandler {
     
     private Map<Integer, Session> controlledPlayers = new HashMap<>();
     
-    private Game game = new Game(this);
+    private Game game;
     
     
     
     public PlayerWebSocket() {
     	// Walls
-    	for (int i = 0; i < game.fieldHeight - 1; i++) {
-    		game.putFieldCellType(0, i, CellType.C);
-    	}
-    	for (int i = 1; i < game.fieldHeight; i++) {
-    		game.putFieldCellType(game.fieldWidth - 1, i, CellType.C);
-    	}
-    	for (int i = 1; i < game.fieldWidth; i++) {
-    		game.putFieldCellType(i, 0, CellType.C);
-    	}
-    	for (int i = 0; i < game.fieldWidth - 1; i++) {
-    		game.putFieldCellType(i, game.fieldHeight - 1, CellType.C);
-    	}
-
-    	int thirdH = (game.fieldHeight + 1) / 3 / 2 * 2;
-    	// Cells
-		for (int i = 1; i < game.fieldWidth - 1; i++) {
-			game.putFieldCellType(i, thirdH - 1, CellType.B);
-			game.putFieldCellType(i, thirdH, CellType.B);
-			game.putFieldCellType(i, 2 * thirdH - 1, CellType.B);
-			game.putFieldCellType(i, 2 * thirdH, CellType.B);
-		}
-    	int thirdW = (game.fieldWidth + 1) / 3 / 2 * 2;
-		for (int j = 1; j < game.fieldHeight - 1; j++) {
-			game.putFieldCellType(thirdW - 1, j, CellType.B);
-			game.putFieldCellType(thirdW, j, CellType.B);
-			game.putFieldCellType(2 * thirdW - 1, j, CellType.B);
-			game.putFieldCellType(2 * thirdW, j, CellType.B);
-		}
-
-		for (int m = 1; m < 3; m++) {
-			for (int n = 1; n < 3; n++) {
-				game.putFieldCellType(m * thirdW,     n * thirdH,     CellType.C);
-				game.putFieldCellType(m * thirdW - 1, n * thirdH - 1, CellType.C);
-				game.putFieldCellType(m * thirdW - 1, n * thirdH,     CellType.C);
-				game.putFieldCellType(m * thirdW,     n * thirdH - 1, CellType.C);
-			}
-		}
+    	CellType e = CellType.E, C = CellType.C, B = CellType.B;
+    	CellType[] map = new CellType[] {
+   			e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e,
+   			e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e,
+   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
+   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
+   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
+   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
+   			e, e, B, B, e, e, B, B, e, e, B, B, C, C, B, B, e, e, B, B, e, e, B, B, e, e,
+   			e, e, B, B, e, e, B, B, e, e, B, B, C, C, B, B, e, e, B, B, e, e, B, B, e, e,
+   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
+   			e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e,
+   			e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e,
+   			e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e,
+   			e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e,
+   			e, e, e, e, B, B, B, B, e, e, e, e, e, e, e, e, e, e, B, B, B, B, e, e, e, e,
+   			C, C, e, e, B, B, B, B, e, e, e, e, e, e, e, e, e, e, B, B, B, B, e, e, C, C,
+   			e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e,
+   			e, e, e, e, e, e, e, e, e, e, B, B, B, B, B, B, e, e, e, e, e, e, e, e, e, e,
+   			e, e, B, B, e, e, B, B, e, e, B, B, B, B, B, B, e, e, B, B, e, e, B, B, e, e,
+   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
+   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
+   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
+    		e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e,
+    		e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e,
+    		e, e, B, B, e, e, B, B, e, e, e, B, B, B, B, e, e, e, B, B, e, e, B, B, e, e,
+    		e, e, e, e, e, e, e, e, e, e, e, B, e, e, B, e, e, e, e, e, e, e, e, e, e, e,
+    		e, e, e, e, e, e, e, e, e, e, e, B, e, e, B, e, e, e, e, e, e, e, e, e, e, e
+    	};
+    	
+    	game = new Game(this, 26, 26, map);
 		
 		synchronized (controlledPlayers) {
 			for (int i = 0; i < game.getPlayersCount(); i++) {

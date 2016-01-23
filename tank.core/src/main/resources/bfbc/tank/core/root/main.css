@@ -127,7 +127,7 @@ div.game {
 	margin: 10px;
 	position: relative;
 	display: inline-block;
-	background: linear-gradient(-170deg, #756655, #606540);
+	background: black; /*linear-gradient(-170deg, #756655, #606540);*/
 }
 
 div.root {

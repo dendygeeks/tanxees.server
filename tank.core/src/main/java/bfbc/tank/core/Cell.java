@@ -50,13 +50,17 @@ public class Cell implements Box, BoxConstruction<Cell> {
 
 	}
 	
-	public Cell(Game game, int i, int j) {
+	public Cell(Game game, int i, int j, CellType type) {
 		this.game = game;
 		this.i = i;
 		this.j = j;
-		type = CellType.E;
+		this.type = type; //CellType.E;
 	}
-	
+
+	public Cell(Game game, int i, int j) {
+		this(game, i, j, CellType.E);
+	}
+
 	public void setType(CellType type) {
 		this.type = type;
 	}

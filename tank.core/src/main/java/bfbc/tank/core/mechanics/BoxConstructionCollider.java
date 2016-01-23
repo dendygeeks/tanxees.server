@@ -17,13 +17,24 @@ public class BoxConstructionCollider<T extends Box> {
 	public class CollisionResult {
 		public final Map<BoxConstruction<T>, IntersectionResult> targets;
 		public CollisionResult(Map<BoxConstruction<T>, IntersectionResult> targets) {
-			this.targets = Collections.unmodifiableMap(new LinkedHashMap<BoxConstruction<T>, IntersectionResult>(targets));
+			this.targets = new LinkedHashMap<BoxConstruction<T>, IntersectionResult>(targets);
 		}
-		
+
+		public CollisionResult(CollisionResult other) {
+			this(other.targets);
+		}
+
 		public IntersectionResult mostAggressiveIntersection() {
 			if (targets.isEmpty()) return null;
 			return targets.get(targets.keySet().iterator().next());
 		}
+		
+		public void subtract(CollisionResult other) {
+			for (BoxConstruction<T> key : other.targets.keySet()) {
+				targets.remove(key);
+			}
+		}
+		
 	}
 	public class MoveResult {
 		public final DeltaXY delta;
@@ -103,14 +114,19 @@ public class BoxConstructionCollider<T extends Box> {
 	
 	public synchronized MoveResult tryMove(BoxConstruction<T> con, DeltaXY delta) {
 		CollisionResult before = getIntersectionDepth(con);
-		if (before.targets.size() > 0) throw new RuntimeException("Invalid state before movement");
+		
+		//if (before.targets.size() > 0) throw new RuntimeException("Invalid state before movement");
 		con.move(delta);
 		CollisionResult after = getIntersectionDepth(con);
 		DeltaXY deltaRes;
-		if (after.targets.size() == 0) {
+		
+		CollisionResult modAfter = new CollisionResult(after);
+		modAfter.subtract(before);
+		
+		if (modAfter.targets.size() == 0) {
 			deltaRes = delta;
 		} else {
-			IntersectionResult mostAggressive = after.mostAggressiveIntersection();
+			IntersectionResult mostAggressive = modAfter.mostAggressiveIntersection();
 			
 			double lenY = (Math.abs(delta.y) - mostAggressive.depthY) / Math.abs(delta.y);
 			double lenX = (Math.abs(delta.x) - mostAggressive.depthX) / Math.abs(delta.x);
@@ -120,7 +136,7 @@ public class BoxConstructionCollider<T extends Box> {
 			con.move(dNew);
 			deltaRes = dNew;
 		}
-		return new MoveResult(deltaRes, after.targets);
+		return new MoveResult(deltaRes, modAfter.targets);
 	}
 	
 	public synchronized void setFriendship(CollisionFriendship<T> friendship) {

@@ -19,9 +19,9 @@ public class Game extends Thread implements MissileCrashListener {
 	@Expose
 	public final int playersCount = 2;
 	@Expose
-	public final int fieldWidth = 56;
+	public final int fieldWidth;// = 28 * 2;
 	@Expose
-	public final int fieldHeight = 52;
+	public final int fieldHeight;// = 26 * 2;
 	@Expose
 	public final double cellSize = 11;
 	
@@ -47,7 +47,7 @@ public class Game extends Thread implements MissileCrashListener {
 	private List<List<Missile>> missiles = new ArrayList<>();
 
 	@Expose
-	private volatile Cell[] field = new Cell[fieldWidth * fieldHeight];
+	private volatile Cell[] field;// = new Cell[fieldWidth * fieldHeight];
 	
 	private double time;
 	private double deltaTime() {
@@ -88,12 +88,13 @@ public class Game extends Thread implements MissileCrashListener {
 		}
 	}
 	
-	public Game(StateUpdateHandler stateUpdateHandler) {
-		this.stateUpdateHandler = stateUpdateHandler;
-
-		// Saving the current time
-		time = (double)System.currentTimeMillis() / 1000;
-
+	public Game(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map) {
+		if (map == null) throw new IllegalArgumentException("Map shouldn't be null");
+		if (map.length != mapWidth * mapHeight) throw new IllegalArgumentException("Invalid map size");
+		this.fieldWidth = mapWidth * 2 + 2;
+		this.fieldHeight = mapHeight * 2 + 2;
+		field = new Cell[fieldWidth * fieldHeight];
+		
 		// Initializing the field
 		for (int j = 0; j < fieldHeight; j++) {
 			for (int i = 0; i < fieldWidth; i++) {
@@ -102,7 +103,35 @@ public class Game extends Thread implements MissileCrashListener {
 				collider.addAgent(field[j * fieldWidth + i]);
 			}
 		}
+
+		// Outer walls
+		for (int i = 0; i < fieldHeight - 1; i++) {
+    		putFieldCellType(0, i, CellType.C);
+    	}
+    	for (int i = 1; i < fieldHeight; i++) {
+    		putFieldCellType(fieldWidth - 1, i, CellType.C);
+    	}
+    	for (int i = 1; i < fieldWidth; i++) {
+    		putFieldCellType(i, 0, CellType.C);
+    	}
+    	for (int i = 0; i < fieldWidth - 1; i++) {
+    		putFieldCellType(i, fieldHeight - 1, CellType.C);
+    	}
+
+    	// Map
+		for (int i = 1; i < fieldWidth - 1; i++) {
+			for (int j = 1; j < fieldHeight - 1; j++) {
+				field[i + j * fieldWidth].setType(map[((i-1)/2) + ((j-1)/2)*mapWidth]);
+			}
+		}
+
 		
+		
+		this.stateUpdateHandler = stateUpdateHandler;
+
+		// Saving the current time
+		time = (double)System.currentTimeMillis() / 1000;
+
 		players = new Player[playersCount];
 		frags = new int[playersCount];
 		debugData = new DebugData[playersCount];
