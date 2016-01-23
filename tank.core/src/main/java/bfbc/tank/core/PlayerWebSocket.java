@@ -62,7 +62,10 @@ public class PlayerWebSocket implements StateUpdateHandler {
     		e, e, e, e, e, e, e, e, e, e, e, B, e, e, B, e, e, e, e, e, e, e, e, e, e, e
     	};
     	
-    	game = new Game(this, 26, 26, map);
+    	game = new Game(this, 26, 26, map, 2, new PointIJ[] {
+    		new PointIJ(19, 50),
+    		new PointIJ(33, 50)
+    	}, new Direction[] { Direction.UP, Direction.UP });
 		
 		synchronized (controlledPlayers) {
 			for (int i = 0; i < game.getPlayersCount(); i++) {

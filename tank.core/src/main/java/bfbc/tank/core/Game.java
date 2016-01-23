@@ -17,13 +17,16 @@ public class Game extends Thread implements MissileCrashListener {
 	public static int FRONTEND_DELAY = (int)(1000 * FRONTEND_TICK);
 	
 	@Expose
-	public final int playersCount = 2;
+	public final int playersCount;// = 2;
 	@Expose
 	public final int fieldWidth;// = 28 * 2;
 	@Expose
 	public final int fieldHeight;// = 26 * 2;
 	@Expose
 	public final double cellSize = 11;
+	
+	private final PointIJ[] spawnPoints;
+	private final Direction[] spawnDirs;
 	
 	public static interface StateUpdateHandler {
 		void gameStateUpdated(Game state);
@@ -65,30 +68,19 @@ public class Game extends Thread implements MissileCrashListener {
 	}
 	
 	private void createPlayer(int index) {
-		switch (index) {
-		case 0:
-			if (players[0] != null) {
-				collider.removeAgent(players[0]);
-			}
-			players[0] = new Player(this, collider, this, Direction.DOWN, 
-                    new PlayerKeys(), 
-                    false, cellSize * (fieldWidth - 1) / 2, cellSize * 3.0);
-			collider.addAgent(players[0]);
-			break;
-		case 1:
-			if (players[1] != null) {
-				collider.removeAgent(players[1]);
-			}
-			players[1] = new Player(this, collider, this, Direction.UP, 
-        			new PlayerKeys(), 
-        			false, cellSize * (fieldWidth - 1) / 2, cellSize * (fieldHeight - 1 - 3.0));
-			collider.addAgent(players[1]);
-			break;
-			
+		if (index < 0 || index >= playersCount) throw new IllegalArgumentException("Index should be from 0 to playersCount - 1");
+		if (players[index] != null) {
+			collider.removeAgent(players[index]);
 		}
+		players[index] = new Player(this, collider, this, spawnDirs[index], 
+                new PlayerKeys(), 
+                false, 
+                cellSize * (spawnPoints[index].i + 0.5), 
+                cellSize * (spawnPoints[index].j + 0.5));
+		collider.addAgent(players[index]);
 	}
 	
-	public Game(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map) {
+	public Game(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, int playersCount, PointIJ[] spawnPoints, Direction[] spawnDirs) {
 		if (map == null) throw new IllegalArgumentException("Map shouldn't be null");
 		if (map.length != mapWidth * mapHeight) throw new IllegalArgumentException("Invalid map size");
 		this.fieldWidth = mapWidth * 2 + 2;
@@ -125,8 +117,13 @@ public class Game extends Thread implements MissileCrashListener {
 			}
 		}
 
-		
-		
+		if (spawnPoints == null) throw new IllegalArgumentException("spawnPoints shouldn't be null");
+		if (spawnDirs == null) throw new IllegalArgumentException("spawnDirs shouldn't be null");
+		if (playersCount != spawnPoints.length) throw new IllegalArgumentException("Players and spawn points count differ");
+		if (playersCount != spawnDirs.length) throw new IllegalArgumentException("Players and spawn dirs count differ");
+		this.playersCount = playersCount;
+		this.spawnPoints = spawnPoints.clone();
+		this.spawnDirs = spawnDirs.clone();
 		this.stateUpdateHandler = stateUpdateHandler;
 
 		// Saving the current time
@@ -136,8 +133,9 @@ public class Game extends Thread implements MissileCrashListener {
 		frags = new int[playersCount];
 		debugData = new DebugData[playersCount];
 		
-		createPlayer(0);
-		createPlayer(1);
+		for (int i = 0; i < playersCount; i++) {
+			createPlayer(i);
+		}
 		
 		collider.setFriendship(new CollisionFriendship<Box>() {
 			@Override
