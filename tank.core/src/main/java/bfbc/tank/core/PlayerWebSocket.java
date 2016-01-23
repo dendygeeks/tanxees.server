@@ -45,26 +45,28 @@ public class PlayerWebSocket implements StateUpdateHandler {
     		game.putFieldCellType(i, game.fieldHeight - 1, CellType.C);
     	}
 
+    	int thirdH = (game.fieldHeight + 1) / 3 / 2 * 2;
     	// Cells
 		for (int i = 1; i < game.fieldWidth - 1; i++) {
-			game.putFieldCellType(i, game.fieldHeight / 3 - 1, CellType.B);
-			game.putFieldCellType(i, game.fieldHeight / 3, CellType.B);
-			game.putFieldCellType(i, 2 * game.fieldHeight / 3 - 1, CellType.B);
-			game.putFieldCellType(i, 2 * game.fieldHeight / 3, CellType.B);
+			game.putFieldCellType(i, thirdH - 1, CellType.B);
+			game.putFieldCellType(i, thirdH, CellType.B);
+			game.putFieldCellType(i, 2 * thirdH - 1, CellType.B);
+			game.putFieldCellType(i, 2 * thirdH, CellType.B);
 		}
+    	int thirdW = (game.fieldWidth + 1) / 3 / 2 * 2;
 		for (int j = 1; j < game.fieldHeight - 1; j++) {
-			game.putFieldCellType(game.fieldWidth / 3, j, CellType.B);
-			game.putFieldCellType(game.fieldWidth / 3 + 1, j, CellType.B);
-			game.putFieldCellType(2 * game.fieldWidth / 3, j, CellType.B);
-			game.putFieldCellType(2 * game.fieldWidth / 3 + 1, j, CellType.B);
+			game.putFieldCellType(thirdW - 1, j, CellType.B);
+			game.putFieldCellType(thirdW, j, CellType.B);
+			game.putFieldCellType(2 * thirdW - 1, j, CellType.B);
+			game.putFieldCellType(2 * thirdW, j, CellType.B);
 		}
 
 		for (int m = 1; m < 3; m++) {
 			for (int n = 1; n < 3; n++) {
-				game.putFieldCellType(m * game.fieldWidth / 3 + 1, n * game.fieldHeight / 3, CellType.C);
-				game.putFieldCellType(m * game.fieldWidth / 3, n * game.fieldHeight / 3 - 1, CellType.C);
-				game.putFieldCellType(m * game.fieldWidth / 3, n * game.fieldHeight / 3, CellType.C);
-				game.putFieldCellType(m * game.fieldWidth / 3 + 1, n * game.fieldHeight / 3 - 1, CellType.C);
+				game.putFieldCellType(m * thirdW,     n * thirdH,     CellType.C);
+				game.putFieldCellType(m * thirdW - 1, n * thirdH - 1, CellType.C);
+				game.putFieldCellType(m * thirdW - 1, n * thirdH,     CellType.C);
+				game.putFieldCellType(m * thirdW,     n * thirdH - 1, CellType.C);
 			}
 		}
 		

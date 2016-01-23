@@ -41,13 +41,18 @@
 			cellImages[k].tag = k;
 			cellImages[k].addEventListener("load", function() {
 				var kk = this.tag;
-				cellCanvases[kk] = document.createElement('canvas');
-				cellCanvases[kk].width = 28;
-				cellCanvases[kk].height = 28;
-				var m_context = cellCanvases[kk].getContext('2d');
-				m_context.drawImage(cellImages[kk], 0, 0, 28, 28);
-				
-				cellTextures[kk] = PIXI.Texture.fromCanvas(cellCanvases[kk]);
+				cellCanvases[kk] = [];
+				cellTextures[kk] = [];
+				for (var i = 0; i < 2; i++) {
+					for (var j = 0; j < 2; j++) {
+						cellCanvases[kk][i + j * 2] = document.createElement('canvas');
+						cellCanvases[kk][i + j * 2].width = 11;
+						cellCanvases[kk][i + j * 2].height = 11;
+						var m_context = cellCanvases[kk][i + j * 2].getContext('2d');
+						m_context.drawImage(cellImages[kk], -i*11, -j*11, 22, 22);//i*14, j*14, (i+1)*14, (j+1)*14, 0, 0, 14, 14);
+						cellTextures[kk][i + j * 2] = PIXI.Texture.fromCanvas(cellCanvases[kk][i + j * 2]);
+					}					
+				}
 			});
 		}
 		
@@ -277,13 +282,14 @@
 				var container = new PIXI.Container();
 				for (var j = 0; j < gameState.fieldHeight; j++) {
 					for (var i = 0; i < gameState.fieldWidth; i++) {
+						var cellSpriteIndex = ((j+1)%2)*2 + ((i+1)%2);
 						var fieldCell = gameState.field[j * gameState.fieldWidth + i];
-						var cell = new PIXI.Sprite(cellTextures[fieldCell]);
+						var cell = new PIXI.Sprite(cellTextures[fieldCell][cellSpriteIndex]);
 						
-						var blockWidth = 14;
-						var blockHeight = 14;
-						cell.scale.x = 0.5;
-						cell.scale.y = 0.5;
+						var blockWidth = gameState.cellSize;
+						var blockHeight = gameState.cellSize;
+						//cell.scale.x = 0.5;
+						//cell.scale.y = 0.5;
 						
 						cell.x = gameState.cellSize * i;
 						cell.y = gameState.cellSize * j;
@@ -318,9 +324,10 @@
 			for (var j = 0; j < gameState.fieldHeight; j++) {
 				for (var i = 0; i < gameState.fieldWidth; i++) {
 					var cell = cells[j * gameState.fieldWidth + i];
+					var cellSpriteIndex = ((j+1)%2)*2 + ((i+1)%2);
 					
 					var fieldCell = gameState.field[j * gameState.fieldWidth + i];
-					cell.texture = cellTextures[fieldCell];
+					cell.texture = cellTextures[fieldCell][cellSpriteIndex];
 
 					
 					/*var fieldCell = gameState.field[j * gameState.fieldWidth + i];
@@ -480,7 +487,7 @@
 		<div class="game">
 			<!--<canvas id="field-canvas" class="field" style="position: relative; left: -7px; top: -7px;" width="300px" height="300px"></canvas>-->
 			<div id="missiles"></div>
-			<div id="field" class="field" style="position: relative; left: -7px; top: -7px; width: 620px; height: 570px;"></div>
+			<div id="field" class="field" style="position: relative; left: -7px; top: -7px; width: 610px; height: 560px;"></div>
 			<div id="players"></div>
 			<div id="debug-svg" style="position: absolute; left: 0; top: 0;"></div>
 		</div>

@@ -124,13 +124,14 @@ div.missile {
 }
 
 div.game {
+	margin: 10px;
 	position: relative;
 	display: inline-block;
 	background: linear-gradient(-170deg, #756655, #606540);
 }
 
 div.root {
-	width: 860px;
+	width: 890px;
 	margin: auto;
 }
 
@@ -144,6 +145,7 @@ div.frags-player {
 div.frags-pane {
 	background: linear-gradient(-170deg, #d0c0b0, #b59785);
 	padding: 15px;
+	margin: 10px;
     position: relative;
     border-radius: 5px;
     border-width: 1px;
