@@ -42,10 +42,10 @@
 			cellImages[k].addEventListener("load", function() {
 				var kk = this.tag;
 				cellCanvases[kk] = document.createElement('canvas');
-				cellCanvases[kk].width = 14;
-				cellCanvases[kk].height = 14;
+				cellCanvases[kk].width = 28;
+				cellCanvases[kk].height = 28;
 				var m_context = cellCanvases[kk].getContext('2d');
-				m_context.drawImage(cellImages[kk], 0, 0, 14, 14);
+				m_context.drawImage(cellImages[kk], 0, 0, 28, 28);
 				
 				cellTextures[kk] = PIXI.Texture.fromCanvas(cellCanvases[kk]);
 			});
@@ -282,6 +282,8 @@
 						
 						var blockWidth = 14;
 						var blockHeight = 14;
+						cell.scale.x = 0.5;
+						cell.scale.y = 0.5;
 						
 						cell.x = gameState.cellSize * i;
 						cell.y = gameState.cellSize * j;

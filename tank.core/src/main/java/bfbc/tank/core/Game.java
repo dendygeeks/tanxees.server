@@ -264,14 +264,14 @@ public class Game extends Thread implements MissileCrashListener {
 				if (!missileHitsAboveCenter) { upJ *= -1; upI *= -1; }	// Now it is above ;)
 				
 				// walking up
-				double i = c.getI(), j = c.getJ();
+				double i = c.getI() + 0.5, j = c.getJ() + 0.5;	// we add 0.5 to fix rounding 0.9999...
 				for (int k = 1; k < 3; k++) {
 					i += upI; j += upJ;
 					if (!removeBricksAfterCrash(i, j, upI, upJ, rightI, rightJ)) break;
 				}
 	
 				// walking down
-				i = c.getI(); j = c.getJ();
+				i = c.getI() + 0.5; j = c.getJ() + 0.5;	// we add 0.5 to fix rounding 0.9999...
 				for (int k = 1; k < 2; k++) {
 					i -= upI; j -= upJ;
 					if (!removeBricksAfterCrash(i, j, upI, upJ, rightI, rightJ)) break;
