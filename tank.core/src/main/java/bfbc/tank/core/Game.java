@@ -98,16 +98,16 @@ public class Game extends Thread implements MissileCrashListener {
 
 		// Outer walls
 		for (int i = 0; i < fieldHeight - 1; i++) {
-    		putFieldCellType(0, i, CellType.C);
+    		putFieldCellType(0, i, CellType.DARK_CONCRETE);
     	}
     	for (int i = 1; i < fieldHeight; i++) {
-    		putFieldCellType(fieldWidth - 1, i, CellType.C);
+    		putFieldCellType(fieldWidth - 1, i, CellType.DARK_CONCRETE);
     	}
     	for (int i = 1; i < fieldWidth; i++) {
-    		putFieldCellType(i, 0, CellType.C);
+    		putFieldCellType(i, 0, CellType.DARK_CONCRETE);
     	}
     	for (int i = 0; i < fieldWidth - 1; i++) {
-    		putFieldCellType(i, fieldHeight - 1, CellType.C);
+    		putFieldCellType(i, fieldHeight - 1, CellType.DARK_CONCRETE);
     	}
 
     	// Map
@@ -243,17 +243,17 @@ public class Game extends Thread implements MissileCrashListener {
 		// Checking boundaries
 		if (i < 0 || i >= fieldWidth || j < 0 || j >= fieldHeight) return false;
 		// Checking if this cell is occupied by a brick
-		if (field[(int)i + (int)j * fieldWidth].getType() != CellType.B) return false;
+		if (field[(int)i + (int)j * fieldWidth].getType() != CellType.BRICKS) return false;
 		
 		// Checking the closer cell
 		double i2 = i - rightI, j2 = j - rightJ;
 		// Checking boundaries for the closer cell
 		if (i2 < 0 || i2 >= fieldWidth || j2 < 0 || j2 >= fieldHeight) return false;
 		// Checking if this cell is empty
-		if (field[(int)i2 + (int)j2 * fieldWidth].getType().isOccupied()) return false;
+		if (field[(int)i2 + (int)j2 * fieldWidth].getType().isWall()) return false;
 		
 		// If we are still here, destroying the brick in (x, y)
-		field[(int)i + (int)j * fieldWidth].setType(CellType.E);
+		field[(int)i + (int)j * fieldWidth].setType(CellType.EMPTY);
 		
 		return true;
 	}
@@ -272,10 +272,10 @@ public class Game extends Thread implements MissileCrashListener {
 		} else if (target instanceof Cell) {
 			// A missile hit a brick wall
 			Cell c = (Cell)target;
-			if (c.getType() == CellType.B) {
+			if (c.getType() == CellType.BRICKS) {
 				
 				// Destroying the brick instantly ^_^
-				c.setType(CellType.E);
+				c.setType(CellType.EMPTY);
 			
 				// Searching for adjacent bricks to destroy
 	

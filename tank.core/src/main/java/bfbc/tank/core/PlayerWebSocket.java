@@ -32,7 +32,7 @@ public class PlayerWebSocket implements StateUpdateHandler {
     
     public PlayerWebSocket() {
     	// Walls
-    	CellType e = CellType.E, C = CellType.C, B = CellType.B;
+    	CellType e = CellType.EMPTY, C = CellType.CONCRETE, B = CellType.BRICKS;
     	CellType[] map = new CellType[] {
    			e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e,
    			e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e,

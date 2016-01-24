@@ -1,8 +1,11 @@
 package bfbc.tank.core;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
@@ -10,6 +13,28 @@ import bfbc.tank.core.mechanics.DeltaXY;
 
 public class Cell implements Box, BoxConstruction<Cell> {
 
+	static class TypeAdapter extends com.google.gson.TypeAdapter<Cell> {
+		public Cell read(JsonReader reader) throws IOException {
+			// TODO It can't read
+			/*if (reader.peek() == JsonToken.NULL) {
+				reader.nextNull();
+				return null;
+			}
+			String name = reader.nextString();
+			return Cell.valueOf(name);*/
+			return null;
+		}
+
+		public void write(JsonWriter writer, Cell value) throws IOException {
+			if (value == null) {
+				writer.nullValue();
+				return;
+			}
+			String name = value.getType().code;
+			writer.value(name);
+		}
+	}
+	
 	private Game game;
 	
 	@Expose
@@ -58,7 +83,7 @@ public class Cell implements Box, BoxConstruction<Cell> {
 	}
 
 	public Cell(Game game, int i, int j) {
-		this(game, i, j, CellType.E);
+		this(game, i, j, CellType.EMPTY);
 	}
 
 	public void setType(CellType type) {
@@ -71,8 +96,7 @@ public class Cell implements Box, BoxConstruction<Cell> {
 
 	@Override
 	public boolean isActive() {
-		return type == CellType.C ||
-		       type == CellType.B;
+		return type.isWall();
 	}
 	
 	@Override
