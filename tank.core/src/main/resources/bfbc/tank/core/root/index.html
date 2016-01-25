@@ -16,8 +16,6 @@
 		var renderer, fieldStage;
 
 		// Preloading
-		new Image().src = "img/tank_parts/tank-caterpillars-frame1.svg"; 
-		new Image().src = "img/tank_parts/tank-caterpillars-frame2.svg"; 
 		new Image().src = "img/tank_parts/tank-shadow.svg"; 
 		new Image().src = "img/tank_parts/green/tank-caterpillars-frame1-overlay.svg"; 
 		new Image().src = "img/tank_parts/green/tank-caterpillars-frame2-overlay.svg"; 
@@ -27,6 +25,70 @@
 		new Image().src = "img/tank_parts/green/tank-full-body-overlay.svg"; 
 		new Image().src = "img/tank_parts/yellow/tank-full-body-overlay.svg";
 		
+		// Caterpillars textures preloading
+		var caterpillarsImages = [];
+		var caterpillarsTextures = [];
+		caterpillarsImages[0] = new Image();
+		caterpillarsImages[0].src = "img/tank_parts/tank-caterpillars-frame1.svg"; 
+		caterpillarsImages[1] = new Image();
+		caterpillarsImages[1].src = "img/tank_parts/tank-caterpillars-frame2.svg"; 
+		for (var i = 0; i < 2; i++) {
+			caterpillarsImages[i].tag = i;
+			caterpillarsImages[i].addEventListener("load", function() {
+				var ii = this.tag;
+				var bt = new PIXI.BaseTexture(caterpillarsImages[ii]);
+				caterpillarsTextures[ii] = new PIXI.Texture(bt);
+			});
+		}
+
+		// Tank full body texture preloading
+		var tankFullBodyTexture;
+		var tankFullBodyImage = new Image();
+		tankFullBodyImage.src = "img/tank_parts/tank-full-body.svg"; 
+		tankFullBodyImage.addEventListener("load", function() {
+			var bt = new PIXI.BaseTexture(tankFullBodyImage);
+			tankFullBodyTexture = new PIXI.Texture(bt);
+		});
+		
+		var skins = [ "yellow", "green" ]
+
+		// Tank caterpillars overlay preloading
+		var caterpillarsOverlayImages = [];
+		var caterpillarsOverlayTextures = [];
+		
+		for (var s in skins) {
+			caterpillarsOverlayImages[s] = [];
+			caterpillarsOverlayTextures[s] = [];
+			for (var i = 0; i < 2; i++) {
+				caterpillarsOverlayImages[s][i] = new Image();
+				caterpillarsOverlayImages[s][i].src = "img/tank_parts/" + skins[s] + "/tank-caterpillars-frame" + (i+1) + "-overlay.svg";
+				caterpillarsOverlayImages[s][i].skinTag = s;
+				caterpillarsOverlayImages[s][i].tag = i;
+				caterpillarsOverlayImages[s][i].addEventListener("load", function() {
+					var ss = this.skinTag;
+					var ii = this.tag;
+					var bt = new PIXI.BaseTexture(caterpillarsOverlayImages[ss][ii]);
+					caterpillarsOverlayTextures[ss][ii] = new PIXI.Texture(bt);
+				});
+			}
+		}
+
+		// Tank full body overlay preloading
+		var fullBodyOverlayImages = [];
+		var fullBodyOverlayTextures = [];
+		
+		for (var s in skins) {
+			fullBodyOverlayImages[s] = new Image();
+			fullBodyOverlayImages[s].src = "img/tank_parts/" + skins[s] + "/tank-full-body-overlay.svg";
+			fullBodyOverlayImages[s].skinTag = s;
+			fullBodyOverlayImages[s].addEventListener("load", function() {
+				var ss = this.skinTag;
+				var bt = new PIXI.BaseTexture(fullBodyOverlayImages[ss]);
+				fullBodyOverlayTextures[ss] = new PIXI.Texture(bt);
+			});
+		}
+
+		// Cell textures preloading		
 		var cellImages = [];
 		cellImages["E"] = new Image();
 		cellImages["E"].src = "img/empty.svg";
@@ -38,7 +100,6 @@
 		cellImages["B"].src = "img/brick-full.svg";
 
 		var cellTextures = [];
-		
 		for (var k in cellImages) {
 			cellImages[k].tag = k;
 			cellImages[k].addEventListener("load", function() {
@@ -66,15 +127,20 @@
 		var debugSvgNode;
 		var cells = [];
 		
+		var playerSprites = [];
+		
 		var firstUpdate = true;
 		
-		var skins = [ "yellow", "green" ]
+		var playersState;
+		var caterpillarFrame = 0;
 		
-		function updateTanks(players) {
-		
+		function updateTanks(gameState) {
+			playersState = gameState.players;
+
 			if (firstUpdate) {
+				
 				// Removing all tanks
-				while (playersNode.firstChild != null) {
+				/*while (playersNode.firstChild != null) {
 					playersNode.removeChild(playersNode.firstChild);
 				}
 				
@@ -117,10 +183,62 @@
 					playersNode.appendChild(playerTankNode);
 					
 					playerTankCaterpillarsNode.caterpillarFrame = 0;
+				}*/
+				
+				for (var i = 0; i < gameState.players.length; i++) {
+					var container = new PIXI.Container();
+
+					var playerSize = 42;
+
+					var caterpillars = new PIXI.Sprite(caterpillarsTextures[caterpillarFrame]);
+					caterpillars.pivot = new PIXI.Point(caterpillars.width / 2, caterpillars.height / 2);
+					caterpillars.width = playerSize;
+					caterpillars.height = playerSize;
+					container.addChild(caterpillars);
+
+					if (i < skins.length) {
+						var caterpillarsOverlay = new PIXI.Sprite(caterpillarsOverlayTextures[i][caterpillarFrame]);
+						caterpillarsOverlay.pivot = new PIXI.Point(caterpillarsOverlay.width / 2, caterpillarsOverlay.height / 2);
+						caterpillarsOverlay.width = playerSize;
+						caterpillarsOverlay.height = playerSize;
+						caterpillarsOverlay.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+						container.addChild(caterpillarsOverlay);
+					}
+
+					var tankFullBody = new PIXI.Sprite(tankFullBodyTexture);
+					tankFullBody.pivot = new PIXI.Point(tankFullBody.width / 2, tankFullBody.height / 2);
+					tankFullBody.width = playerSize;
+					tankFullBody.height = playerSize;
+					container.addChild(tankFullBody);
+					
+					if (i < skins.length) {
+						var fullBodyOverlay = new PIXI.Sprite(fullBodyOverlayTextures[i]);
+						fullBodyOverlay.pivot = new PIXI.Point(fullBodyOverlay.width / 2, fullBodyOverlay.height / 2);
+						fullBodyOverlay.width = playerSize;
+						fullBodyOverlay.height = playerSize;
+						fullBodyOverlay.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+						container.addChild(fullBodyOverlay);
+					}
+
+					fieldStage.addChild(container);
+					
+					playerSprites[i] = container;
+					playerSprites[i].caterpillars = caterpillars;
 				}
 			}
 			
-			var playerTankNodeElements = playersNode.childNodes;
+			for (var i = 0; i < gameState.players.length; i++) {
+				playerSprites[i].x = playersState[i].posX + gameState.cellSize / 2;
+				playerSprites[i].y = playersState[i].posY + gameState.cellSize / 2;
+				playerSprites[i].rotation = 3.14159 / 180 * playersState[i].angle;
+				if (window.frame % 40 == 0) {
+					playerSprites[i].caterpillars.texture = caterpillarsTextures[caterpillarFrame];
+					caterpillarFrame = (caterpillarFrame + 1) % 2;
+				}
+
+			}
+
+/*			var playerTankNodeElements = playersNode.childNodes;
 			for (var i = 0; i < playerTankNodeElements.length; i++) {
 				var playerTankNode = document.getElementById("player" + (i+1) + "-tank");
 				var playerCaterpillarsNode = document.getElementById("player" + (i+1) + "-tank-caterpillars");
@@ -129,7 +247,7 @@
 				playerTankNode.posX = players[i].posX;
 				playerTankNode.posY = players[i].posY;
 				playerTankNode.angle = players[i].angle;
-			}
+			}*/
 			
 		}
 		
@@ -180,9 +298,6 @@
 		}
 		
 		function updateScore(frags) {
-			//<div class="frags-player">
-			//	Player 1: <span id="player1-frags">0</span>
-			//</div>
 		
 			if (firstUpdate) {
 				for (var i = 0; i < frags.length; i++) {
@@ -221,7 +336,7 @@
 				activePlayerIndex = state.activePlayerIndex;
 
 				// Players
-				updateTanks(gameState.players);
+				updateTanks(gameState);
 
 				// Field
 				updateField(gameState);
@@ -246,20 +361,26 @@
 					window.setInterval(function() {
 						window.frame ++;
 						var playerTankNodeElements = playersNode.childNodes;
-						for (var i = 0; i < playerTankNodeElements.length; i++) {
-							var playerTankNode = playerTankNodeElements[i];
+						for (var i = 0; i < playersState.length; i++) {
+							/*var playerTankNode = playerTankNodeElements[i];
 							var playerTankCaterpillarsNode;
-							var playerTankCaterpillarsOverlayNode;
-							for (var j = 0; j < playerTankNode.childNodes.length; j++) {
+							var playerTankCaterpillarsOverlayNode;*/
+							/*for (var j = 0; j < playerTankNode.childNodes.length; j++) {
 								var node = playerTankNode.childNodes[j];
 								if (node.id == "player" + (i+1) + "-tank-caterpillars") playerTankCaterpillarsNode = node;
 								else if (node.id == "player" + (i+1) + "-tank-caterpillars-overlay") playerTankCaterpillarsOverlayNode = node;
-							}
+							}*/
 							
 							if (window.frame % 4 == 0) {
-								caterpillarFrame(playerTankCaterpillarsNode, playerTankCaterpillarsOverlayNode);
+								for (var i = 0; i < gameState.players.length; i++) {
+									if (playersState[i].moving) {
+										playerSprites[i].caterpillars.texture = caterpillarsTextures[caterpillarFrame];
+									}
+								}
+								caterpillarFrame = (caterpillarFrame + 1) % 2;
 							}
-							positionUnit(playerTankNode, gameState.cellSize);
+
+							//positionUnit(playerTankNode, gameState.cellSize);
 						}
 						
 						var missilesNodeElements = missilesNode.childNodes;
@@ -321,9 +442,10 @@
 					}
 				}
 			}
+			
 		}
 		
-		function caterpillarFrame(caterpillarNode, caterpillarOverlayNode) {
+		/*function caterpillarFrame(caterpillarNode, caterpillarOverlayNode) {
 			if (caterpillarNode.moving) {
 				caterpillarNode.classList.remove("frame" + (caterpillarNode.caterpillarFrame+1));
 				caterpillarOverlayNode.classList.remove("frame" + (caterpillarNode.caterpillarFrame+1));
@@ -333,7 +455,8 @@
 				caterpillarNode.classList.add("frame" + (caterpillarNode.caterpillarFrame+1));
 				caterpillarOverlayNode.classList.add("frame" + (caterpillarNode.caterpillarFrame+1));
 			}
-		}
+
+		}*/
 					
 		function positionUnit(unitNode, cellSize) {
 			unitNode.style.transform = "rotate(" + (unitNode.angle) + "deg)";
