@@ -60,6 +60,7 @@
 		var activePlayerIndex;
 
 		var fieldNode;
+		var fragsNode;
 		var playersNode;
 		var missilesNode;
 		var debugSvgNode;
@@ -179,6 +180,27 @@
 		}
 		
 		function updateScore(frags) {
+			//<div class="frags-player">
+			//	Player 1: <span id="player1-frags">0</span>
+			//</div>
+		
+			if (firstUpdate) {
+				for (var i = 0; i < frags.length; i++) {
+			
+					var fragsPlayer = document.createElement("div");
+					fragsPlayer.classList.add("frags-player");
+	
+					var fragsPlayerText = document.createTextNode("Player " + (i+1) + ": ");
+					var playerFrags = document.createElement("span");
+					playerFrags.setAttribute("id", "player" + (i+1) + "-frags");
+					
+					fragsPlayer.appendChild(fragsPlayerText);
+					fragsPlayer.appendChild(playerFrags);
+					
+					fragsNode.appendChild(fragsPlayer);
+				}
+			}
+
 			for (var i = 0; i < frags.length; i++) {
 				var playerFragsNode = document.getElementById("player" + (i+1) + "-frags");
 				playerFragsNode.innerHTML = frags[i];
@@ -328,6 +350,7 @@
 			fieldNode = document.getElementById("field");
 			missilesNode = document.getElementById("missiles");
 			debugSvgNode = document.getElementById("debug-svg");
+			fragsNode = document.getElementById("frags-pane");
 		
 			webSocketAddress = buildWebSocketAddress("player");
 			openStatusSocket();
@@ -423,22 +446,20 @@
 	<div class="root">
 		<div class="game">
 			<div id="missiles"></div>
-<!--			<div id="field" class="field" style="position: relative; left: -5px; top: -5px; width: 100px; height: 100px; margin: 0;"></div>-->
-			
 			<div id="field" class="field" style="position: relative; width: 100px; height: 100px; margin: 0;"></div>
 			
 			<div id="players"></div>
 			<div id="debug-svg" style="position: absolute; left: 0; top: 0;"></div>
 			<div class="field-inset"></div>
 		</div>
-		<div class="frags-pane">
+		<div id="frags-pane" class="frags-pane">
 			<h2 class="frags">Frags</h2>
-			<div class="frags-player">
+			<!--<div class="frags-player">
 				Player 1: <span id="player1-frags">0</span>
 			</div>
 			<div class="frags-player">
 				Player 2: <span id="player2-frags">0</span>
-			</div>
+			</div>-->
 		</div>
 	</div>
 </body>

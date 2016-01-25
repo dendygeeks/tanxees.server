@@ -32,40 +32,43 @@ public class PlayerWebSocket implements StateUpdateHandler {
     
     public PlayerWebSocket() {
     	// Walls
-    	CellType e = CellType.EMPTY, C = CellType.CONCRETE, B = CellType.BRICKS;
+    	CellType __ = CellType.EMPTY, _C = CellType.CONCRETE, _B = CellType.BRICKS;
     	CellType[] map = new CellType[] {
-   			e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e,
-   			e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e,
-   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
-   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
-   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
-   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
-   			e, e, B, B, e, e, B, B, e, e, B, B, C, C, B, B, e, e, B, B, e, e, B, B, e, e,
-   			e, e, B, B, e, e, B, B, e, e, B, B, C, C, B, B, e, e, B, B, e, e, B, B, e, e,
-   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
-   			e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e,
-   			e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e,
-   			e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e,
-   			e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e,
-   			e, e, e, e, B, B, B, B, e, e, e, e, e, e, e, e, e, e, B, B, B, B, e, e, e, e,
-   			C, C, e, e, B, B, B, B, e, e, e, e, e, e, e, e, e, e, B, B, B, B, e, e, C, C,
-   			e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e,
-   			e, e, e, e, e, e, e, e, e, e, B, B, B, B, B, B, e, e, e, e, e, e, e, e, e, e,
-   			e, e, B, B, e, e, B, B, e, e, B, B, B, B, B, B, e, e, B, B, e, e, B, B, e, e,
-   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
-   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
-   			e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e, B, B, e, e,
-    		e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e,
-    		e, e, B, B, e, e, B, B, e, e, e, e, e, e, e, e, e, e, B, B, e, e, B, B, e, e,
-    		e, e, B, B, e, e, B, B, e, e, e, B, B, B, B, e, e, e, B, B, e, e, B, B, e, e,
-    		e, e, e, e, e, e, e, e, e, e, e, B, e, e, B, e, e, e, e, e, e, e, e, e, e, e,
-    		e, e, e, e, e, e, e, e, e, e, e, B, e, e, B, e, e, e, e, e, e, e, e, e, e, e
+   			__, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
+   			__, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, _B, _B, _C, _C, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, _B, _B, _C, _C, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __, _B, _B, __, __, _B, _B, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __, _B, _B, __, __, _B, _B, __, __,
+   			__, __, __, __, __, __, __, __, __, __, _B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __,
+   			__, __, __, __, __, __, __, __, __, __, _B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __,
+   			_B, _B, __, __, _B, _B, _B, _B, __, __, __, __, __, __, __, __, __, __, _B, _B, _B, _B, __, __, _B, _B,
+   			_C, _C, __, __, _B, _B, _B, _B, __, __, __, __, __, __, __, __, __, __, _B, _B, _B, _B, __, __, _C, _C,
+   			__, __, __, __, __, __, __, __, __, __, _B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __,
+   			__, __, __, __, __, __, __, __, __, __, _B, _B, _B, _B, _B, _B, __, __, __, __, __, __, __, __, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, _B, _B, _B, _B, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __,
+   			__, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __,
+    		__, __, _B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __, _B, _B, __, __, _B, _B, __, __,
+    		__, __, _B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __, _B, _B, __, __, _B, _B, __, __,
+    		__, __, _B, _B, __, __, _B, _B, __, __, __, _B, _B, _B, _B, __, __, __, _B, _B, __, __, _B, _B, __, __,
+    		__, __, __, __, __, __, __, __, __, __, __, _B, __, __, _B, __, __, __, __, __, __, __, __, __, __, __,
+    		__, __, __, __, __, __, __, __, __, __, __, _B, __, __, _B, __, __, __, __, __, __, __, __, __, __, __
     	};
     	
-    	game = new Game(this, 26, 26, map, 2, new PointIJ[] {
+    	game = new Game(this, 26, 26, map, 4, new PointIJ[] {
     		new PointIJ(19, 50),
-    		new PointIJ(33, 50)
-    	}, new Direction[] { Direction.UP, Direction.UP });
+    		new PointIJ(33, 50),
+    		new PointIJ(2, 2),
+    		//new PointIJ(26, 2),
+    		new PointIJ(50, 2)
+    	}, new Direction[] { Direction.UP, Direction.UP, Direction.DOWN, Direction.DOWN/*, Direction.DOWN */});
 		
 		synchronized (controlledPlayers) {
 			for (int i = 0; i < game.getPlayersCount(); i++) {
@@ -125,13 +128,14 @@ public class PlayerWebSocket implements StateUpdateHandler {
         
         int selectedPlayer = -1;
 		synchronized (controlledPlayers) {
-	        for (Integer playerIndex : controlledPlayers.keySet()) {
+			ArrayList<Integer> plrs = new ArrayList<>(controlledPlayers.keySet());
+			for (int playerIndex = plrs.size() - 1; playerIndex >= 0; playerIndex--) {
 	        	if (controlledPlayers.get(playerIndex) == null) {
 	        		controlledPlayers.put(playerIndex, session);
 	        		selectedPlayer = playerIndex;
 	        		break;
 	        	}
-	        }
+			}
 		}
 		
     	synchronized (this) {
