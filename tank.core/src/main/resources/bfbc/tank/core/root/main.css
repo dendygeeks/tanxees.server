@@ -114,6 +114,11 @@ div.field {
 	margin: 0;
 }
 
+div.field-inset {
+	position: absolute; left:0; top:0; width: 100%; height: 100%; box-shadow: inset 0 0 10px #000000;	
+}
+
+
 div.missile {
 	position: absolute; left: 0; top: 0;
 	width: 20px;
@@ -127,8 +132,8 @@ div.game {
 	margin: 10px;
 	position: relative;
 	display: inline-block;
-	background: linear-gradient(-170deg, #283820, #203028);
-	
+	background: linear-gradient(-170deg, #202818, #101818);
+	/*box-shadow: #222222 0px 1px 5px;*/	
 	border-width: 4px;
     border-color: #333333;
     border-radius: 5px;
@@ -148,14 +153,16 @@ div.frags-player {
 }
 
 div.frags-pane {
+	box-shadow: #222222 0px 1px 5px;
 	background: linear-gradient(-170deg, #d0c0b0, #b59785);
 	padding: 15px;
-	margin: 10px;
+	margin: 15px;
     position: relative;
     border-radius: 5px;
-    border-width: 1px;
-    border-color: #202020;
-    width: 200px;
+	border-style: solid;
+    border-width: 4px;
+	border-color: #a08270;
+    width: 194px;
     
     display: inline-block;
     vertical-align: top;
