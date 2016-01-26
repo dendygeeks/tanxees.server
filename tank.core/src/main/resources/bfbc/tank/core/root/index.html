@@ -292,9 +292,9 @@
 						var missileHeight = 30;		// TODO: Set correct size
 						
 						missileSpritesList[i][j] = new PIXI.Sprite(missileTexture);
-						missileSpritesList[i][j].pivot = new PIXI.Point(missileWidth / 2, missileHeight / 2);
-						missileSpritesList[i][j].width = missileWidth;
-						missileSpritesList[i][j].height = missileHeight;
+						missileSpritesList[i][j].pivot = new PIXI.Point(missileSpritesList[i][j].width / 2, missileSpritesList[i][j].height / 2);
+						//missileSpritesList[i][j].width = missileWidth;
+						//missileSpritesList[i][j].height = missileHeight;
 						missileSpritesContainer.addChild(missileSpritesList[i][j]);
 					}
 
