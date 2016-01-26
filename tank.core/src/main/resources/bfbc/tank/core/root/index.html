@@ -115,15 +115,6 @@
 		});
 		
 		// Tile textures preloading		
-		/*var cellImages = [];
-		cellImages["E"] = new Image();
-		cellImages["E"].src = "img/empty.svg";
-		cellImages["C"] = new Image();
-		cellImages["C"].src = "img/concrete-full.svg";
-		cellImages["DC"] = new Image();
-		cellImages["DC"].src = "img/darkconcrete-full.svg";
-		cellImages["B"] = new Image();
-		cellImages["B"].src = "img/brick-full.svg";*/
 		
 		var cellImage = new Image();
 		cellImage.src = "img/tiles.svg";
@@ -142,7 +133,7 @@
 						cellTextures[kk][i + j * 2] = new PIXI.Texture(cellImageTexture, new PIXI.Rectangle(i*11 + deltaX, j*11, 11, 11));
 					}					
 				}
- 				deltaX += 22; // Moving to the next tile
+ 				deltaX += 24; // Moving to the next tile
 			}
 		});
 		
