@@ -26,6 +26,11 @@ public class Player extends Unit {
 	private boolean moving;
 	
 	private boolean wantToFire;
+	
+	private double velocity = 85.0d;
+	private double angleVel = 500;
+
+	private double dragVelocity = 3*velocity;	// From the ceiling
 
 	private BoxConstructionCollider<Box> collider;
 	private MissileCrashListener crashListener;
@@ -63,6 +68,15 @@ public class Player extends Unit {
 		this(game, collider, crashListener, direction, activeCommand, moving, posX, posY, null);
 	}
 
+	private void safeMove(DeltaXY dxy) {
+		BoxConstructionCollider<Box>.MoveResult mr = collider.tryMove(this, dxy);
+		for (BoxConstruction<Box> t : mr.targets.keySet()) {
+			if (t instanceof Missile) {
+				crashListener.missileCrashed((Missile)t, this);
+			}
+		}
+	}
+	
 	public void frameStep() {
 		moving = false;
 		if (activeCommand.isDown()) {
@@ -88,7 +102,6 @@ public class Player extends Unit {
 		if (angleDelta > 180) angleDelta -= 360;
 		
 		boolean notRotating = false;
-		double angleVel = 500;
 		double angleSmall = angleVel / 50;
 		if (angleDelta > angleSmall) {
 			angle += angleVel * Game.MODEL_TICK;
@@ -100,8 +113,38 @@ public class Player extends Unit {
 			angle = DIRECTION_ANGLES.get(direction);
 			notRotating = true;
 		}
+		
+		// Dragging. A small hack that makes driving around corners easier for the user 
+		if (!notRotating) {
+			double cs = getGame().cellSize;
+			double dx = ((posX - cs/2) % cs) / cs;
+			double dy = ((posY - cs/2) % cs) / cs;
+			if (dx > 0.5d) dx -= 1.0d;
+			if (dy > 0.5d) dy -= 1.0d;
+			System.out.println(dx);
+			
+			// We should drag the unit along the normal direction
+			double dirAng = DIRECTION_ANGLES.get(direction) / 180.0d * Math.PI;
+			double normX = -Math.sin(dirAng), 
+			       normY = Math.cos(dirAng);
+			double oldDirX = Math.cos(angle / 180.0d * Math.PI),
+			       oldDirY = Math.sin(angle / 180.0d * Math.PI);
+			
+			double rotationFactor = Math.abs(oldDirX*normX + oldDirY*normY);
+			double targetFactor = (-dx)*oldDirX + (-dy)*oldDirY;
+			//if (targetFactor > 0) {	// We are only moving forward
+				double velX = dragVelocity * targetFactor * oldDirX * rotationFactor,
+				       velY = dragVelocity * targetFactor * oldDirY * rotationFactor;
+	
+				DeltaXY dxy = new DeltaXY(
+						velX * Game.MODEL_TICK,
+						velY * Game.MODEL_TICK
+				);
+				safeMove(dxy);
+			//}
+			
+		}
 
-		double velocity = 85.0d;
 		double displacement = velocity * Game.MODEL_TICK;
 		
 		if (notRotating && wantToFire) {
@@ -132,13 +175,8 @@ public class Player extends Unit {
 			default:
 				throw new RuntimeException("Strange direction case");
 			}
-			
-			BoxConstructionCollider<Box>.MoveResult mr = collider.tryMove(this, dxy);
-			for (BoxConstruction<Box> t : mr.targets.keySet()) {
-				if (t instanceof Missile) {
-					crashListener.missileCrashed((Missile)t, this);
-				}
-			}
+
+			safeMove(dxy);
 		}
 	}
 	
