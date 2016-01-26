@@ -88,6 +88,19 @@
 			});
 		}
 
+		// Missile
+		var missileImage = new Image();
+		missileImage.src = "img/missile.svg";
+
+		var missileTexture;
+		missileImage.tag = k;
+		missileImage.addEventListener("load", function() {
+			var kk = this.tag;
+			missileTexture = [];
+			var baseTex = new PIXI.BaseTexture(missileImage);
+			missileTexture = new PIXI.Texture(baseTex);
+		});
+		
 		// Cell textures preloading		
 		var cellImages = [];
 		cellImages["E"] = new Image();
@@ -123,7 +136,7 @@
 		var fieldNode;
 		var fragsNode;
 		var playersNode;
-		var missilesNode;
+		var missilesNode;	var missileSpritesList = []; var missileSpritesContainer;
 		var debugSvgNode;
 		var cells = [];
 		
@@ -251,17 +264,53 @@
 			
 		}
 		
+		
 		function updateMissiles(missiles) {
-			var recreateMissilesNode = false;
-			if (missilesNode.childNodes.length != missiles.length) {
-				recreateMissilesNode = true;
-				// Removing all missiles for all players
-				while (missilesNode.firstChild != null) {
-					missilesNode.removeChild(missilesNode.firstChild);
+			var recreateMissiles = false;
+			if (missileSpritesList.length != missiles.length) {
+				recreateMissiles = true;
+			} else {
+				for (var i = 0; i < playersState.length; i++) {
+					if (missileSpritesList[i].length != missiles[i].length) {
+						recreateMissiles = true;
+					}
 				}
 			}
 			
-			for (var i = 0; i < playersNode.childNodes.length; i++) {
+			if (recreateMissiles) {
+				// Removing all missiles for all players
+				if (missileSpritesContainer != null) {
+					fieldStage.removeChild(missileSpritesContainer);
+				}
+				missileSpritesContainer = new PIXI.Container();
+				missileSpritesList = [];
+				for (var i = 0; i < playersState.length; i++) {
+					missileSpritesList[i] = [];
+					for (var j = 0; j < missiles[i].length; j++) {
+					
+						var missileWidth = 30;		// TODO: Set correct size
+						var missileHeight = 30;		// TODO: Set correct size
+						
+						missileSpritesList[i][j] = new PIXI.Sprite(missileTexture);
+						missileSpritesList[i][j].pivot = new PIXI.Point(missileWidth / 2, missileHeight / 2);
+						missileSpritesList[i][j].width = missileWidth;
+						missileSpritesList[i][j].height = missileHeight;
+						missileSpritesContainer.addChild(missileSpritesList[i][j]);
+					}
+
+				}
+				fieldStage.addChild(missileSpritesContainer);
+			} 
+			for (var i = 0; i < playersState.length; i++) {
+				for (var j = 0; j < missiles[i].length; i++) {
+					missileSpritesList[i][j].x = missiles[i][j].posX;
+					missileSpritesList[i][j].y = missiles[i][j].posY;
+					missileSpritesList[i][j].rotation = 3.14159 / 180 * missiles[i][j].angle;
+				}
+
+			}
+			
+			/*for (var i = 0; i < playersNode.childNodes.length; i++) {
 				var playerMissilesNode;
 				if (recreateMissilesNode) {
 					playerMissilesNode = document.createElement("div");
@@ -294,7 +343,7 @@
 					playerMissilesNode.appendChild(missileNode);
 				}
 
-			}
+			}*/
 		}
 		
 		function updateScore(frags) {
