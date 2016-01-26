@@ -108,16 +108,14 @@
 		missileImage.src = "img/missile.svg";
 
 		var missileTexture;
-		missileImage.tag = k;
 		missileImage.addEventListener("load", function() {
-			var kk = this.tag;
 			missileTexture = [];
 			var baseTex = new PIXI.BaseTexture(missileImage);
 			missileTexture = new PIXI.Texture(baseTex);
 		});
 		
-		// Cell textures preloading		
-		var cellImages = [];
+		// Tile textures preloading		
+		/*var cellImages = [];
 		cellImages["E"] = new Image();
 		cellImages["E"].src = "img/empty.svg";
 		cellImages["C"] = new Image();
@@ -125,23 +123,28 @@
 		cellImages["DC"] = new Image();
 		cellImages["DC"].src = "img/darkconcrete-full.svg";
 		cellImages["B"] = new Image();
-		cellImages["B"].src = "img/brick-full.svg";
+		cellImages["B"].src = "img/brick-full.svg";*/
+		
+		var cellImage = new Image();
+		cellImage.src = "img/tiles.svg";
+		var cellImageTexture = new PIXI.BaseTexture(cellImage);
 
 		var cellTextures = [];
-		for (var k in cellImages) {
-			cellImages[k].tag = k;
-			cellImages[k].addEventListener("load", function() {
-				var kk = this.tag;
+		cellImage.addEventListener("load", function() {
+			var deltaX = 0;
+			var tileTexMap = ["B", "C", "DC", "E"];
+			for (var k in tileTexMap) {
+				kk = tileTexMap[k];
 				cellTextures[kk] = [];
 
-				var baseTex = new PIXI.BaseTexture(cellImages[kk]);
 				for (var i = 0; i < 2; i++) {
 					for (var j = 0; j < 2; j++) {
-						cellTextures[kk][i + j * 2] = new PIXI.Texture(baseTex, new PIXI.Rectangle(i*11, j*11, 11, 11));
+						cellTextures[kk][i + j * 2] = new PIXI.Texture(cellImageTexture, new PIXI.Rectangle(i*11 + deltaX, j*11, 11, 11));
 					}					
 				}
-			});
-		}
+ 				deltaX += 22; // Moving to the next tile
+			}
+		});
 		
 		
 		function updateTanks(gameState) {
@@ -357,7 +360,7 @@
 				fieldNode.style.width = (gameState.fieldWidth * gameState.cellSize) + "px";
 				fieldNode.style.height = (gameState.fieldHeight * gameState.cellSize) + "px";
 				
-				var container = new PIXI.Container();
+				var container = new PIXI.ParticleContainer(10000, { uvs: true });
 				for (var j = 0; j < gameState.fieldHeight; j++) {
 					for (var i = 0; i < gameState.fieldWidth; i++) {
 						var cellSpriteIndex = ((j+1)%2)*2 + ((i+1)%2);
