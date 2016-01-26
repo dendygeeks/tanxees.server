@@ -28,8 +28,6 @@ public class PlayerWebSocket implements StateUpdateHandler {
     
     private Game game;
     
-    
-    
     public PlayerWebSocket() {
     	// Walls
     	CellType __ = CellType.EMPTY, _C = CellType.CONCRETE, _B = CellType.BRICKS;

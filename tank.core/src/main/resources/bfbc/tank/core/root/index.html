@@ -13,17 +13,32 @@
 	
 	<script>
 	
-		var renderer, fieldStage;
+		// WebSockets
+		var websocket;
+		var webSocketAddress;
+		
+		// Game state
+		var activePlayerIndex;
+		var playersState;
 
+		// Client state
+		var firstUpdate = true;
+		var caterpillarFrame = 0;
+
+		// Nodes
+		var fieldNode;
+		var fragsNode;
+		var debugSvgNode;
+
+		// PIXI objects
+		var renderer, fieldStage;
+		var missileSprites = []; 
+		var missileSpritesContainer;
+		var cellSprites = [];
+		var playerSprites = [];
+		
 		// Preloading
 		new Image().src = "img/tank_parts/tank-shadow.svg"; 
-		new Image().src = "img/tank_parts/green/tank-caterpillars-frame1-overlay.svg"; 
-		new Image().src = "img/tank_parts/green/tank-caterpillars-frame2-overlay.svg"; 
-		new Image().src = "img/tank_parts/yellow/tank-caterpillars-frame1-overlay.svg"; 
-		new Image().src = "img/tank_parts/yellow/tank-caterpillars-frame2-overlay.svg"; 
-		new Image().src = "img/tank_parts/tank-full-body.svg"; 
-		new Image().src = "img/tank_parts/green/tank-full-body-overlay.svg"; 
-		new Image().src = "img/tank_parts/yellow/tank-full-body-overlay.svg";
 		
 		// Caterpillars textures preloading
 		var caterpillarsImages = [];
@@ -88,7 +103,7 @@
 			});
 		}
 
-		// Missile
+		// Missile preloading
 		var missileImage = new Image();
 		missileImage.src = "img/missile.svg";
 
@@ -128,75 +143,10 @@
 			});
 		}
 		
-		// Globals
-		var websocket;
-		var webSocketAddress;
-		var activePlayerIndex;
-
-		var fieldNode;
-		var fragsNode;
-		var playersNode;
-		var missilesNode;	var missileSpritesList = []; var missileSpritesContainer;
-		var debugSvgNode;
-		var cells = [];
-		
-		var playerSprites = [];
-		
-		var firstUpdate = true;
-		
-		var playersState;
-		var caterpillarFrame = 0;
 		
 		function updateTanks(gameState) {
-			playersState = gameState.players;
 
 			if (firstUpdate) {
-				
-				// Removing all tanks
-				/*while (playersNode.firstChild != null) {
-					playersNode.removeChild(playersNode.firstChild);
-				}
-				
-				for (var i = 0; i < players.length; i++) {
-	
-					var playerTankShadowNode = document.createElement("div");
-					playerTankShadowNode.setAttribute("id", "player" + (i+1) + "-tank-shadow");
-					playerTankShadowNode.classList.add("tank-shadow");
-					
-					var playerTankCaterpillarsNode = document.createElement("div");
-					playerTankCaterpillarsNode.setAttribute("id", "player" + (i+1) + "-tank-caterpillars");
-					playerTankCaterpillarsNode.classList.add("tank-caterpillars");
-					playerTankCaterpillarsNode.classList.add("frame1");
-
-					var playerTankCaterpillarsOverlayNode = document.createElement("div");
-					playerTankCaterpillarsOverlayNode.setAttribute("id", "player" + (i+1) + "-tank-caterpillars-overlay");
-					playerTankCaterpillarsOverlayNode.classList.add("tank-caterpillars-overlay");
-					playerTankCaterpillarsOverlayNode.classList.add(skins[i]);
-					playerTankCaterpillarsOverlayNode.classList.add("frame1");
-					
-					var playerTankBodyNode = document.createElement("div");
-					playerTankBodyNode.setAttribute("id", "player" + (i+1) + "-tank-body");
-					playerTankBodyNode.classList.add("tank-body");
-					
-					var playerTankBodyOverlayNode = document.createElement("div");
-					playerTankBodyOverlayNode.setAttribute("id", "player" + (i+1) + "-tank-overlay");
-					playerTankBodyOverlayNode.classList.add("tank-body-overlay");
-					playerTankBodyOverlayNode.classList.add(skins[i]);
-					
-					var playerTankNode = document.createElement("div");
-					playerTankNode.setAttribute("id", "player" + (i+1) + "-tank");
-					playerTankNode.classList.add("tank");
-					
-					playerTankNode.appendChild(playerTankShadowNode);
-					playerTankNode.appendChild(playerTankCaterpillarsNode);
-					playerTankNode.appendChild(playerTankCaterpillarsOverlayNode);
-					playerTankNode.appendChild(playerTankBodyNode);
-					playerTankNode.appendChild(playerTankBodyOverlayNode);
-					
-					playersNode.appendChild(playerTankNode);
-					
-					playerTankCaterpillarsNode.caterpillarFrame = 0;
-				}*/
 				
 				for (var i = 0; i < gameState.players.length; i++) {
 					var container = new PIXI.Container();
@@ -251,27 +201,17 @@
 
 			}
 
-/*			var playerTankNodeElements = playersNode.childNodes;
-			for (var i = 0; i < playerTankNodeElements.length; i++) {
-				var playerTankNode = document.getElementById("player" + (i+1) + "-tank");
-				var playerCaterpillarsNode = document.getElementById("player" + (i+1) + "-tank-caterpillars");
-
-				playerCaterpillarsNode.moving = players[i].moving;
-				playerTankNode.posX = players[i].posX;
-				playerTankNode.posY = players[i].posY;
-				playerTankNode.angle = players[i].angle;
-			}*/
-			
 		}
 		
 		
-		function updateMissiles(missiles) {
+		function updateMissiles(gameState) {
+			var missiles = gameState.missiles;
 			var recreateMissiles = false;
-			if (missileSpritesList.length != missiles.length) {
+			if (missileSprites.length != missiles.length) {
 				recreateMissiles = true;
 			} else {
 				for (var i = 0; i < playersState.length; i++) {
-					if (missileSpritesList[i].length != missiles[i].length) {
+					if (missileSprites[i].length != missiles[i].length) {
 						recreateMissiles = true;
 					}
 				}
@@ -279,71 +219,36 @@
 			
 			if (recreateMissiles) {
 				// Removing all missiles for all players
-				if (missileSpritesContainer != null) {
-					fieldStage.removeChild(missileSpritesContainer);
+				if (missileSpritesContainer == null) {
+					missileSpritesContainer = new PIXI.Container();
+					fieldStage.addChild(missileSpritesContainer);
 				}
-				missileSpritesContainer = new PIXI.Container();
-				missileSpritesList = [];
+				missileSpritesContainer.removeChildren();
+				missileSprites = [];
 				for (var i = 0; i < playersState.length; i++) {
-					missileSpritesList[i] = [];
+					missileSprites[i] = [];
 					for (var j = 0; j < missiles[i].length; j++) {
 					
 						var missileWidth = 30;		// TODO: Set correct size
 						var missileHeight = 30;		// TODO: Set correct size
 						
-						missileSpritesList[i][j] = new PIXI.Sprite(missileTexture);
-						missileSpritesList[i][j].pivot = new PIXI.Point(missileSpritesList[i][j].width / 2, missileSpritesList[i][j].height / 2);
-						//missileSpritesList[i][j].width = missileWidth;
-						//missileSpritesList[i][j].height = missileHeight;
-						missileSpritesContainer.addChild(missileSpritesList[i][j]);
+						missileSprites[i][j] = new PIXI.Sprite(missileTexture);
+						missileSprites[i][j].pivot = new PIXI.Point(missileSprites[i][j].width / 2, missileSprites[i][j].height / 2);
+						//missileSprites[i][j].width = missileWidth;
+						//missileSprites[i][j].height = missileHeight;
+						missileSpritesContainer.addChild(missileSprites[i][j]);
 					}
 
 				}
-				fieldStage.addChild(missileSpritesContainer);
 			} 
 			for (var i = 0; i < playersState.length; i++) {
 				for (var j = 0; j < missiles[i].length; j++) {
-					missileSpritesList[i][j].x = missiles[i][j].posX;
-					missileSpritesList[i][j].y = missiles[i][j].posY;
-					missileSpritesList[i][j].rotation = 3.14159 / 180 * missiles[i][j].angle;
+					missileSprites[i][j].x = missiles[i][j].posX + gameState.cellSize / 2;
+					missileSprites[i][j].y = missiles[i][j].posY + gameState.cellSize / 2;
+					missileSprites[i][j].rotation = 3.14159 / 180 * missiles[i][j].angle;
 				}
 
 			}
-			
-			/*for (var i = 0; i < playersNode.childNodes.length; i++) {
-				var playerMissilesNode;
-				if (recreateMissilesNode) {
-					playerMissilesNode = document.createElement("div");
-					missilesNode.appendChild(playerMissilesNode);
-				} else {
-					playerMissilesNode = missilesNode.childNodes[i];
-				}
-				
-				var recreatePlayerMissiles = false;
-				if (playerMissilesNode.childNodes.length != missiles[i].length) {
-					recreatePlayerMissiles = true;
-					// Removing all missiles for player
-					while (playerMissilesNode.firstChild != null) {
-						playerMissilesNode.removeChild(playerMissilesNode.firstChild);
-					}
-				}
-				
-				for (var j = 0; j < missiles[i].length; j++) {
-					if (recreatePlayerMissiles) {
-						var missileNode = document.createElement("div");
-						missileNode.classList.add("missile");
-					} else {
-						missileNode = playerMissilesNode.childNodes[j];
-					}
-					
-					missileNode.posX = missiles[i][j].posX;
-					missileNode.posY = missiles[i][j].posY;
-					missileNode.angle = missiles[i][j].angle;
-
-					playerMissilesNode.appendChild(missileNode);
-				}
-
-			}*/
 		}
 		
 		function updateScore(frags) {
@@ -384,21 +289,24 @@
 				// Active player index
 				activePlayerIndex = state.activePlayerIndex;
 
+				playersState = gameState.players;
+
+				// Missiles
+				updateMissiles(gameState);
+
 				// Players
 				updateTanks(gameState);
 
 				// Field
 				updateField(gameState);
 
-				// Missiles
-				updateMissiles(gameState.missiles);
 				
 				// Score
 				updateScore(gameState.frags);
 				
 				// Debug SVG
 				var svgCollect = "";
-				for (var i = 0; i < playersNode.childNodes.length; i++) {
+				for (var i = 0; i < playersState.length; i++) {
 					if (gameState.debugData[i] != null) {
 						svgCollect += gameState.debugData[i].svg;
 					}
@@ -409,16 +317,7 @@
 					window.frame = 0;
 					window.setInterval(function() {
 						window.frame ++;
-						var playerTankNodeElements = playersNode.childNodes;
 						for (var i = 0; i < playersState.length; i++) {
-							/*var playerTankNode = playerTankNodeElements[i];
-							var playerTankCaterpillarsNode;
-							var playerTankCaterpillarsOverlayNode;*/
-							/*for (var j = 0; j < playerTankNode.childNodes.length; j++) {
-								var node = playerTankNode.childNodes[j];
-								if (node.id == "player" + (i+1) + "-tank-caterpillars") playerTankCaterpillarsNode = node;
-								else if (node.id == "player" + (i+1) + "-tank-caterpillars-overlay") playerTankCaterpillarsOverlayNode = node;
-							}*/
 							
 							if (window.frame % 4 == 0) {
 								for (var i = 0; i < gameState.players.length; i++) {
@@ -428,17 +327,15 @@
 								}
 								caterpillarFrame = (caterpillarFrame + 1) % 2;
 							}
-
-							//positionUnit(playerTankNode, gameState.cellSize);
 						}
 						
-						var missilesNodeElements = missilesNode.childNodes;
+						/*var missilesNodeElements = missilesNode.childNodes;
 						for (var i = 0; i < missilesNodeElements.length; i++) {
 							
 							for (var j = 0; j < missilesNodeElements[i].childNodes.length; j++) {
 								positionUnit(missilesNodeElements[i].childNodes[j], gameState.cellSize);
 							}
-						}
+						}*/
 						
 						renderer.render(fieldStage);
 					}, 1000 / 50/*fps*/);
@@ -455,7 +352,7 @@
 		function updateField(gameState) {
 
 			if (firstUpdate) {
-				cells = [];
+				cellSprites = [];
 			
 				fieldNode.style.width = (gameState.fieldWidth * gameState.cellSize) + "px";
 				fieldNode.style.height = (gameState.fieldHeight * gameState.cellSize) + "px";
@@ -474,7 +371,7 @@
 						cell.y = gameState.cellSize * j;
 						
 						container.addChild(cell);
-						cells[j * gameState.fieldWidth + i] = cell;
+						cellSprites[j * gameState.fieldWidth + i] = cell;
 					};
 				};
 				fieldStage.addChild(container);
@@ -483,7 +380,7 @@
 			
 				for (var j = 0; j < gameState.fieldHeight; j++) {
 					for (var i = 0; i < gameState.fieldWidth; i++) {
-						var cell = cells[j * gameState.fieldWidth + i];
+						var cell = cellSprites[j * gameState.fieldWidth + i];
 						var cellSpriteIndex = ((j+1)%2)*2 + ((i+1)%2);
 						
 						var fieldCell = gameState.field[j * gameState.fieldWidth + i];
@@ -493,32 +390,11 @@
 			}
 			
 		}
-		
-		/*function caterpillarFrame(caterpillarNode, caterpillarOverlayNode) {
-			if (caterpillarNode.moving) {
-				caterpillarNode.classList.remove("frame" + (caterpillarNode.caterpillarFrame+1));
-				caterpillarOverlayNode.classList.remove("frame" + (caterpillarNode.caterpillarFrame+1));
-
-				caterpillarNode.caterpillarFrame = (caterpillarNode.caterpillarFrame + 1) % 2;
-
-				caterpillarNode.classList.add("frame" + (caterpillarNode.caterpillarFrame+1));
-				caterpillarOverlayNode.classList.add("frame" + (caterpillarNode.caterpillarFrame+1));
-			}
-
-		}*/
-					
-		function positionUnit(unitNode, cellSize) {
-			unitNode.style.transform = "rotate(" + (unitNode.angle) + "deg)";
-			
-			unitNode.style.left = (unitNode.posX - unitNode.clientWidth / 2 + cellSize / 2) + "px";
-			unitNode.style.top = (unitNode.posY - unitNode.clientHeight / 2 + cellSize / 2) + "px";
-		}
 
 		// Setting events
 		
 		window.addEventListener("load", function() {
 		
-			playersNode = document.getElementById("players");
 			fieldNode = document.getElementById("field");
 			missilesNode = document.getElementById("missiles");
 			debugSvgNode = document.getElementById("debug-svg");
@@ -617,21 +493,14 @@
 	
 	<div class="root">
 		<div class="game">
-			<div id="missiles"></div>
 			<div id="field" class="field" style="position: relative; width: 100px; height: 100px; margin: 0;"></div>
 			
-			<div id="players"></div>
 			<div id="debug-svg" style="position: absolute; left: 0; top: 0;"></div>
 			<div class="field-inset"></div>
 		</div>
 		<div id="frags-pane" class="frags-pane">
 			<h2 class="frags">Frags</h2>
-			<!--<div class="frags-player">
-				Player 1: <span id="player1-frags">0</span>
-			</div>
-			<div class="frags-player">
-				Player 2: <span id="player2-frags">0</span>
-			</div>-->
+			<!-- Adding player frags here -->
 		</div>
 	</div>
 </body>
