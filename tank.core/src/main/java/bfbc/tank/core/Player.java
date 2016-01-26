@@ -121,7 +121,6 @@ public class Player extends Unit {
 			double dy = ((posY - cs/2) % cs) / cs;
 			if (dx > 0.5d) dx -= 1.0d;
 			if (dy > 0.5d) dy -= 1.0d;
-			System.out.println(dx);
 			
 			// We should drag the unit along the normal direction
 			double dirAng = DIRECTION_ANGLES.get(direction) / 180.0d * Math.PI;
