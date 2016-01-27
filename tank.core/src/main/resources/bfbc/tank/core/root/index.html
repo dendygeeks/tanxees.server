@@ -65,7 +65,7 @@
 			tankFullBodyTexture = new PIXI.Texture(bt);
 		});
 		
-		var skins = [ "yellow", "green", "pinkie" ]
+		var skins = [ "yellow", "green", "pinkie", "boring" ]
 
 		// Tank caterpillars overlay preloading
 		var caterpillarsOverlayImages = [];
@@ -114,6 +114,22 @@
 			missileTexture = new PIXI.Texture(baseTex);
 		});
 		
+		// Missile overlay preloading
+		var missileOverlayImages = [];
+		var missileOverlayTextures = [];
+		
+		for (var s in skins) {
+			missileOverlayImages[s] = new Image();
+			missileOverlayImages[s].src = "img/tank_parts/" + skins[s] + "/missile-overlay.svg";
+			missileOverlayImages[s].skinTag = s;
+			missileOverlayImages[s].addEventListener("load", function() {
+				var ss = this.skinTag;
+				var bt = new PIXI.BaseTexture(missileOverlayImages[ss]);
+				missileOverlayTextures[ss] = new PIXI.Texture(bt);
+			});
+		}
+		
+		
 		// Tile textures preloading		
 		
 		var cellImage = new Image();
@@ -143,39 +159,28 @@
 			if (firstUpdate) {
 				
 				for (var i = 0; i < gameState.players.length; i++) {
+					var skinIndex = i;
+					if (skinIndex >= skins.length) skinIndex = skins.length - 1;
+				
 					var container = new PIXI.Container();
-
-					//var playerSize = 42;
 
 					var caterpillars = new PIXI.Sprite(caterpillarsTextures[caterpillarFrame]);
 					caterpillars.pivot = new PIXI.Point(caterpillars.width / 2, caterpillars.height / 2);
-					//caterpillars.width = playerSize;
-					//caterpillars.height = playerSize;
 					container.addChild(caterpillars);
 
-					if (i < skins.length) {
-						var caterpillarsOverlay = new PIXI.Sprite(caterpillarsOverlayTextures[i][caterpillarFrame]);
-						caterpillarsOverlay.pivot = new PIXI.Point(caterpillarsOverlay.width / 2, caterpillarsOverlay.height / 2);
-						//caterpillarsOverlay.width = playerSize;
-						//caterpillarsOverlay.height = playerSize;
-						caterpillarsOverlay.blendMode = PIXI.BLEND_MODES.MULTIPLY;
-						container.addChild(caterpillarsOverlay);
-					}
+					var caterpillarsOverlay = new PIXI.Sprite(caterpillarsOverlayTextures[skinIndex][caterpillarFrame]);
+					caterpillarsOverlay.pivot = new PIXI.Point(caterpillarsOverlay.width / 2, caterpillarsOverlay.height / 2);
+					caterpillarsOverlay.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+					container.addChild(caterpillarsOverlay);
 
 					var tankFullBody = new PIXI.Sprite(tankFullBodyTexture);
 					tankFullBody.pivot = new PIXI.Point(tankFullBody.width / 2, tankFullBody.height / 2);
-					//tankFullBody.width = playerSize;
-					//tankFullBody.height = playerSize;
 					container.addChild(tankFullBody);
 					
-					if (i < skins.length) {
-						var fullBodyOverlay = new PIXI.Sprite(fullBodyOverlayTextures[i]);
-						fullBodyOverlay.pivot = new PIXI.Point(fullBodyOverlay.width / 2, fullBodyOverlay.height / 2);
-						//fullBodyOverlay.width = playerSize;
-						//fullBodyOverlay.height = playerSize;
-						fullBodyOverlay.blendMode = PIXI.BLEND_MODES.MULTIPLY;
-						container.addChild(fullBodyOverlay);
-					}
+					var fullBodyOverlay = new PIXI.Sprite(fullBodyOverlayTextures[skinIndex]);
+					fullBodyOverlay.pivot = new PIXI.Point(fullBodyOverlay.width / 2, fullBodyOverlay.height / 2);
+					fullBodyOverlay.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+					container.addChild(fullBodyOverlay);
 
 					fieldStage.addChild(container);
 					
@@ -222,15 +227,22 @@
 				for (var i = 0; i < playersState.length; i++) {
 					missileSprites[i] = [];
 					for (var j = 0; j < missiles[i].length; j++) {
-					
-						var missileWidth = 30;		// TODO: Set correct size
-						var missileHeight = 30;		// TODO: Set correct size
+
+						var skinIndex = missiles[i][j].ownerPlayerId;
+						if (skinIndex >= skins.length) skinIndex = skins.length - 1;
+
+						missileSprites[i][j] = new PIXI.Container();
+											
+						missileSprites[i][j].base = new PIXI.Sprite(missileTexture);
+						missileSprites[i][j].addChild(missileSprites[i][j].base);
+
+						missileSprites[i][j].overlay = new PIXI.Sprite(missileOverlayTextures[skinIndex]);
+						missileSprites[i][j].overlay.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+						missileSprites[i][j].addChild(missileSprites[i][j].overlay);
 						
-						missileSprites[i][j] = new PIXI.Sprite(missileTexture);
 						missileSprites[i][j].pivot = new PIXI.Point(missileSprites[i][j].width / 2, missileSprites[i][j].height / 2);
-						//missileSprites[i][j].width = missileWidth;
-						//missileSprites[i][j].height = missileHeight;
 						missileSpritesContainer.addChild(missileSprites[i][j]);
+
 					}
 
 				}

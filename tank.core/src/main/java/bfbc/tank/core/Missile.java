@@ -1,5 +1,7 @@
 package bfbc.tank.core;
 
+import com.google.gson.annotations.Expose;
+
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.DeltaXY;
@@ -11,6 +13,7 @@ public class Missile extends Unit {
 	
 	private BoxConstructionCollider<Box> collider;
 	
+	@Expose
 	private int ownerPlayerId;
 	
 	private MissileCrashListener crashListener;
