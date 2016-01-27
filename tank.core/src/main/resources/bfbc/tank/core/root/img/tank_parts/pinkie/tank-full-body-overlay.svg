@@ -15,7 +15,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="tank-caterpillars-frame1-overlay.svg"
+   sodipodi:docname="tank-full-body-overlay.svg"
    inkscape:export-filename="/Users/il/tank2.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"
@@ -1740,7 +1740,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="7.919596"
-     inkscape:cx="29.832614"
+     inkscape:cx="11.144792"
      inkscape:cy="30.557103"
      inkscape:document-units="px"
      inkscape:current-layer="layer7"
@@ -2237,11 +2237,10 @@
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="Tower color overlay"
-     style="display:none"
-     transform="translate(0,-68)"
-     sodipodi:insensitive="true">
+     style="display:inline"
+     transform="translate(0,-68)">
     <path
-       style="fill:#ffe67e;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#f87eff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 14.149897,89.041646 c 0.0069,-2.693378 2.084684,-5.213301 5.08446,-5.15505 2.999777,0.05825 4.147489,1.687566 5.041182,3.791108 l 14.179963,0 c 0.771571,1.038085 0.566516,2.016776 -0.09531,2.967694 l -14.275281,0.09274 c -0.101749,0.956334 -2.196061,3.518294 -4.922735,3.584087 -2.726674,0.06579 -5.019255,-2.5872 -5.012273,-5.280581 z"
        id="path4644"
        inkscape:connector-curvature="0"
@@ -2251,11 +2250,10 @@
      inkscape:groupmode="layer"
      id="layer11"
      inkscape:label="Body color overlay"
-     style="display:none"
-     transform="translate(0,-68)"
-     sodipodi:insensitive="true">
+     style="display:inline"
+     transform="translate(0,-68)">
     <rect
-       style="display:inline;fill:#ffe67e;fill-opacity:1;stroke:none;stroke-width:1.54100001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="display:inline;fill:#f87eff;fill-opacity:1;stroke:none;stroke-width:1.54100001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect4761-0"
        width="20.662125"
        height="15.784947"
@@ -2269,7 +2267,7 @@
      inkscape:groupmode="layer"
      id="layer12"
      inkscape:label="Caterpillars [Frame 1] color overlay"
-     style="display:inline"
+     style="display:none"
      transform="translate(0,-68)"
      sodipodi:insensitive="true">
     <g

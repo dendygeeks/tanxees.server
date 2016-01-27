@@ -65,7 +65,7 @@
 			tankFullBodyTexture = new PIXI.Texture(bt);
 		});
 		
-		var skins = [ "yellow", "green" ]
+		var skins = [ "yellow", "green", "pinkie" ]
 
 		// Tank caterpillars overlay preloading
 		var caterpillarsOverlayImages = [];
@@ -145,34 +145,34 @@
 				for (var i = 0; i < gameState.players.length; i++) {
 					var container = new PIXI.Container();
 
-					var playerSize = 42;
+					//var playerSize = 42;
 
 					var caterpillars = new PIXI.Sprite(caterpillarsTextures[caterpillarFrame]);
 					caterpillars.pivot = new PIXI.Point(caterpillars.width / 2, caterpillars.height / 2);
-					caterpillars.width = playerSize;
-					caterpillars.height = playerSize;
+					//caterpillars.width = playerSize;
+					//caterpillars.height = playerSize;
 					container.addChild(caterpillars);
 
 					if (i < skins.length) {
 						var caterpillarsOverlay = new PIXI.Sprite(caterpillarsOverlayTextures[i][caterpillarFrame]);
 						caterpillarsOverlay.pivot = new PIXI.Point(caterpillarsOverlay.width / 2, caterpillarsOverlay.height / 2);
-						caterpillarsOverlay.width = playerSize;
-						caterpillarsOverlay.height = playerSize;
+						//caterpillarsOverlay.width = playerSize;
+						//caterpillarsOverlay.height = playerSize;
 						caterpillarsOverlay.blendMode = PIXI.BLEND_MODES.MULTIPLY;
 						container.addChild(caterpillarsOverlay);
 					}
 
 					var tankFullBody = new PIXI.Sprite(tankFullBodyTexture);
 					tankFullBody.pivot = new PIXI.Point(tankFullBody.width / 2, tankFullBody.height / 2);
-					tankFullBody.width = playerSize;
-					tankFullBody.height = playerSize;
+					//tankFullBody.width = playerSize;
+					//tankFullBody.height = playerSize;
 					container.addChild(tankFullBody);
 					
 					if (i < skins.length) {
 						var fullBodyOverlay = new PIXI.Sprite(fullBodyOverlayTextures[i]);
 						fullBodyOverlay.pivot = new PIXI.Point(fullBodyOverlay.width / 2, fullBodyOverlay.height / 2);
-						fullBodyOverlay.width = playerSize;
-						fullBodyOverlay.height = playerSize;
+						//fullBodyOverlay.width = playerSize;
+						//fullBodyOverlay.height = playerSize;
 						fullBodyOverlay.blendMode = PIXI.BLEND_MODES.MULTIPLY;
 						container.addChild(fullBodyOverlay);
 					}
