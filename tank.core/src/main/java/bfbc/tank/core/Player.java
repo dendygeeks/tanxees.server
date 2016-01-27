@@ -157,24 +157,8 @@ public class Player extends Unit {
 
 		// If we are not rotating, we are moving
 		if (notRotating && moving) {
-			DeltaXY dxy;
-			switch (direction) {
-			case LEFT:
-				dxy = new DeltaXY(-displacement, 0);
-				break;
-			case RIGHT:
-				dxy = new DeltaXY(displacement, 0);
-				break;
-			case UP:
-				dxy = new DeltaXY(0, -displacement);
-				break;
-			case DOWN:
-				dxy = new DeltaXY(0, displacement);
-				break;
-			default:
-				throw new RuntimeException("Strange direction case");
-			}
-
+			DeltaXY dxy = new DeltaXY(displacement * Math.cos(angle / 180 * Math.PI),
+					displacement * Math.sin(angle / 180 * Math.PI));
 			safeMove(dxy);
 		}
 	}
