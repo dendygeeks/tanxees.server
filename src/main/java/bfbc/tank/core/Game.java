@@ -239,6 +239,12 @@ public class Game extends Thread implements MissileCrashListener {
 		}
 	}
 	
+	synchronized void destroyMissile(Missile m) {
+		int index = m.getOwnerPlayerId();
+		missiles.get(index).remove(m);
+		collider.removeAgent(m);
+	}
+	
 	private boolean removeBricksAfterCrash(double i, double j, double upI, double upJ, double rightI, double rightJ) {
 		// Checking boundaries
 		if (i < 0 || i >= fieldWidth || j < 0 || j >= fieldHeight) return false;
@@ -269,6 +275,11 @@ public class Game extends Thread implements MissileCrashListener {
 				frags[myId] ++;
 				createPlayer(id);
 			}
+		} else if (target instanceof Missile) {
+			// If to missiles collide they both are destroyed
+			Missile m = (Missile)target;
+			destroyMissile(m);
+			
 		} else if (target instanceof Cell) {
 			// A missile hit a brick wall
 			Cell c = (Cell)target;
@@ -307,7 +318,6 @@ public class Game extends Thread implements MissileCrashListener {
 
 		}
 		
-		missiles.get(missile.getOwnerPlayerId()).remove(missile);
-		collider.removeAgent(missile);
+		destroyMissile(missile);
 	}
 }
