@@ -105,7 +105,7 @@
 
 		// Missile preloading
 		var missileImage = new Image();
-		missileImage.src = "img/missile.svg";
+		missileImage.src = "img/missile/missile.svg";
 
 		var missileTexture;
 		missileImage.addEventListener("load", function() {
@@ -120,7 +120,7 @@
 		
 		for (var s in skins) {
 			missileOverlayImages[s] = new Image();
-			missileOverlayImages[s].src = "img/tank_parts/" + skins[s] + "/missile-overlay.svg";
+			missileOverlayImages[s].src = "img/missile/" + skins[s] + "/missile-overlay.svg";
 			missileOverlayImages[s].skinTag = s;
 			missileOverlayImages[s].addEventListener("load", function() {
 				var ss = this.skinTag;
