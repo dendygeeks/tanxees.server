@@ -38,15 +38,15 @@
 		var playerSprites = [];
 		
 		// Preloading
-		new Image().src = "img/tank_parts/tank-shadow.svg"; 
+		new Image().src = "img/small_tank/tank-shadow.svg"; 
 		
 		// Caterpillars textures preloading
 		var caterpillarsImages = [];
 		var caterpillarsTextures = [];
 		caterpillarsImages[0] = new Image();
-		caterpillarsImages[0].src = "img/tank_parts/tank-caterpillars-frame1.svg"; 
+		caterpillarsImages[0].src = "img/small_tank/tank-caterpillars-frame1.svg"; 
 		caterpillarsImages[1] = new Image();
-		caterpillarsImages[1].src = "img/tank_parts/tank-caterpillars-frame2.svg"; 
+		caterpillarsImages[1].src = "img/small_tank/tank-caterpillars-frame2.svg"; 
 		for (var i = 0; i < 2; i++) {
 			caterpillarsImages[i].tag = i;
 			caterpillarsImages[i].addEventListener("load", function() {
@@ -59,13 +59,13 @@
 		// Tank full body texture preloading
 		var tankFullBodyTexture;
 		var tankFullBodyImage = new Image();
-		tankFullBodyImage.src = "img/tank_parts/tank-full-body.svg"; 
+		tankFullBodyImage.src = "img/small_tank/tank-full-body.svg"; 
 		tankFullBodyImage.addEventListener("load", function() {
 			var bt = new PIXI.BaseTexture(tankFullBodyImage);
 			tankFullBodyTexture = new PIXI.Texture(bt);
 		});
 		
-		var skins = [ "yellow", "green", "pinkie", "boring" ]
+		var skins = [ "yellow", "boring" ]; //[ "yellow", "green", "pinkie", "boring" ]
 
 		// Tank caterpillars overlay preloading
 		var caterpillarsOverlayImages = [];
@@ -76,7 +76,7 @@
 			caterpillarsOverlayTextures[s] = [];
 			for (var i = 0; i < 2; i++) {
 				caterpillarsOverlayImages[s][i] = new Image();
-				caterpillarsOverlayImages[s][i].src = "img/tank_parts/" + skins[s] + "/tank-caterpillars-frame" + (i+1) + "-overlay.svg";
+				caterpillarsOverlayImages[s][i].src = "img/small_tank/" + skins[s] + "/tank-caterpillars-frame" + (i+1) + "-overlay.svg";
 				caterpillarsOverlayImages[s][i].skinTag = s;
 				caterpillarsOverlayImages[s][i].tag = i;
 				caterpillarsOverlayImages[s][i].addEventListener("load", function() {
@@ -94,7 +94,7 @@
 		
 		for (var s in skins) {
 			fullBodyOverlayImages[s] = new Image();
-			fullBodyOverlayImages[s].src = "img/tank_parts/" + skins[s] + "/tank-full-body-overlay.svg";
+			fullBodyOverlayImages[s].src = "img/small_tank/" + skins[s] + "/tank-full-body-overlay.svg";
 			fullBodyOverlayImages[s].skinTag = s;
 			fullBodyOverlayImages[s].addEventListener("load", function() {
 				var ss = this.skinTag;
