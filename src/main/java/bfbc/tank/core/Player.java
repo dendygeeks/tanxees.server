@@ -1,166 +1,89 @@
 package bfbc.tank.core;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gson.annotations.Expose;
 
-import bfbc.tank.core.mechanics.Box;
-import bfbc.tank.core.mechanics.BoxConstruction;
-import bfbc.tank.core.mechanics.BoxConstructionCollider;
-import bfbc.tank.core.mechanics.DeltaXY;
-
-public class Player extends Unit {
-	
-	private static final double SIZE = 34;
-	
-	private static final HashMap<Direction, Double> DIRECTION_ANGLES;
-	static {
-		DIRECTION_ANGLES = new HashMap<>();
-		DIRECTION_ANGLES.put(Direction.RIGHT, 0d);
-		DIRECTION_ANGLES.put(Direction.DOWN, 90d);
-		DIRECTION_ANGLES.put(Direction.LEFT, 180d);
-		DIRECTION_ANGLES.put(Direction.UP, 270d);
-	}
+public class Player {
+	private Game game;
 	
 	@Expose
-	private boolean moving;
+	private PlayerUnit unit;
 	
-	private boolean wantToFire;
+	@Expose
+	private int frags;
 	
-	private double velocity = 85.0d;
-	private double angleVel = 500;
-
-	private double dragVelocity = 3*velocity;	// From the ceiling
-
-	private BoxConstructionCollider<Box> collider;
-	private MissileCrashListener crashListener;
+	@Expose
+	private DebugData debugData;
 	
-	public boolean isMoving() {
-		return moving;
+	@Expose
+	private List<Missile> missiles = new ArrayList<>();
+	
+	private PointIJ spawnPoint;
+	private Direction spawnDir;
+	
+	PlayerUnit getUnit() {
+		return unit;
 	}
 
-	private PlayerKeys activeCommand;
-	
-	private Direction direction;
-
-	public Direction getDirection() {
-		return direction;
-	}
-	
-	public PlayerKeys getActiveCommand() {
-		return activeCommand;
-	}
-	
-	public void setActiveCommand(PlayerKeys activeCommand) {
-		this.activeCommand = activeCommand;
-	}
-	
-	public Player(Game game, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY, Double angle) {
-		super(game, SIZE, SIZE, posX, posY, angle != null ? angle : DIRECTION_ANGLES.get(direction));
-		this.collider = collider;
-		this.crashListener = crashListener;
-		this.activeCommand = activeCommand;
-		this.direction = direction;
-		this.moving = moving;
-	}
-
-	public Player(Game game, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY) {
-		this(game, collider, crashListener, direction, activeCommand, moving, posX, posY, null);
-	}
-
-	private void safeMove(DeltaXY dxy) {
-		BoxConstructionCollider<Box>.MoveResult mr = collider.tryMove(this, dxy);
-		for (BoxConstruction<Box> t : mr.targets.keySet()) {
-			if (t instanceof Missile) {
-				crashListener.missileCrashed((Missile)t, this);
-			}
+	void createTank() {
+		if (unit != null) {
+			game.getCollider().removeAgent(unit);
 		}
+		
+		unit = new PlayerUnit(game, game.getCollider(), game, spawnDir, 
+                new PlayerKeys(), 
+                false, 
+                game.cellSize * (spawnPoint.i + 0.5), 
+                game.cellSize * (spawnPoint.j + 0.5)
+        );
+		
+        game.getCollider().addAgent(unit);
 	}
-	
+
+	public Player(Game game, PointIJ spawnPoint, Direction spawnDir) {
+		this.game = game;
+		this.frags = 0;
+		this.debugData = null;
+		this.missiles = new ArrayList<>();
+		this.spawnPoint = spawnPoint;
+		this.spawnDir = spawnDir;
+	}
+
 	public void frameStep() {
-		moving = false;
-		if (activeCommand.isDown()) {
-			direction = Direction.DOWN;
-			moving = true;
-		} else if (activeCommand.isLeft()) {
-			direction = Direction.LEFT;
-			moving = true;
-		} else if (activeCommand.isRight()) {
-			direction = Direction.RIGHT;
-			moving = true;
-		} else if (activeCommand.isUp()) {
-			direction = Direction.UP;
-			moving = true;
-		}
-		
-		if (activeCommand.isFire()) {
-			wantToFire = true;
-		}
-
-		double angleDelta = DIRECTION_ANGLES.get(direction) - getAngle();
-		if (angleDelta < -180) angleDelta += 360;
-		if (angleDelta > 180) angleDelta -= 360;
-		
-		boolean notRotating = false;
-		double angleSmall = angleVel / 50;
-		if (angleDelta > angleSmall) {
-			angle += angleVel * Game.MODEL_TICK;
-			moving = true;
-		} else if (angleDelta < -angleSmall) {
-			angle -= angleVel * Game.MODEL_TICK;
-			moving = true;
-		} else {
-			angle = DIRECTION_ANGLES.get(direction);
-			notRotating = true;
-		}
-		
-		// Dragging. A small hack that makes driving around corners easier for the user 
-		if (!notRotating) {
-			double cs = getGame().cellSize;
-			double dx = ((posX - cs/2) % cs) / cs;
-			double dy = ((posY - cs/2) % cs) / cs;
-			if (dx > 0.5d) dx -= 1.0d;
-			if (dy > 0.5d) dy -= 1.0d;
-			
-			// We should drag the unit along the normal direction
-			double dirAng = DIRECTION_ANGLES.get(direction) / 180.0d * Math.PI;
-			double normX = -Math.sin(dirAng), 
-			       normY = Math.cos(dirAng);
-			double oldDirX = Math.cos(angle / 180.0d * Math.PI),
-			       oldDirY = Math.sin(angle / 180.0d * Math.PI);
-			
-			double rotationFactor = Math.abs(oldDirX*normX + oldDirY*normY);
-			double targetFactor = (-dx)*oldDirX + (-dy)*oldDirY;
-			//if (targetFactor > 0) {	// We are only moving forward
-				double velX = dragVelocity * targetFactor * oldDirX * rotationFactor,
-				       velY = dragVelocity * targetFactor * oldDirY * rotationFactor;
-	
-				DeltaXY dxy = new DeltaXY(
-						velX * Game.MODEL_TICK,
-						velY * Game.MODEL_TICK
-				);
-				safeMove(dxy);
-			//}
-			
-		}
-
-		double displacement = velocity * Game.MODEL_TICK;
-		
-		if (notRotating && wantToFire) {
-			double missileVelocity = velocity * 1.2; // Missile is a bit faster than tank
-			if (moving) {
-				missileVelocity += velocity;
-			}
-			getGame().createMissile(this, getPosX(), getPosY(), getAngle(), missileVelocity);
-			wantToFire = false;
-		}
-
-		// If we are not rotating, we are moving
-		if (notRotating && moving) {
-			DeltaXY dxy = new DeltaXY(displacement * Math.cos(angle / 180 * Math.PI),
-					displacement * Math.sin(angle / 180 * Math.PI));
-			safeMove(dxy);
+		unit.frameStep();
+		List<Missile> missilesClone = new ArrayList<>(missiles);
+		for (Missile m : missilesClone) {
+			m.frameStep();
 		}
 	}
 	
+	public void setDebugData(DebugData debugData) {
+		this.debugData = debugData;
+	}
+
+	public void setPlayerKeys(PlayerKeys playerKeys) {
+		unit.setActiveCommand(playerKeys);
+	}
+	
+	Missile createMissile(String myId, double posX, double posY, double angle, double velocity) {
+		if (missiles.isEmpty()) {
+			Missile newMissile = new Missile(game, game, game.getCollider(), myId, posX, posY, angle, velocity);
+			missiles.add(newMissile);
+			game.getCollider().addAgent(newMissile);
+			return newMissile;
+		} else {
+			return null;
+		}
+	}
+	
+	void destroyMissile(Missile m) {
+		missiles.remove(m);
+		game.getCollider().removeAgent(m);
+	}
+
+	public void incrementFrags() {
+		frags ++;
+	}
 }

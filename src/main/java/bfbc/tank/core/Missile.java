@@ -14,11 +14,11 @@ public class Missile extends Unit {
 	private BoxConstructionCollider<Box> collider;
 	
 	@Expose
-	private int ownerPlayerId;
+	private String ownerPlayerId;
 	
 	private MissileCrashListener crashListener;
 
-	Missile(Game game, MissileCrashListener crashListener, BoxConstructionCollider<Box> collider, int ownerPlayerId, double posX, double posY, double angle, double velocity)
+	Missile(Game game, MissileCrashListener crashListener, BoxConstructionCollider<Box> collider, String ownerPlayerId, double posX, double posY, double angle, double velocity)
 	{
 		super(game, SIZE, SIZE, posX, posY, angle);
 		this.crashListener = crashListener;
@@ -30,14 +30,14 @@ public class Missile extends Unit {
 	
 	public void frameStep() {
 		DeltaXY delta = new DeltaXY(velX * Game.MODEL_TICK, velY * Game.MODEL_TICK);
-		BoxConstructionCollider<Box>.MoveResult mr = collider.tryMove(this, delta);
+		BoxConstructionCollider<Box>.MoveRotateResult mr = collider.tryMove(this, delta);
 		
 		if (!mr.targets.isEmpty()) {
 			crashListener.missileCrashed(this, mr.mostAggressiveIntersectionTarget());
 		}
 	}
 	
-	public int getOwnerPlayerId() {
+	public String getOwnerPlayerId() {
 		return ownerPlayerId;
 	}
 	

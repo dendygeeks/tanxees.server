@@ -36,10 +36,12 @@ public class BoxConstructionCollider<T extends Box> {
 		}
 		
 	}
-	public class MoveResult {
+	public class MoveRotateResult {
+		public final boolean success;
 		public final DeltaXY delta;
 		public final Map<BoxConstruction<T>, IntersectionResult> targets;
-		public MoveResult(DeltaXY delta, Map<BoxConstruction<T>, IntersectionResult> targets) {
+		public MoveRotateResult(boolean success, DeltaXY delta, Map<BoxConstruction<T>, IntersectionResult> targets) {
+			this.success = success;
 			this.delta = delta;
 			this.targets = Collections.unmodifiableMap(new LinkedHashMap<BoxConstruction<T>, IntersectionResult>(targets));
 		}
@@ -112,17 +114,38 @@ public class BoxConstructionCollider<T extends Box> {
 		return new CollisionResult(sortedTargets);
 	}
 	
-	public synchronized MoveResult tryMove(BoxConstruction<T> con, DeltaXY delta) {
+	/*public MoveRotateResult tryRotate(BoxConstruction<T> con, DeltaAngle delta) {
+		CollisionResult before = getIntersectionDepth(con);
+		con.rotate(delta);
+		CollisionResult after = getIntersectionDepth(con);
+
+		CollisionResult modAfter = new CollisionResult(after);
+		modAfter.subtract(before);
+		
+		DeltaXY deltaRes;
+		boolean success = true;
+		if (modAfter.targets.size() == 0) {
+			deltaRes = new DeltaXY(0, 0);
+		} else {
+			
+		}
+
+		return new MoveRotateResult(success, deltaRes, modAfter.targets);
+
+	}*/
+	
+	public synchronized MoveRotateResult tryMove(BoxConstruction<T> con, DeltaXY delta) {
 		CollisionResult before = getIntersectionDepth(con);
 		
 		//if (before.targets.size() > 0) throw new RuntimeException("Invalid state before movement");
 		con.move(delta);
 		CollisionResult after = getIntersectionDepth(con);
-		DeltaXY deltaRes;
 		
 		CollisionResult modAfter = new CollisionResult(after);
 		modAfter.subtract(before);
 		
+		DeltaXY deltaRes;
+		boolean success = true;
 		if (modAfter.targets.size() == 0) {
 			deltaRes = delta;
 		} else {
@@ -132,12 +155,14 @@ public class BoxConstructionCollider<T extends Box> {
 			double lenX = (Math.abs(delta.x) - mostAggressive.depthX) / Math.abs(delta.x);
 			double len = Math.max(lenX, lenY);
 			DeltaXY dNew = delta.mul(len - 0.0001);
-			con.move(delta.inv());
+			con.move(delta.inverse());
 			con.move(dNew);
 			deltaRes = dNew;
 		}
-		return new MoveResult(deltaRes, modAfter.targets);
+		return new MoveRotateResult(success, deltaRes, modAfter.targets);
 	}
+	
+	
 	
 	public synchronized void setFriendship(CollisionFriendship<T> friendship) {
 		this.friendship = friendship;

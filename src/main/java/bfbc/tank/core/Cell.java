@@ -9,6 +9,7 @@ import com.google.gson.stream.JsonWriter;
 
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
+import bfbc.tank.core.mechanics.DeltaAngle;
 import bfbc.tank.core.mechanics.DeltaXY;
 
 public class Cell implements Box, BoxConstruction<Cell> {
@@ -125,5 +126,10 @@ public class Cell implements Box, BoxConstruction<Cell> {
 	
 	public int getJ() {
 		return j;
+	}
+
+	@Override
+	public void rotate(DeltaAngle delta) {
+		throw new RuntimeException("Not supported");
 	}
 }

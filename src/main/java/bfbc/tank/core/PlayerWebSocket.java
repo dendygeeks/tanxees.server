@@ -18,15 +18,17 @@ import com.google.gson.annotations.Expose;
 
 import bfbc.tank.core.Game.StateUpdateHandler;
 
-@WebSocket
+@WebSocket(maxTextMessageSize = 1024 * 1024 * 10, maxBinaryMessageSize = 1024 * 1024 * 100)
 public class PlayerWebSocket implements StateUpdateHandler {
 
 	// Store sessions if you want to, for example, broadcast a message to all users
     private static final Queue<Session> sessions = new ConcurrentLinkedQueue<>();
     
-    private Map<Integer, Session> controlledPlayers = new HashMap<>();
+    private Map<String, Session> controlledPlayers = new HashMap<>();
     
     private Game game;
+    
+	private String[] playerIds = new String[] { "player1", "player2", "bot1", "bot2" };
     
     public PlayerWebSocket() {
     	// Walls
@@ -60,17 +62,23 @@ public class PlayerWebSocket implements StateUpdateHandler {
     		__, __, __, __, __, __, __, __, __, __, __, _B, __, __, _B, __, __, __, __, __, __, __, __, __, __, __
     	};
     	
-    	game = new Game(this, 26, 26, map, 4, new PointIJ[] {
-    		new PointIJ(19, 50),
-    		new PointIJ(33, 50),
-    		new PointIJ(2, 2),
-    		//new PointIJ(26, 2),
-    		new PointIJ(50, 2)
-    	}, new Direction[] { Direction.UP, Direction.UP, Direction.DOWN, Direction.DOWN/*, Direction.DOWN */});
+    	HashMap<String, PointIJ> spawnPoints = new HashMap<>();
+    	spawnPoints.put(playerIds[0], new PointIJ(19, 50));
+    	spawnPoints.put(playerIds[1], new PointIJ(33, 50));
+    	spawnPoints.put(playerIds[2], new PointIJ(2, 2));
+    	spawnPoints.put(playerIds[3], new PointIJ(50, 2));
+    	
+    	HashMap<String, Direction> spawnDirs = new HashMap<>();
+    	spawnDirs.put(playerIds[0], Direction.UP);
+    	spawnDirs.put(playerIds[1], Direction.UP);
+    	spawnDirs.put(playerIds[2], Direction.DOWN);
+    	spawnDirs.put(playerIds[3], Direction.DOWN);
+    	
+    	game = new Game(this, 26, 26, map, playerIds, spawnPoints, spawnDirs);
 		
 		synchronized (controlledPlayers) {
-			for (int i = 0; i < game.getPlayersCount(); i++) {
-				controlledPlayers.put(i, null);
+			for (String id : playerIds) {
+				controlledPlayers.put(id, null);
 			}
 		}
 	}
@@ -79,11 +87,11 @@ public class PlayerWebSocket implements StateUpdateHandler {
     	@Expose
     	private final Game game;
     	@Expose
-    	private final int activePlayerIndex;
+    	private final String activePlayerId;
 
-    	public TheState(Game game, int activePlayerIndex) {
+    	public TheState(Game game, String activePlayerId) {
 			this.game = game;
-			this.activePlayerIndex = activePlayerIndex;
+			this.activePlayerId = activePlayerId;
 		}
     	
     	public synchronized String toJson() {
@@ -97,13 +105,13 @@ public class PlayerWebSocket implements StateUpdateHandler {
     		List<Session> sessionsToRemove = new ArrayList<>();
 
     		for (Session s : sessions) {
-    			int playerIndex = -1;
-    			for (int i = 0; i < game.getPlayersCount(); i++) {
-    	    		if (s == controlledPlayers.get(i)) playerIndex = i;
+    			String controlledPlayerId = null;
+    			for (String id : playerIds) {
+    	    		if (s == controlledPlayers.get(id)) controlledPlayerId = id;
     	    	}
     			
 	    		try {
-					s.getRemote().sendString(new TheState(game, playerIndex).toJson());
+					s.getRemote().sendString(new TheState(game, controlledPlayerId).toJson());
 				} catch (Exception e) {
 					sessionsToRemove.add(s);
 					e.printStackTrace();
@@ -124,9 +132,17 @@ public class PlayerWebSocket implements StateUpdateHandler {
         	game.start();
         }
         
-        int selectedPlayer = -1;
+        String playerId = session.getUpgradeRequest().getParameterMap().get("playerId").get(0);
+        
+        if (controlledPlayers.get(playerId) == null) {
+        	controlledPlayers.put(playerId, session);
+        } else {
+        	System.err.println("Can't connect client to player id \"" + playerId + "\". It's occupied.");
+        }
+        
+        /*int selectedPlayer = -1;
 		synchronized (controlledPlayers) {
-			ArrayList<Integer> plrs = new ArrayList<>(controlledPlayers.keySet());
+			ArrayList<String> plrs = new ArrayList<>(controlledPlayers.keySet());
 			for (int playerIndex = plrs.size() - 1; playerIndex >= 0; playerIndex--) {
 	        	if (controlledPlayers.get(playerIndex) == null) {
 	        		controlledPlayers.put(playerIndex, session);
@@ -134,11 +150,11 @@ public class PlayerWebSocket implements StateUpdateHandler {
 	        		break;
 	        	}
 			}
-		}
+		}*/
 		
     	synchronized (this) {
 			try {
-				session.getRemote().sendString(new TheState(game, selectedPlayer).toJson());
+				session.getRemote().sendString(new TheState(game, playerId).toJson());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -151,9 +167,9 @@ public class PlayerWebSocket implements StateUpdateHandler {
     	System.out.println("Session disconnected: " + session.getRemoteAddress());
         sessions.remove(session);
 		synchronized (controlledPlayers) {
-	        for (Integer playerIndex : controlledPlayers.keySet()) {
-	        	if (controlledPlayers.get(playerIndex) == session) {
-	        		controlledPlayers.put(playerIndex, null);
+	        for (String playerId : controlledPlayers.keySet()) {
+	        	if (controlledPlayers.get(playerId) == session) {
+	        		controlledPlayers.put(playerId, null);
 	        		break;
 	        	}
 	        }
@@ -163,11 +179,11 @@ public class PlayerWebSocket implements StateUpdateHandler {
     @OnWebSocketMessage
     public void message(Session session, String message) throws IOException {
 		synchronized (controlledPlayers) {
-			for (Integer playerIndex : controlledPlayers.keySet()) {
-				if (controlledPlayers.get(playerIndex) == session) {
+	        for (String playerId : controlledPlayers.keySet()) {
+				if (controlledPlayers.get(playerId) == session) {
 					ClientState cs = ClientState.fromJson(message);
-					game.setDebugData(playerIndex, cs.getDebugData());
-	        		game.setPlayerKeys(playerIndex, cs.getKeys());
+					game.setDebugData(playerId, cs.getDebugData());
+	        		game.setPlayerKeys(playerId, cs.getKeys());
 	        	}
 	        }
 		}

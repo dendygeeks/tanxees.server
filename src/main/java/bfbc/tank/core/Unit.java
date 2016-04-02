@@ -6,6 +6,7 @@ import com.google.gson.annotations.Expose;
 
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
+import bfbc.tank.core.mechanics.DeltaAngle;
 import bfbc.tank.core.mechanics.DeltaXY;
 
 /**
@@ -70,6 +71,26 @@ public class Unit implements Box, BoxConstruction<Box> {
 	public void move(DeltaXY delta) {
 		posX += delta.x;
 		posY += delta.y;
+	}
+	
+	@Override
+	public void rotate(DeltaAngle delta) {
+		switch (delta) {
+		case ZERO:
+			break;
+		case PI_BY_2:
+			double t = sizeX;
+			sizeX = sizeY;
+			sizeY = t;
+			break;
+		case PI:
+			break;
+		case THREE_PI_BY_2:
+			t = sizeX;
+			sizeX = sizeY;
+			sizeY = t;
+			break;
+		}
 	}
 	
 	@Override

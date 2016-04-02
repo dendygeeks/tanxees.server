@@ -7,7 +7,7 @@ public class DeltaXY {
 		this.y = y;
 	}
 	
-	public DeltaXY inv() {
+	public DeltaXY inverse() {
 		return new DeltaXY(-x, -y);
 	}
 	
