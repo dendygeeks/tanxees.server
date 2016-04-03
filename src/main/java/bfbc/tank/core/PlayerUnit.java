@@ -45,7 +45,7 @@ public class PlayerUnit extends Unit {
 	
 	private Direction direction;
 
-	private MissileSpawner missileSpawner;
+	private Player player;
 
 	public Direction getDirection() {
 		return direction;
@@ -59,9 +59,9 @@ public class PlayerUnit extends Unit {
 		this.activeCommand = activeCommand;
 	}
 	
-	public PlayerUnit(MissileSpawner missileSpawner, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY, Double angle) {
+	public PlayerUnit(Player player, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY, Double angle) {
 		super(SIZE, SIZE, posX, posY, angle != null ? angle : DIRECTION_ANGLES.get(direction));
-		this.missileSpawner = missileSpawner;
+		this.player = player;
 		this.cellSize = cellSize;
 		this.collider = collider;
 		this.crashListener = crashListener;
@@ -70,8 +70,8 @@ public class PlayerUnit extends Unit {
 		this.moving = moving;
 	}
 
-	public PlayerUnit(MissileSpawner missileSpawner, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY) {
-		this(missileSpawner, cellSize, collider, crashListener, direction, activeCommand, moving, posX, posY, null);
+	public PlayerUnit(Player player, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY) {
+		this(player, cellSize, collider, crashListener, direction, activeCommand, moving, posX, posY, null);
 	}
 
 	private void safeMove(DeltaXY dxy) {
@@ -157,7 +157,11 @@ public class PlayerUnit extends Unit {
 			if (moving) {
 				missileVelocity += velocity;
 			}
-			missileSpawner.spawnMissile(this, getPosX(), getPosY(), getAngle(), missileVelocity);
+			
+			if (player.getMissilesCount() == 0) {
+				Missile newMissile = new Missile(crashListener, collider, posX, posY, angle, missileVelocity);
+				player.addMissile(newMissile);
+			}
 			wantToFire = false;
 		}
 

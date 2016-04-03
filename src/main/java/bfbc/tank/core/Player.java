@@ -8,7 +8,10 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-public class Player implements MissileSpawner {
+import bfbc.tank.core.mechanics.Box;
+import bfbc.tank.core.mechanics.BoxConstructionCollider;
+
+public class Player {
 	enum Appearance {
 
 		GREEN("green"), YELLOW("yellow"), GRAY("gray");
@@ -35,9 +38,10 @@ public class Player implements MissileSpawner {
 			this.id = id;
 		}
 	}
-
-	private Game game;
-
+	
+	private MissileCrashListener missileCrashListener;
+	private BoxConstructionCollider<Box> collider;
+	
 	@Expose
 	private PlayerUnit unit;
 
@@ -60,19 +64,10 @@ public class Player implements MissileSpawner {
 		return unit;
 	}
 
-	void createUnit() {
-		if (unit != null) {
-			game.getCollider().removeAgent(unit);
-		}
 
-		unit = new PlayerUnit(this, game.cellSize, game.getCollider(), game, spawnDir, new PlayerKeys(), false,
-				game.cellSize * (spawnPoint.i + 0.5), game.cellSize * (spawnPoint.j + 0.5));
-
-		game.getCollider().addAgent(unit);
-	}
-
-	public Player(Game game, Appearance appearance, PointIJ spawnPoint, Direction spawnDir) {
-		this.game = game;
+	public Player(MissileCrashListener missileCrashListener, BoxConstructionCollider<Box> collider, Appearance appearance, PointIJ spawnPoint, Direction spawnDir) {
+		this.missileCrashListener = missileCrashListener;
+		this.collider = collider;
 		this.frags = 0;
 		this.debugData = null;
 		this.missiles = new ArrayList<>();
@@ -97,27 +92,44 @@ public class Player implements MissileSpawner {
 		unit.setActiveCommand(playerKeys);
 	}
 
-	public Missile spawnMissile(PlayerUnit t, double posX, double posY, double angle, double velocity) {
-		if (missiles.isEmpty()) {
-			Missile newMissile = new Missile(game, game.getCollider(), posX, posY, angle, velocity);
-			missiles.add(newMissile);
-			game.getCollider().addAgent(newMissile);
-			return newMissile;
-		} else {
-			return null;
-		}
-	}
-
 	public boolean ownsMissile(Missile missile) {
 		return missiles.contains(missile);
 	}
 	
-	void destroyMissile(Missile m) {
+	void removeMissile(Missile m) {
+		collider.removeAgent(m);
 		missiles.remove(m);
-		game.getCollider().removeAgent(m);
 	}
 
 	public void incrementFrags() {
 		frags++;
+	}
+
+	public void respawnUnit(double cellSize) {
+		if (unit != null) {
+			collider.removeAgent(unit);
+		}
+
+		unit = new PlayerUnit(this, 
+			cellSize, 
+			collider, 
+			missileCrashListener, 
+			spawnDir, 
+			new PlayerKeys(), 
+			false,
+			cellSize * (spawnPoint.i + 0.5), 
+			cellSize * (spawnPoint.j + 0.5)
+		);
+
+		collider.addAgent(unit);
+	}
+
+	void addMissile(Missile newMissile) {
+		missiles.add(newMissile);
+		collider.addAgent(newMissile);
+	}
+	
+	int getMissilesCount() {
+		return missiles.size();
 	}
 }

@@ -72,7 +72,7 @@ public class Game extends Thread implements MissileCrashListener {
 	}
 	
 	private void createPlayerUnit(String id) {
-		players.get(id).createUnit();
+		players.get(id).respawnUnit(cellSize);
 	}
 	
 	public Game(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, Player.Appearance> appearances, HashMap<String, PointIJ> spawnPoints, HashMap<String, Direction> spawnDirs) {
@@ -129,7 +129,7 @@ public class Game extends Thread implements MissileCrashListener {
 
 		
 		for (String id : playerIds) {
-			players.put(id, new Player(this, appearances.get(id), spawnPoints.get(id), spawnDirs.get(id)));
+			players.put(id, new Player(this, collider, appearances.get(id), spawnPoints.get(id), spawnDirs.get(id)));
 			createPlayerUnit(id);
 		}
 		
@@ -173,7 +173,7 @@ public class Game extends Thread implements MissileCrashListener {
 
 			int ticks = (int) (dt / MODEL_TICK);
 			
-			for(int t = 0; t < ticks; t++) {
+			for (int t = 0; t < ticks; t++) {
 				frameStep();
 			}
 			
@@ -246,8 +246,7 @@ public class Game extends Thread implements MissileCrashListener {
 			// If to missiles collide they both are destroyed
 			Missile targetMissile = (Missile)target;
 			Player targetOwner = findMissileOwner(targetMissile);
-			targetOwner.destroyMissile(targetMissile);
-			
+			targetOwner.removeMissile(targetMissile);
 		} else if (target instanceof Cell) {
 			// A missile hit a brick wall
 			Cell c = (Cell)target;
@@ -286,6 +285,6 @@ public class Game extends Thread implements MissileCrashListener {
 
 		}
 		
-		missileOwner.destroyMissile(missile);
+		missileOwner.removeMissile(missile);
 	}
 }

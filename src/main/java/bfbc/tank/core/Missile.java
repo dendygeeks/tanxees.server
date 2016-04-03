@@ -10,7 +10,6 @@ public class Missile extends Unit {
 	private double velX, velY;
 	
 	private BoxConstructionCollider<Box> collider;
-	
 	private MissileCrashListener crashListener;
 
 	Missile(MissileCrashListener crashListener, BoxConstructionCollider<Box> collider, double posX, double posY, double angle, double velocity)
