@@ -14,8 +14,11 @@
    viewBox="0 0 42 41.999999"
    id="svg8488"
    version="1.1"
-   inkscape:version="0.91 r13725"
-   sodipodi:docname="missile-overlay.svg">
+   inkscape:version="0.48.2 r9819"
+   sodipodi:docname="missile-overlay.svg"
+   inkscape:export-filename="/Users/il/Projects/tanks/tanks.sdl/res/overlay/yellow/missile-overlay.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs8490">
     <linearGradient
@@ -65,15 +68,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="7.919596"
-     inkscape:cx="19.140915"
-     inkscape:cy="21.200011"
+     inkscape:cx="9.3505755"
+     inkscape:cy="21.64644"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1366"
-     inkscape:window-height="715"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
+     inkscape:window-width="1280"
+     inkscape:window-height="752"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata8493">
@@ -93,18 +96,18 @@
      id="layer1"
      transform="translate(0,-1010.3622)">
     <rect
-       style="fill:#ffe67e;fill-opacity:1;stroke:none;stroke-width:0.40000001;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffe67e;fill-opacity:1;stroke:none;stroke-width:0.29478001999999998;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="rect8496"
-       width="6.0469451"
-       height="4.8483567"
-       x="17.370365"
-       y="-1033.9651"
+       width="3.4296782"
+       height="4.6425147"
+       x="19.482292"
+       y="-1033.8588"
        rx="0"
        ry="0"
        transform="scale(1,-1)" />
     <path
-       style="fill:#ffe67e;fill-opacity:1;stroke:none;stroke-width:0.40000001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dashoffset:0;stroke-opacity:1"
-       d="m 25.687636,1031.5349 c 0.0947,2.321 -2.335978,2.4306 -2.335978,2.4306 l 0,-4.8613 c 0,0 2.241276,0.1096 2.335978,2.4307 z"
+       style="fill:#ffe67e;fill-opacity:1;stroke:none;stroke-width:0.39957213000000003;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dashoffset:0"
+       d="m 25.396526,1031.5318 c 0.09869,2.2225 -2.434335,2.3274 -2.434335,2.3274 l 0,-4.6549 c 0,0 2.335645,0.1049 2.434335,2.3275 z"
        id="path2983"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="zccz" />

@@ -28,7 +28,11 @@ public class PlayerWebSocket implements StateUpdateHandler {
     
     private Game game;
     
-	private String[] playerIds = new String[] { "player1", "player2", "bot1", "bot2" };
+    private static final String PLAYER_ID_PLAYER1 = "player1";
+    private static final String PLAYER_ID_PLAYER2 = "player2";
+    private static final String PLAYER_ID_BOT1 = "bot1";
+    private static final String PLAYER_ID_BOT2 = "bot2";
+	private String[] playerIds = new String[] { PLAYER_ID_PLAYER1, PLAYER_ID_PLAYER2, PLAYER_ID_BOT1, PLAYER_ID_BOT2 };
     
     public PlayerWebSocket() {
     	// Walls
@@ -63,18 +67,24 @@ public class PlayerWebSocket implements StateUpdateHandler {
     	};
     	
     	HashMap<String, PointIJ> spawnPoints = new HashMap<>();
-    	spawnPoints.put(playerIds[0], new PointIJ(19, 50));
-    	spawnPoints.put(playerIds[1], new PointIJ(33, 50));
-    	spawnPoints.put(playerIds[2], new PointIJ(2, 2));
-    	spawnPoints.put(playerIds[3], new PointIJ(50, 2));
+    	spawnPoints.put(PLAYER_ID_PLAYER1, new PointIJ(19, 50));
+    	spawnPoints.put(PLAYER_ID_PLAYER2, new PointIJ(33, 50));
+    	spawnPoints.put(PLAYER_ID_BOT1, new PointIJ(2, 2));
+    	spawnPoints.put(PLAYER_ID_BOT2, new PointIJ(50, 2));
     	
     	HashMap<String, Direction> spawnDirs = new HashMap<>();
-    	spawnDirs.put(playerIds[0], Direction.UP);
-    	spawnDirs.put(playerIds[1], Direction.UP);
-    	spawnDirs.put(playerIds[2], Direction.DOWN);
-    	spawnDirs.put(playerIds[3], Direction.DOWN);
+    	spawnDirs.put(PLAYER_ID_PLAYER1, Direction.UP);
+    	spawnDirs.put(PLAYER_ID_PLAYER2, Direction.UP);
+    	spawnDirs.put(PLAYER_ID_BOT1, Direction.DOWN);
+    	spawnDirs.put(PLAYER_ID_BOT2, Direction.DOWN);
     	
-    	game = new Game(this, 26, 26, map, playerIds, spawnPoints, spawnDirs);
+    	HashMap<String, Player.Appearance> appearances = new HashMap<>();
+    	appearances.put(PLAYER_ID_PLAYER1, Player.Appearance.GREEN);
+    	appearances.put(PLAYER_ID_PLAYER2, Player.Appearance.YELLOW);
+    	appearances.put(PLAYER_ID_BOT1, Player.Appearance.GRAY);
+    	appearances.put(PLAYER_ID_BOT2, Player.Appearance.GRAY);
+    	
+    	game = new Game(this, 26, 26, map, playerIds, appearances, spawnPoints, spawnDirs);
 		
 		synchronized (controlledPlayers) {
 			for (String id : playerIds) {

@@ -11,6 +11,7 @@ public class GlobalServices {
     	builder.excludeFieldsWithoutExposeAnnotation();
     	
     	builder.registerTypeAdapter(Cell.class, new Cell.TypeAdapter());
+    	builder.registerTypeAdapter(Player.Appearance.class, new Player.Appearance.TypeAdapter());
     	
     	gson = builder.create();
 	}

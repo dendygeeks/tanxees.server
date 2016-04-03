@@ -14,9 +14,9 @@
    height="42"
    id="svg2"
    version="1.1"
-   inkscape:version="0.91 r13725"
+   inkscape:version="0.48.2 r9819"
    sodipodi:docname="tank-caterpillars-frame2-overlay.svg"
-   inkscape:export-filename="/Users/il/tank2.png"
+   inkscape:export-filename="/Users/il/Projects/tanks/tanks.sdl/res/overlay/yellow/tank-caterpillars-frame2-overlay.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"
    style="enable-background:new">
@@ -1745,10 +1745,10 @@
      inkscape:document-units="px"
      inkscape:current-layer="layer7"
      showgrid="false"
-     inkscape:window-width="1366"
-     inkscape:window-height="715"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
+     inkscape:window-width="1280"
+     inkscape:window-height="752"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata7">
@@ -2192,7 +2192,8 @@
        cx="40.532372"
        cy="50.755062"
        rx="15.783633"
-       ry="15.909903" />
+       ry="15.909903"
+       d="m 56.316005,50.755062 c 0,8.786797 -7.066574,15.909903 -15.783633,15.909903 -8.71706,0 -15.783634,-7.123106 -15.783634,-15.909903 0,-8.786796 7.066574,-15.909902 15.783634,-15.909902 8.717059,0 15.783633,7.123106 15.783633,15.909902 z" />
     <path
        style="opacity:0.65540538;fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter5044)"
        d="m 52.780471,55.048212 14.142135,4.04061 -0.252538,-17.172593 -12.879445,4.798224 z"
@@ -2214,7 +2215,8 @@
        cx="19.234798"
        cy="-89.034538"
        rx="5.0517526"
-       ry="5.1565204" />
+       ry="5.1565204"
+       d="m 24.286551,-89.034538 c 0,2.847867 -2.261747,5.15652 -5.051753,5.15652 -2.790005,0 -5.051752,-2.308653 -5.051752,-5.15652 0,-2.847868 2.261747,-5.156521 5.051752,-5.156521 2.790006,0 5.051753,2.308653 5.051753,5.156521 z" />
     <ellipse
        style="opacity:0.62162158;fill:#e3e3e3;fill-opacity:1;stroke:#323232;stroke-width:0.18888941;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path4765-6"
@@ -2222,7 +2224,8 @@
        cx="19.328436"
        cy="-89.025177"
        rx="3.0575888"
-       ry="3.1586945" />
+       ry="3.1586945"
+       d="m 22.386025,-89.025177 c 0,1.744499 -1.368929,3.158695 -3.057589,3.158695 -1.68866,0 -3.057589,-1.414196 -3.057589,-3.158695 0,-1.744499 1.368929,-3.158695 3.057589,-3.158695 1.68866,0 3.057589,1.414196 3.057589,3.158695 z" />
     <rect
        style="opacity:1;fill:url(#linearGradient4836);fill-opacity:1;fill-rule:nonzero;stroke:#484848;stroke-width:0.33181685;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect4763"
