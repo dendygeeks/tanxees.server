@@ -1,8 +1,6 @@
 package bfbc.tank.core;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gson.annotations.Expose;
@@ -61,13 +59,20 @@ public class Game extends Thread implements MissileCrashListener {
 		}
 		return null;
 	}
+	
+	Player findMissileOwner(Missile missile) {
+		for (Player p : players.values()) {
+			if (p.ownsMissile(missile)) return p;
+		}
+		return null;
+	}
 
 	BoxConstructionCollider<Box> getCollider() {
 		return collider;
 	}
 	
-	private void createPlayer(String id) {
-		players.get(id).createTank();
+	private void createPlayerUnit(String id) {
+		players.get(id).createUnit();
 	}
 	
 	public Game(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, Player.Appearance> appearances, HashMap<String, PointIJ> spawnPoints, HashMap<String, Direction> spawnDirs) {
@@ -125,7 +130,7 @@ public class Game extends Thread implements MissileCrashListener {
 		
 		for (String id : playerIds) {
 			players.put(id, new Player(this, appearances.get(id), spawnPoints.get(id), spawnDirs.get(id)));
-			createPlayer(id);
+			createPlayerUnit(id);
 		}
 		
 		collider.setFriendship(new CollisionFriendship<Box>() {
@@ -143,7 +148,7 @@ public class Game extends Thread implements MissileCrashListener {
 				
 				if (t != null && m != null) {
 					// Missile can't hit the player who has launched it
-					return players.get(m.getOwnerPlayerId()).getUnit() != t;
+					return findMissileOwner(m).getUnit() != t;
 				} else {
 					// Everything else can collide
 					return true;
@@ -154,7 +159,7 @@ public class Game extends Thread implements MissileCrashListener {
 	}
 	
 	public synchronized void frameStep() {
-		HashMap<String, Player> playersClone = (HashMap<String, Player>) players.clone();
+		HashMap<String, Player> playersClone = new HashMap<>(players);
 		for (Player p : playersClone.values()) {
 			p.frameStep();
 		}
@@ -206,16 +211,6 @@ public class Game extends Thread implements MissileCrashListener {
 		return this.field[y * fieldWidth + x].getType();
 	}
 	
-	synchronized Missile createMissile(PlayerUnit t, double posX, double posY, double angle, double velocity) {
-		String id = findPlayerIdByTank(t);
-		return players.get(id).createMissile(id, posX, posY, angle, velocity);
-	}
-	
-	synchronized void destroyMissile(Missile m) {
-		String id = m.getOwnerPlayerId();
-		players.get(id).destroyMissile(m);
-	}
-	
 	private boolean removeBricksAfterCrash(double i, double j, double upI, double upJ, double rightI, double rightJ) {
 		// Checking boundaries
 		if (i < 0 || i >= fieldWidth || j < 0 || j >= fieldHeight) return false;
@@ -237,19 +232,21 @@ public class Game extends Thread implements MissileCrashListener {
 	
 	@Override
 	public void missileCrashed(Missile missile, BoxConstruction<?> target) {
+		Player missileOwner = findMissileOwner(missile);
 		if (target instanceof PlayerUnit) {
 			PlayerUnit t = (PlayerUnit)target;
-			if (players.get(missile.getOwnerPlayerId()).getUnit() != t) {
+			if (missileOwner.getUnit() != t) {
 				String id = findPlayerIdByTank(t);
-				String myId = missile.getOwnerPlayerId();
-				System.out.println("Player " + (id + 1) + " is killed by player " + (myId + 1));
+				String myId = findPlayerId(missileOwner);
+				System.out.println("Player " + id + " is killed by player " + myId);
 				players.get(myId).incrementFrags();
-				createPlayer(id);
+				createPlayerUnit(id);
 			}
 		} else if (target instanceof Missile) {
 			// If to missiles collide they both are destroyed
-			Missile m = (Missile)target;
-			destroyMissile(m);
+			Missile targetMissile = (Missile)target;
+			Player targetOwner = findMissileOwner(targetMissile);
+			targetOwner.destroyMissile(targetMissile);
 			
 		} else if (target instanceof Cell) {
 			// A missile hit a brick wall
@@ -289,6 +286,6 @@ public class Game extends Thread implements MissileCrashListener {
 
 		}
 		
-		destroyMissile(missile);
+		missileOwner.destroyMissile(missile);
 	}
 }

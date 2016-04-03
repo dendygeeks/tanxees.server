@@ -13,8 +13,6 @@ import bfbc.tank.core.mechanics.DeltaXY;
  * Something that can move and rotate
  */
 public class Unit implements Box, BoxConstruction<Box> {
-
-	private Game game;
 	
 	@Expose
 	protected double sizeX, sizeY;
@@ -25,8 +23,7 @@ public class Unit implements Box, BoxConstruction<Box> {
 	@Expose
 	protected double angle;
 	
-	public Unit(Game game, double sizeX, double sizeY, double posX, double posY, double angle) {
-		this.game = game;
+	public Unit(double sizeX, double sizeY, double posX, double posY, double angle) {
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
 		this.posX = posX;
@@ -117,9 +114,5 @@ public class Unit implements Box, BoxConstruction<Box> {
 			}
 		};
 		return res;
-	}
-	
-	protected Game getGame() {
-		return game;
 	}
 }

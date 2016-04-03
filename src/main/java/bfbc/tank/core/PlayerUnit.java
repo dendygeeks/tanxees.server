@@ -22,6 +22,8 @@ public class PlayerUnit extends Unit {
 		DIRECTION_ANGLES.put(Direction.UP, 270d);
 	}
 	
+	private double cellSize;
+	
 	@Expose
 	private boolean moving;
 	
@@ -43,6 +45,8 @@ public class PlayerUnit extends Unit {
 	
 	private Direction direction;
 
+	private MissileSpawner missileSpawner;
+
 	public Direction getDirection() {
 		return direction;
 	}
@@ -55,8 +59,10 @@ public class PlayerUnit extends Unit {
 		this.activeCommand = activeCommand;
 	}
 	
-	public PlayerUnit(Game game, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY, Double angle) {
-		super(game, SIZE, SIZE, posX, posY, angle != null ? angle : DIRECTION_ANGLES.get(direction));
+	public PlayerUnit(MissileSpawner missileSpawner, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY, Double angle) {
+		super(SIZE, SIZE, posX, posY, angle != null ? angle : DIRECTION_ANGLES.get(direction));
+		this.missileSpawner = missileSpawner;
+		this.cellSize = cellSize;
 		this.collider = collider;
 		this.crashListener = crashListener;
 		this.activeCommand = activeCommand;
@@ -64,8 +70,8 @@ public class PlayerUnit extends Unit {
 		this.moving = moving;
 	}
 
-	public PlayerUnit(Game game, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY) {
-		this(game, collider, crashListener, direction, activeCommand, moving, posX, posY, null);
+	public PlayerUnit(MissileSpawner missileSpawner, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY) {
+		this(missileSpawner, cellSize, collider, crashListener, direction, activeCommand, moving, posX, posY, null);
 	}
 
 	private void safeMove(DeltaXY dxy) {
@@ -116,7 +122,7 @@ public class PlayerUnit extends Unit {
 		
 		// Dragging. A small hack that makes driving around corners easier for the user 
 		if (!notRotating) {
-			double cs = getGame().cellSize;
+			double cs = cellSize;
 			double dx = ((posX - cs/2) % cs) / cs;
 			double dy = ((posY - cs/2) % cs) / cs;
 			if (dx > 0.5d) dx -= 1.0d;
@@ -151,7 +157,7 @@ public class PlayerUnit extends Unit {
 			if (moving) {
 				missileVelocity += velocity;
 			}
-			getGame().createMissile(this, getPosX(), getPosY(), getAngle(), missileVelocity);
+			missileSpawner.spawnMissile(this, getPosX(), getPosY(), getAngle(), missileVelocity);
 			wantToFire = false;
 		}
 

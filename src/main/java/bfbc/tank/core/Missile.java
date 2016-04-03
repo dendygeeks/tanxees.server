@@ -1,7 +1,5 @@
 package bfbc.tank.core;
 
-import com.google.gson.annotations.Expose;
-
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.DeltaXY;
@@ -13,19 +11,15 @@ public class Missile extends Unit {
 	
 	private BoxConstructionCollider<Box> collider;
 	
-	@Expose
-	private String ownerPlayerId;
-	
 	private MissileCrashListener crashListener;
 
-	Missile(Game game, MissileCrashListener crashListener, BoxConstructionCollider<Box> collider, String ownerPlayerId, double posX, double posY, double angle, double velocity)
+	Missile(MissileCrashListener crashListener, BoxConstructionCollider<Box> collider, double posX, double posY, double angle, double velocity)
 	{
-		super(game, SIZE, SIZE, posX, posY, angle);
+		super(SIZE, SIZE, posX, posY, angle);
 		this.crashListener = crashListener;
 		this.collider = collider;
 		this.velX = velocity * Math.cos(angle * Math.PI / 180.0);
 		this.velY = velocity * Math.sin(angle * Math.PI / 180.0);
-		this.ownerPlayerId = ownerPlayerId;
 	}
 	
 	public void frameStep() {
@@ -36,9 +30,4 @@ public class Missile extends Unit {
 			crashListener.missileCrashed(this, mr.mostAggressiveIntersectionTarget());
 		}
 	}
-	
-	public String getOwnerPlayerId() {
-		return ownerPlayerId;
-	}
-	
 }
