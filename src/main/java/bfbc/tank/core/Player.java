@@ -39,12 +39,42 @@ public class Player {
 		}
 	}
 	
+	enum UnitType {
+
+		SMALL("small"), MEDIUM("medium");
+
+		static class TypeAdapter extends com.google.gson.TypeAdapter<UnitType> {
+			public UnitType read(JsonReader reader) throws IOException {
+				// TODO It can't read
+				return null;
+			}
+
+			public void write(JsonWriter writer, UnitType value) throws IOException {
+				if (value == null) {
+					writer.nullValue();
+					return;
+				}
+				String name = value.id;
+				writer.value(name);
+			}
+		}
+
+		public final String id;
+
+		UnitType(String id) {
+			this.id = id;
+		}
+	}
+	
 	private MissileCrashListener missileCrashListener;
 	private BoxConstructionCollider<Box> collider;
 	
 	@Expose
 	private PlayerUnit unit;
 
+	@Expose
+	private UnitType unitType;
+	
 	@Expose
 	private Appearance appearance;
 
@@ -65,13 +95,14 @@ public class Player {
 	}
 
 
-	public Player(MissileCrashListener missileCrashListener, BoxConstructionCollider<Box> collider, Appearance appearance, PointIJ spawnPoint, Direction spawnDir) {
+	public Player(MissileCrashListener missileCrashListener, BoxConstructionCollider<Box> collider, Appearance appearance, UnitType unitType, PointIJ spawnPoint, Direction spawnDir) {
 		this.missileCrashListener = missileCrashListener;
 		this.collider = collider;
 		this.frags = 0;
 		this.debugData = null;
 		this.missiles = new ArrayList<>();
 		this.appearance = appearance;
+		this.unitType = unitType;
 		this.spawnPoint = spawnPoint;
 		this.spawnDir = spawnDir;
 	}

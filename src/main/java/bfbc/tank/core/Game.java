@@ -75,7 +75,7 @@ public class Game extends Thread implements MissileCrashListener {
 		players.get(id).respawnUnit(cellSize);
 	}
 	
-	public Game(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, Player.Appearance> appearances, HashMap<String, PointIJ> spawnPoints, HashMap<String, Direction> spawnDirs) {
+	public Game(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, Player.Appearance> appearances, HashMap<String, Player.UnitType> unitTypes, HashMap<String, PointIJ> spawnPoints, HashMap<String, Direction> spawnDirs) {
 		if (map == null) throw new IllegalArgumentException("Map shouldn't be null");
 		if (map.length != mapWidth * mapHeight) throw new IllegalArgumentException("Invalid map size");
 		this.fieldWidth = mapWidth * 2 + 2;
@@ -129,7 +129,7 @@ public class Game extends Thread implements MissileCrashListener {
 
 		
 		for (String id : playerIds) {
-			players.put(id, new Player(this, collider, appearances.get(id), spawnPoints.get(id), spawnDirs.get(id)));
+			players.put(id, new Player(this, collider, appearances.get(id), unitTypes.get(id), spawnPoints.get(id), spawnDirs.get(id)));
 			createPlayerUnit(id);
 		}
 		

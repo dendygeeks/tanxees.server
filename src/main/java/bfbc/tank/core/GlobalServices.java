@@ -12,6 +12,7 @@ public class GlobalServices {
     	
     	builder.registerTypeAdapter(Cell.class, new Cell.TypeAdapter());
     	builder.registerTypeAdapter(Player.Appearance.class, new Player.Appearance.TypeAdapter());
+    	builder.registerTypeAdapter(Player.UnitType.class, new Player.UnitType.TypeAdapter());
     	
     	gson = builder.create();
 	}
