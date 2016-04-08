@@ -114,7 +114,7 @@ public class BoxConstructionCollider<T extends Box> {
 		return new CollisionResult(sortedTargets);
 	}
 	
-	/*public MoveRotateResult tryRotate(BoxConstruction<T> con, DeltaAngle delta) {
+	private MoveRotateResult tryRotateSingle(BoxConstruction<T> con, DeltaAngle delta) {
 		CollisionResult before = getIntersectionDepth(con);
 		con.rotate(delta);
 		CollisionResult after = getIntersectionDepth(con);
@@ -122,17 +122,70 @@ public class BoxConstructionCollider<T extends Box> {
 		CollisionResult modAfter = new CollisionResult(after);
 		modAfter.subtract(before);
 		
-		DeltaXY deltaRes;
 		boolean success = true;
+		DeltaXY deltaRes;
 		if (modAfter.targets.size() == 0) {
 			deltaRes = new DeltaXY(0, 0);
 		} else {
+			// Trying to get out of the collision targets
 			
+			// Searching for the maximal intersection depth
+			double maxDepthX = 0, maxDepthY = 0;
+			for (IntersectionResult ir : modAfter.targets.values()) {
+				maxDepthX = Math.max(maxDepthX, ir.depthX);
+				maxDepthY = Math.max(maxDepthY, ir.depthY);
+			}
+			
+			success = false;
+			deltaRes = null;
+			DeltaXY minDelta = null;
+			for (int i = -1; i <= 1; i++) {
+				for (int j = -1; j <= 1; j++) {
+					if (i != 0 || j != 0) {
+						DeltaXY dr = new DeltaXY(maxDepthX * i, maxDepthY * j);
+						con.move(dr);
+						CollisionResult wentAway = getIntersectionDepth(con);
+						wentAway.subtract(before);
+						if (wentAway.targets.size() == 0) {
+							success = true;
+							if (minDelta == null) { 
+								minDelta = dr; 
+							} else {
+								minDelta = minDelta.length() < dr.length() ? minDelta : dr;
+							}
+							
+						}
+						con.move(dr.inverse());
+					}
+				}
+			}
+			deltaRes = minDelta;
+			if (!success) {
+				con.rotate(delta.inverse());
+			}
 		}
-
 		return new MoveRotateResult(success, deltaRes, modAfter.targets);
-
-	}*/
+	}
+	
+	public MoveRotateResult tryRotate(BoxConstruction<T> con, DeltaAngle delta) {
+		MoveRotateResult mrr;
+		if (delta != DeltaAngle.ZERO) {
+			if (delta == DeltaAngle.PI) {
+				delta = DeltaAngle.PI_BY_2; // Direction is not important
+				mrr = tryRotateSingle(con, delta);
+				if (mrr.success) {
+					// Rotating again
+					mrr = tryRotateSingle(con, delta);
+				}
+			} else {
+				mrr = tryRotateSingle(con, delta);
+			}
+		} else {
+			// Nothing
+			mrr = new MoveRotateResult(true, new DeltaXY(0, 0), new HashMap<>());
+		}
+		return mrr;
+	}
 	
 	public synchronized MoveRotateResult tryMove(BoxConstruction<T> con, DeltaXY delta) {
 		CollisionResult before = getIntersectionDepth(con);
@@ -161,7 +214,6 @@ public class BoxConstructionCollider<T extends Box> {
 		}
 		return new MoveRotateResult(success, deltaRes, modAfter.targets);
 	}
-	
 	
 	
 	public synchronized void setFriendship(CollisionFriendship<T> friendship) {

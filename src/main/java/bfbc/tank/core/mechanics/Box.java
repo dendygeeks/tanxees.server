@@ -23,7 +23,7 @@ public interface Box {
 		double d2x = box2.getRight() - c2x;
 		double d2y = box2.getBottom() - c2y;
 		
-		if ((Math.abs(c2x - c1x) > d1x + d2x) || (Math.abs(c2y - c1y) > d1y + d2y)) {
+		if ((Math.abs(c2x - c1x) >= d1x + d2x) || (Math.abs(c2y - c1y) >= d1y + d2y)) {
 			return null;
 		} else {
 			double xOverlap = Math.max(0, Math.min(box1.getRight(), box2.getRight()) - Math.max(box1.getLeft(), box2.getLeft())),

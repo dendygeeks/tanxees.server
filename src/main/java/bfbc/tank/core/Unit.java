@@ -74,7 +74,7 @@ public class Unit implements Box, BoxConstruction<Box> {
 	public void rotate(DeltaAngle delta) {
 		switch (delta) {
 		case ZERO:
-			break;
+			break; 	
 		case PI_BY_2:
 			double t = sizeX;
 			sizeX = sizeY;

@@ -7,11 +7,13 @@ import com.google.gson.annotations.Expose;
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
+import bfbc.tank.core.mechanics.BoxConstructionCollider.MoveRotateResult;
+import bfbc.tank.core.mechanics.DeltaAngle;
 import bfbc.tank.core.mechanics.DeltaXY;
 
 public class PlayerUnit extends Unit {
 	
-	private static final double SIZE = 34;
+	//private static final double SIZE = 34;
 	
 	private static final HashMap<Direction, Double> DIRECTION_ANGLES;
 	static {
@@ -30,9 +32,10 @@ public class PlayerUnit extends Unit {
 	private boolean wantToFire;
 	
 	private double velocity = 85.0d;
+	private double backVelocity = -50.0d;
 	private double angleVel = 500;
 
-	private double dragVelocity = 3*velocity;	// From the ceiling
+	private double dragVelocity = 1.0 * velocity;	// From the ceiling
 
 	private BoxConstructionCollider<Box> collider;
 	private MissileCrashListener crashListener;
@@ -59,8 +62,14 @@ public class PlayerUnit extends Unit {
 		this.activeCommand = activeCommand;
 	}
 	
-	public PlayerUnit(Player player, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY, Double angle) {
-		super(SIZE, SIZE, posX, posY, angle != null ? angle : DIRECTION_ANGLES.get(direction));
+	private static double sizeForDir(boolean isY /* if not, it is X */, double sizeW, double sizeL, Direction direction) {
+		boolean dirV = (direction == Direction.UP || direction == Direction.DOWN);
+		return (dirV ^ isY) ? sizeW : sizeL;
+	}
+	
+	public PlayerUnit(Player player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY, Double angle) {
+		super(sizeForDir(false, sizeW, sizeL, direction), 
+		      sizeForDir(true, sizeW, sizeL, direction), posX, posY, angle != null ? angle : DIRECTION_ANGLES.get(direction));
 		this.player = player;
 		this.cellSize = cellSize;
 		this.collider = collider;
@@ -70,8 +79,8 @@ public class PlayerUnit extends Unit {
 		this.moving = moving;
 	}
 
-	public PlayerUnit(Player player, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY) {
-		this(player, cellSize, collider, crashListener, direction, activeCommand, moving, posX, posY, null);
+	public PlayerUnit(Player player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY) {
+		this(player, sizeW, sizeL, cellSize, collider, crashListener, direction, activeCommand, moving, posX, posY, null);
 	}
 
 	private void safeMove(DeltaXY dxy) {
@@ -85,34 +94,53 @@ public class PlayerUnit extends Unit {
 	
 	public void frameStep() {
 		moving = false;
+		boolean moveBackwards = false;
+		Direction newDir = direction;
 		if (activeCommand.isDown()) {
-			direction = Direction.DOWN;
+			newDir = Direction.DOWN;
 			moving = true;
 		} else if (activeCommand.isLeft()) {
-			direction = Direction.LEFT;
+			newDir = Direction.LEFT;
 			moving = true;
 		} else if (activeCommand.isRight()) {
-			direction = Direction.RIGHT;
+			newDir = Direction.RIGHT;
 			moving = true;
 		} else if (activeCommand.isUp()) {
-			direction = Direction.UP;
+			newDir = Direction.UP;
 			moving = true;
+		}
+		
+		DeltaAngle modelAngleDelta = Direction.sub(newDir, direction);
+		if (modelAngleDelta != DeltaAngle.ZERO) {
+			MoveRotateResult mrr = collider.tryRotate(this, modelAngleDelta);
+			if (mrr.success) {
+				direction = newDir;
+				this.move(mrr.delta);
+			} else {
+				if (modelAngleDelta.angle == 180) {
+					// We can't turn around cause there is no space to rotate.
+					// So we will drive backwards
+					moveBackwards = true;
+				} else {
+					moving = false;
+				}
+			}
 		}
 		
 		if (activeCommand.isFire()) {
 			wantToFire = true;
 		}
 
-		double angleDelta = DIRECTION_ANGLES.get(direction) - getAngle();
-		if (angleDelta < -180) angleDelta += 360;
-		if (angleDelta > 180) angleDelta -= 360;
+		double visualAngleDelta = DIRECTION_ANGLES.get(direction) - getAngle();
+		if (visualAngleDelta < -180) visualAngleDelta += 360;
+		if (visualAngleDelta > 180) visualAngleDelta -= 360;
 		
 		boolean notRotating = false;
 		double angleSmall = angleVel / 50;
-		if (angleDelta > angleSmall) {
+		if (visualAngleDelta > angleSmall) {
 			angle += angleVel * Game.MODEL_TICK;
 			moving = true;
-		} else if (angleDelta < -angleSmall) {
+		} else if (visualAngleDelta < -angleSmall) {
 			angle -= angleVel * Game.MODEL_TICK;
 			moving = true;
 		} else {
@@ -150,7 +178,12 @@ public class PlayerUnit extends Unit {
 			
 		}
 
-		double displacement = velocity * Game.MODEL_TICK;
+		double displacement;
+		if (!moveBackwards) { 
+			displacement = velocity * Game.MODEL_TICK;
+		} else {
+			displacement = backVelocity * Game.MODEL_TICK;
+		}
 		
 		if (notRotating && wantToFire) {
 			double missileVelocity = velocity * 1.2; // Missile is a bit faster than tank
