@@ -131,9 +131,10 @@ public class BoxConstructionCollider<T extends Box> {
 			
 			// Searching for the maximal intersection depth
 			double maxDepthX = 0, maxDepthY = 0;
+			double bloha = 0.01;
 			for (IntersectionResult ir : modAfter.targets.values()) {
-				maxDepthX = Math.max(maxDepthX, ir.depthX);
-				maxDepthY = Math.max(maxDepthY, ir.depthY);
+				maxDepthX = Math.max(maxDepthX, ir.depthX) + bloha;
+				maxDepthY = Math.max(maxDepthY, ir.depthY) + bloha;
 			}
 			
 			success = false;
@@ -160,6 +161,11 @@ public class BoxConstructionCollider<T extends Box> {
 				}
 			}
 			deltaRes = minDelta;
+			
+			if (deltaRes != null) {
+				con.move(deltaRes);
+			}
+			
 			if (!success) {
 				con.rotate(delta.inverse());
 			}

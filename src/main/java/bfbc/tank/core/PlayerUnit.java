@@ -114,8 +114,7 @@ public class PlayerUnit extends Unit {
 		if (modelAngleDelta != DeltaAngle.ZERO) {
 			MoveRotateResult mrr = collider.tryRotate(this, modelAngleDelta);
 			if (mrr.success) {
-				direction = newDir;
-				this.move(mrr.delta);
+				direction = newDir;				
 			} else {
 				if (modelAngleDelta.angle == 180) {
 					// We can't turn around cause there is no space to rotate.

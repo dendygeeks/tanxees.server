@@ -41,7 +41,7 @@ public class Player {
 	
 	enum UnitType {
 
-		SMALL("small", 22, 27), MEDIUM("medium", 34, 34);
+		SMALL("small", 20/*22*/, 27), MEDIUM("medium", 34, 34);
 
 		static class TypeAdapter extends com.google.gson.TypeAdapter<UnitType> {
 			public UnitType read(JsonReader reader) throws IOException {
