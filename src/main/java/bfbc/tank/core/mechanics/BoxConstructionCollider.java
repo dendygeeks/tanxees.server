@@ -122,7 +122,6 @@ public class BoxConstructionCollider<T extends Box> {
 		CollisionResult modAfter = new CollisionResult(after);
 		modAfter.subtract(before);
 		
-		boolean success = true;
 		DeltaXY deltaRes;
 		if (modAfter.targets.size() == 0) {
 			deltaRes = new DeltaXY(0, 0);
@@ -137,7 +136,6 @@ public class BoxConstructionCollider<T extends Box> {
 				maxDepthY = Math.max(maxDepthY, ir.depthY) + bloha;
 			}
 			
-			success = false;
 			deltaRes = null;
 			DeltaXY minDelta = null;
 			for (int i = -1; i <= 1; i++) {
@@ -148,7 +146,6 @@ public class BoxConstructionCollider<T extends Box> {
 						CollisionResult wentAway = getIntersectionDepth(con);
 						wentAway.subtract(before);
 						if (wentAway.targets.size() == 0) {
-							success = true;
 							if (minDelta == null) { 
 								minDelta = dr; 
 							} else {
@@ -160,17 +157,19 @@ public class BoxConstructionCollider<T extends Box> {
 					}
 				}
 			}
-			deltaRes = minDelta;
+			
+			// Let's check if we are trying to "leap" too far away
+			if (minDelta != null && minDelta.length() < con.getExcentricity()) {
+				deltaRes = minDelta;
+			}
 			
 			if (deltaRes != null) {
 				con.move(deltaRes);
-			}
-			
-			if (!success) {
+			} else {
 				con.rotate(delta.inverse());
 			}
 		}
-		return new MoveRotateResult(success, deltaRes, modAfter.targets);
+		return new MoveRotateResult(deltaRes != null, deltaRes, modAfter.targets);
 	}
 	
 	public MoveRotateResult tryRotate(BoxConstruction<T> con, DeltaAngle delta) {

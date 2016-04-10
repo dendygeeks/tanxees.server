@@ -44,6 +44,11 @@ public class Cell implements Box, BoxConstruction<Cell> {
 	private int i, j;
 	
 	@Override
+	public double getExcentricity() {
+		return 0;
+	}
+	
+	@Override
 	public double getLeft() {
 		return (i - 0.5) * game.cellSize;
 	}

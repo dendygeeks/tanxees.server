@@ -41,6 +41,11 @@ public class Unit implements Box, BoxConstruction<Box> {
 		return angle;
 	}
 	
+	@Override
+	public double getExcentricity() {
+		return Math.abs(sizeX - sizeY) / 2;
+	}
+	
 	public String toJson() {
 		return GlobalServices.getGson().toJson(this);
 	}
