@@ -218,7 +218,7 @@ public class Game extends Thread implements MissileCrashListener {
 		// Checking boundaries
 		if (i < 0 || i >= fieldWidth || j < 0 || j >= fieldHeight) return false;
 		// Checking if this cell is occupied by a brick
-		if (field[(int)i + (int)j * fieldWidth].getType() != CellType.BRICKS) return false;
+		if (!field[(int)i + (int)j * fieldWidth].getType().isBrick()) return false;
 		
 		// Checking the closer cell
 		double i2 = i - rightI, j2 = j - rightJ;
@@ -253,7 +253,7 @@ public class Game extends Thread implements MissileCrashListener {
 		} else if (target instanceof Cell) {
 			// A missile hit a brick wall
 			Cell c = (Cell)target;
-			if (c.getType() == CellType.BRICKS) {
+			if (c.getType().isBrick()) {
 				
 				// Destroying the brick instantly ^_^
 				c.setType(CellType.EMPTY);

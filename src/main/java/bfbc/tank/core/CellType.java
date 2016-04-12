@@ -4,7 +4,8 @@ public enum CellType {
 	EMPTY("E"), 
 	CONCRETE("C"), 
 	BRICKS("B"), 
-	DARK_CONCRETE("DC");
+	DARK_CONCRETE("DC"),
+	DARK_BRICKS("DB");
 	
 	public final String code;
 	
@@ -18,6 +19,12 @@ public enum CellType {
 	public boolean isWall() {
 		return this.equals(CONCRETE) ||
 		       this.equals(BRICKS) ||
-		       this.equals(DARK_CONCRETE);
+		       this.equals(DARK_CONCRETE) ||
+		       this.equals(DARK_BRICKS);
+	}
+	
+	public boolean isBrick() {
+		return this.equals(BRICKS) || 
+		       this.equals(DARK_BRICKS);
 	}
 }

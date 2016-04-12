@@ -37,7 +37,7 @@ public class PlayerWebSocket implements StateUpdateHandler {
     
     public PlayerWebSocket() {
     	// Walls
-    	CellType __ = CellType.EMPTY, _C = CellType.CONCRETE, _B = CellType.BRICKS;
+    	CellType __ = CellType.EMPTY, _C = CellType.CONCRETE, _B = CellType.BRICKS, DB = CellType.DARK_BRICKS;
     	CellType[] map = new CellType[] {
    			__, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
    			__, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
@@ -63,8 +63,8 @@ public class PlayerWebSocket implements StateUpdateHandler {
     		__, __, _B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __, _B, _B, __, __, _B, _B, __, __,
     		__, __, _B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __, _B, _B, __, __, _B, _B, __, __,
     		__, __, _B, _B, __, __, _B, _B, __, __, __, _B, _B, _B, _B, __, __, __, _B, _B, __, __, _B, _B, __, __,
-    		__, __, __, __, __, __, __, __, __, __, __, _B, __, __, _B, __, __, __, __, __, __, __, __, __, __, __,
-    		__, __, __, __, __, __, __, __, __, __, __, _B, __, __, _B, __, __, __, __, __, __, __, __, __, __, __
+    		__, __, __, __, __, __, __, __, __, __, __, _B, DB, DB, _B, __, __, __, __, __, __, __, __, __, __, __,
+    		__, __, __, __, __, __, __, __, __, __, __, _B, DB, DB, _B, __, __, __, __, __, __, __, __, __, __, __
     	};
     	
     	HashMap<String, PlayerUnit.SpawnConfig> spawnConfigs = new HashMap<>();
