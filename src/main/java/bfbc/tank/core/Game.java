@@ -29,6 +29,8 @@ public class Game extends Thread implements MissileCrashListener {
 	
 	private StateUpdateHandler stateUpdateHandler;
 	
+	private HashMap<String, PlayerUnit.SpawnConfig> spawnConfigs; 
+	
 	private BoxConstructionCollider<Box> collider = new BoxConstructionCollider<>();
 	//private ArrayList<CellBoxConstruction> cells = new ArrayList<>();
 	
@@ -72,10 +74,12 @@ public class Game extends Thread implements MissileCrashListener {
 	}
 	
 	private void createPlayerUnit(String id) {
-		players.get(id).respawnUnit(cellSize);
+		players.get(id).respawnUnit(cellSize, spawnConfigs.get(id));
 	}
 	
-	public Game(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, Player.Appearance> appearances, HashMap<String, Player.UnitType> unitTypes, HashMap<String, PointIJ> spawnPoints, HashMap<String, Direction> spawnDirs) {
+	public Game(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, Player.Appearance> appearances, HashMap<String, Player.UnitType> unitTypes, HashMap<String, PlayerUnit.SpawnConfig> spawnConfigs) {
+		this.spawnConfigs = new HashMap<>(spawnConfigs);
+		
 		if (map == null) throw new IllegalArgumentException("Map shouldn't be null");
 		if (map.length != mapWidth * mapHeight) throw new IllegalArgumentException("Invalid map size");
 		this.fieldWidth = mapWidth * 2 + 2;
@@ -112,8 +116,7 @@ public class Game extends Thread implements MissileCrashListener {
 			}
 		}
 
-		if (spawnPoints == null) throw new IllegalArgumentException("spawnPoints shouldn't be null");
-		if (spawnDirs == null) throw new IllegalArgumentException("spawnDirs shouldn't be null");
+		if (spawnConfigs == null) throw new IllegalArgumentException("spawnConfigs shouldn't be null");
 		
 		// TODO Validation
 		//if (playersCount != spawnPoints.length) throw new IllegalArgumentException("Players and spawn points count differ");
@@ -129,7 +132,7 @@ public class Game extends Thread implements MissileCrashListener {
 
 		
 		for (String id : playerIds) {
-			players.put(id, new Player(this, collider, appearances.get(id), unitTypes.get(id), spawnPoints.get(id), spawnDirs.get(id)));
+			players.put(id, new Player(this, collider, appearances.get(id), unitTypes.get(id)));
 			createPlayerUnit(id);
 		}
 		

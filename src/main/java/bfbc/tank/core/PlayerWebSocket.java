@@ -17,6 +17,7 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import com.google.gson.annotations.Expose;
 
 import bfbc.tank.core.Game.StateUpdateHandler;
+import bfbc.tank.core.PlayerUnit.SpawnConfig;
 
 @WebSocket(maxTextMessageSize = 1024 * 1024 * 10, maxBinaryMessageSize = 1024 * 1024 * 100)
 public class PlayerWebSocket implements StateUpdateHandler {
@@ -66,17 +67,11 @@ public class PlayerWebSocket implements StateUpdateHandler {
     		__, __, __, __, __, __, __, __, __, __, __, _B, __, __, _B, __, __, __, __, __, __, __, __, __, __, __
     	};
     	
-    	HashMap<String, PointIJ> spawnPoints = new HashMap<>();
-    	spawnPoints.put(PLAYER_ID_PLAYER1, new PointIJ(19, 50));
-    	spawnPoints.put(PLAYER_ID_PLAYER2, new PointIJ(33, 50));
-    	spawnPoints.put(PLAYER_ID_BOT1, new PointIJ(2, 2));
-    	spawnPoints.put(PLAYER_ID_BOT2, new PointIJ(50, 2));
-    	
-    	HashMap<String, Direction> spawnDirs = new HashMap<>();
-    	spawnDirs.put(PLAYER_ID_PLAYER1, Direction.UP);
-    	spawnDirs.put(PLAYER_ID_PLAYER2, Direction.UP);
-    	spawnDirs.put(PLAYER_ID_BOT1, Direction.DOWN);
-    	spawnDirs.put(PLAYER_ID_BOT2, Direction.DOWN);
+    	HashMap<String, PlayerUnit.SpawnConfig> spawnConfigs = new HashMap<>();
+    	spawnConfigs.put(PLAYER_ID_PLAYER1, new SpawnConfig(new PointIJ(19, 50), Direction.UP));
+    	spawnConfigs.put(PLAYER_ID_PLAYER2, new SpawnConfig(new PointIJ(33, 50), Direction.UP));
+    	spawnConfigs.put(PLAYER_ID_BOT1, new SpawnConfig(new PointIJ(2, 2), Direction.UP));
+    	spawnConfigs.put(PLAYER_ID_BOT2, new SpawnConfig(new PointIJ(50, 2), Direction.UP));
     	
     	HashMap<String, Player.Appearance> appearances = new HashMap<>();
     	appearances.put(PLAYER_ID_PLAYER1, Player.Appearance.GREEN);
@@ -90,7 +85,7 @@ public class PlayerWebSocket implements StateUpdateHandler {
     	unitTypes.put(PLAYER_ID_BOT1, Player.UnitType.MEDIUM);
     	unitTypes.put(PLAYER_ID_BOT2, Player.UnitType.MEDIUM);
     	
-    	game = new Game(this, 26, 26, map, playerIds, appearances, unitTypes, spawnPoints, spawnDirs);
+    	game = new Game(this, 26, 26, map, playerIds, appearances, unitTypes, spawnConfigs);
 		
 		synchronized (controlledPlayers) {
 			for (String id : playerIds) {

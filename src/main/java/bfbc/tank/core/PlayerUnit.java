@@ -13,6 +13,22 @@ import bfbc.tank.core.mechanics.DeltaXY;
 
 public class PlayerUnit extends Unit {
 	
+	public static class SpawnConfig {
+		public final Direction direction;
+		public final PointIJ spawnPoint;
+		public SpawnConfig(PointIJ spawnPoint, Direction direction) {
+			this.spawnPoint = spawnPoint;
+			this.direction = direction;
+		}
+		public double getPosX(double cellSize) {
+			return cellSize * (spawnPoint.i + 0.5);
+		}
+		public double getPosY(double cellSize) {
+			return cellSize * (spawnPoint.j + 0.5);
+		}
+		
+	}
+	
 	//private static final double SIZE = 34;
 	
 	private static final HashMap<Direction, Double> DIRECTION_ANGLES;
@@ -67,20 +83,22 @@ public class PlayerUnit extends Unit {
 		return (dirV ^ isY) ? sizeW : sizeL;
 	}
 	
-	public PlayerUnit(Player player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY, Double angle) {
-		super(sizeForDir(false, sizeW, sizeL, direction), 
-		      sizeForDir(true, sizeW, sizeL, direction), posX, posY, angle != null ? angle : DIRECTION_ANGLES.get(direction));
+	public PlayerUnit(Player player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving, Double angle) {
+		super(sizeForDir(false, sizeW, sizeL, spawnConfig.direction), 
+		      sizeForDir(true, sizeW, sizeL, spawnConfig.direction), 
+		      spawnConfig.getPosX(cellSize), 
+		      spawnConfig.getPosY(cellSize), angle != null ? angle : DIRECTION_ANGLES.get(spawnConfig.direction));
 		this.player = player;
 		this.cellSize = cellSize;
 		this.collider = collider;
 		this.crashListener = crashListener;
 		this.activeCommand = activeCommand;
-		this.direction = direction;
+		this.direction = spawnConfig.direction;
 		this.moving = moving;
 	}
 
-	public PlayerUnit(Player player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, Direction direction, PlayerKeys activeCommand, boolean moving, double posX, double posY) {
-		this(player, sizeW, sizeL, cellSize, collider, crashListener, direction, activeCommand, moving, posX, posY, null);
+	public PlayerUnit(Player player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving) {
+		this(player, sizeW, sizeL, cellSize, collider, crashListener, spawnConfig, activeCommand, moving, null);
 	}
 
 	private void safeMove(DeltaXY dxy) {

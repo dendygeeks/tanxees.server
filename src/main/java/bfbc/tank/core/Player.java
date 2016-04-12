@@ -8,6 +8,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import bfbc.tank.core.PlayerUnit.SpawnConfig;
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 
@@ -90,15 +91,15 @@ public class Player {
 	@Expose
 	private List<Missile> missiles = new ArrayList<>();
 
-	private PointIJ spawnPoint;
-	private Direction spawnDir;
+/*	private PointIJ spawnPoint;
+	private Direction spawnDir;*/
 
 	PlayerUnit getUnit() {
 		return unit;
 	}
 
 
-	public Player(MissileCrashListener missileCrashListener, BoxConstructionCollider<Box> collider, Appearance appearance, UnitType unitType, PointIJ spawnPoint, Direction spawnDir) {
+	public Player(MissileCrashListener missileCrashListener, BoxConstructionCollider<Box> collider, Appearance appearance, UnitType unitType) {
 		this.missileCrashListener = missileCrashListener;
 		this.collider = collider;
 		this.frags = 0;
@@ -106,8 +107,6 @@ public class Player {
 		this.missiles = new ArrayList<>();
 		this.appearance = appearance;
 		this.unitType = unitType;
-		this.spawnPoint = spawnPoint;
-		this.spawnDir = spawnDir;
 	}
 
 	public void frameStep() {
@@ -139,7 +138,7 @@ public class Player {
 		frags++;
 	}
 
-	public void respawnUnit(double cellSize) {
+	public void respawnUnit(double cellSize, PlayerUnit.SpawnConfig spawnConfig) {
 		if (unit != null) {
 			collider.removeAgent(unit);
 		}
@@ -150,11 +149,11 @@ public class Player {
 			cellSize, 
 			collider, 
 			missileCrashListener, 
-			spawnDir, 
+			spawnConfig, 
 			new PlayerKeys(), 
-			false,
-			cellSize * (spawnPoint.i + 0.5), 
-			cellSize * (spawnPoint.j + 0.5)
+			false
+			/*, cellSize * (spawnPoint.i + 0.5), 
+			cellSize * (spawnPoint.j + 0.5)*/
 		);
 
 		collider.addAgent(unit);
