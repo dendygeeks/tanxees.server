@@ -36,6 +36,8 @@ public class Game extends Thread implements MissileCrashListener {
 	
 	@Expose
 	private volatile HashMap<String, Player> players;
+	@Expose
+	private volatile Flag flag;
 	
 	@Expose
 	private volatile Cell[] field;// = new Cell[fieldWidth * fieldHeight];
@@ -129,7 +131,8 @@ public class Game extends Thread implements MissileCrashListener {
 		time = (double)System.currentTimeMillis() / 1000;
 
 		players = new HashMap<String, Player>();
-
+		flag = new Flag(cellSize * 5, cellSize * 6);
+		collider.addAgent(flag);
 		
 		for (String id : playerIds) {
 			players.put(id, new Player(this, collider, appearances.get(id), unitTypes.get(id)));
