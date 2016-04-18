@@ -1,5 +1,6 @@
 package bfbc.tank.core;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +24,9 @@ public class Game extends Thread implements MissileCrashListener {
 	@Expose
 	public final double cellSize = 11;
 	
+	@Expose
+	public boolean isOver = false;
+	
 	public static interface StateUpdateHandler {
 		void gameStateUpdated(Game state);
 	}
@@ -31,7 +35,7 @@ public class Game extends Thread implements MissileCrashListener {
 	
 	private HashMap<String, PlayerUnit.SpawnConfig> spawnConfigs; 
 	
-	private BoxConstructionCollider<Box> collider = new BoxConstructionCollider<>();
+	private BoxConstructionCollider collider = new BoxConstructionCollider();
 	//private ArrayList<CellBoxConstruction> cells = new ArrayList<>();
 	
 	@Expose
@@ -71,7 +75,7 @@ public class Game extends Thread implements MissileCrashListener {
 		return null;
 	}
 
-	BoxConstructionCollider<Box> getCollider() {
+	BoxConstructionCollider getCollider() {
 		return collider;
 	}
 	
@@ -79,7 +83,7 @@ public class Game extends Thread implements MissileCrashListener {
 		players.get(id).respawnUnit(cellSize, spawnConfigs.get(id));
 	}
 	
-	public Game(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, Player.Appearance> appearances, HashMap<String, Player.UnitType> unitTypes, HashMap<String, PlayerUnit.SpawnConfig> spawnConfigs) {
+	public Game(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, Player.Appearance> appearances, HashMap<String, Player.UnitType> unitTypes, HashMap<String, PlayerUnit.SpawnConfig> spawnConfigs, int flagI, int flagJ) {
 		this.spawnConfigs = new HashMap<>(spawnConfigs);
 		
 		if (map == null) throw new IllegalArgumentException("Map shouldn't be null");
@@ -131,7 +135,7 @@ public class Game extends Thread implements MissileCrashListener {
 		time = (double)System.currentTimeMillis() / 1000;
 
 		players = new HashMap<String, Player>();
-		flag = new Flag(cellSize * 5, cellSize * 6);
+		flag = new Flag(cellSize * flagI, cellSize * flagJ);
 		collider.addAgent(flag);
 		
 		for (String id : playerIds) {
@@ -139,9 +143,9 @@ public class Game extends Thread implements MissileCrashListener {
 			createPlayerUnit(id);
 		}
 		
-		collider.setFriendship(new CollisionFriendship<Box>() {
+		collider.setFriendship(new CollisionFriendship() {
 			@Override
-			public boolean canCollide(BoxConstruction<Box> con1, BoxConstruction<Box> con2) {
+			public boolean canCollide(BoxConstruction<?> con1, BoxConstruction<?> con2) {
 				PlayerUnit t = null;
 				Missile m = null;
 				if ((con1 instanceof PlayerUnit) && (con2 instanceof Missile)) {
@@ -217,6 +221,10 @@ public class Game extends Thread implements MissileCrashListener {
 		return this.field[y * fieldWidth + x].getType();
 	}
 	
+	public boolean isOver() {
+		return isOver;
+	}
+	
 	private boolean removeBricksAfterCrash(double i, double j, double upI, double upJ, double rightI, double rightJ) {
 		// Checking boundaries
 		if (i < 0 || i >= fieldWidth || j < 0 || j >= fieldHeight) return false;
@@ -237,60 +245,64 @@ public class Game extends Thread implements MissileCrashListener {
 	}
 	
 	@Override
-	public void missileCrashed(Missile missile, BoxConstruction<?> target) {
+	public void missileCrashed(Missile missile, Collection<BoxConstruction<?>> targets) {
 		Player missileOwner = findMissileOwner(missile);
-		if (target instanceof PlayerUnit) {
-			PlayerUnit t = (PlayerUnit)target;
-			if (missileOwner.getUnit() != t) {
-				String id = findPlayerIdByTank(t);
-				String myId = findPlayerId(missileOwner);
-				System.out.println("Player " + id + " is killed by player " + myId);
-				players.get(myId).incrementFrags();
-				createPlayerUnit(id);
-			}
-		} else if (target instanceof Missile) {
-			// If to missiles collide they both are destroyed
-			Missile targetMissile = (Missile)target;
-			Player targetOwner = findMissileOwner(targetMissile);
-			targetOwner.removeMissile(targetMissile);
-		} else if (target instanceof Cell) {
-			// A missile hit a brick wall
-			Cell c = (Cell)target;
-			if (c.getType().isBrick()) {
-				
-				// Destroying the brick instantly ^_^
-				c.setType(CellType.EMPTY);
-			
-				// Searching for adjacent bricks to destroy
-	
-				// Assuming the missile is moving "right", calculting "up" vector
-				double rightI = Math.cos(missile.angle * Math.PI / 180), rightJ = Math.sin(missile.angle * Math.PI / 180);
-				double upI = rightJ, upJ = -rightI;
-				
-				// Checking if the missile did hit "above" or "below" the brick center
-				double fromBrickToMissileX = missile.posX - c.getX(),
-				       fromBrickToMissileY = missile.posY - c.getY();
-				boolean missileHitsAboveCenter = (upJ * fromBrickToMissileY + upI * fromBrickToMissileX) > 0;
-				
-				if (!missileHitsAboveCenter) { upJ *= -1; upI *= -1; }	// Now it is above ;)
-				
-				// walking up
-				double i = c.getI() + 0.5, j = c.getJ() + 0.5;	// we add 0.5 to fix rounding 0.9999...
-				for (int k = 1; k < 3; k++) {
-					i += upI; j += upJ;
-					if (!removeBricksAfterCrash(i, j, upI, upJ, rightI, rightJ)) break;
+		for (BoxConstruction<?> target : targets) {
+			if (target instanceof PlayerUnit) {
+				PlayerUnit t = (PlayerUnit)target;
+				if (missileOwner.getUnit() != t) {
+					String id = findPlayerIdByTank(t);
+					String myId = findPlayerId(missileOwner);
+					System.out.println("Player " + id + " is killed by player " + myId);
+					players.get(myId).incrementFrags();
+					createPlayerUnit(id);
 				}
-	
-				// walking down
-				i = c.getI() + 0.5; j = c.getJ() + 0.5;	// we add 0.5 to fix rounding 0.9999...
-				for (int k = 1; k < 2; k++) {
-					i -= upI; j -= upJ;
-					if (!removeBricksAfterCrash(i, j, upI, upJ, rightI, rightJ)) break;
-				}
-			}
-
-		}
+			} else if (target instanceof Missile) {
+				// If to missiles collide they both are destroyed
+				Missile targetMissile = (Missile)target;
+				Player targetOwner = findMissileOwner(targetMissile);
+				targetOwner.removeMissile(targetMissile);
+			} else if (target instanceof Cell) {
+				// A missile hit a brick wall
+				Cell c = (Cell)target;
+				if (c.getType().isBrick()) {
+					
+					// Destroying the brick instantly ^_^
+					c.setType(CellType.EMPTY);
+				
+					// Searching for adjacent bricks to destroy
 		
+					// Assuming the missile is moving "right", calculting "up" vector
+					double rightI = Math.cos(missile.angle * Math.PI / 180), rightJ = Math.sin(missile.angle * Math.PI / 180);
+					double upI = rightJ, upJ = -rightI;
+					
+					// Checking if the missile did hit "above" or "below" the brick center
+					double fromBrickToMissileX = missile.posX - c.getX(),
+					       fromBrickToMissileY = missile.posY - c.getY();
+					boolean missileHitsAboveCenter = (upJ * fromBrickToMissileY + upI * fromBrickToMissileX) > 0;
+					
+					if (!missileHitsAboveCenter) { upJ *= -1; upI *= -1; }	// Now it is above ;)
+					
+					// walking up
+					double i = c.getI() + 0.5, j = c.getJ() + 0.5;	// we add 0.5 to fix rounding 0.9999...
+					for (int k = 1; k < 3; k++) {
+						i += upI; j += upJ;
+						if (!removeBricksAfterCrash(i, j, upI, upJ, rightI, rightJ)) break;
+					}
+		
+					// walking down
+					i = c.getI() + 0.5; j = c.getJ() + 0.5;	// we add 0.5 to fix rounding 0.9999...
+					for (int k = 1; k < 2; k++) {
+						i -= upI; j -= upJ;
+						if (!removeBricksAfterCrash(i, j, upI, upJ, rightI, rightJ)) break;
+					}
+				}
+			} else if (target instanceof Flag) {
+				((Flag) target).setCrashed(true);
+				isOver = true;
+				
+			}
+		}
 		missileOwner.removeMissile(missile);
 	}
 }

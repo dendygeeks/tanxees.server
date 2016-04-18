@@ -9,6 +9,7 @@ public class GlobalServices {
 	static {
     	GsonBuilder builder = new GsonBuilder();
     	builder.excludeFieldsWithoutExposeAnnotation();
+    	//builder.setPrettyPrinting();
     	
     	builder.registerTypeAdapter(Cell.class, new Cell.TypeAdapter());
     	builder.registerTypeAdapter(Player.Appearance.class, new Player.Appearance.TypeAdapter());

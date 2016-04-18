@@ -1,6 +1,5 @@
 package bfbc.tank.core;
 
-import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.DeltaXY;
 
@@ -9,10 +8,10 @@ public class Missile extends Unit {
 	
 	private double velX, velY;
 	
-	private BoxConstructionCollider<Box> collider;
+	private BoxConstructionCollider collider;
 	private MissileCrashListener crashListener;
 
-	Missile(MissileCrashListener crashListener, BoxConstructionCollider<Box> collider, double posX, double posY, double angle, double velocity)
+	Missile(MissileCrashListener crashListener, BoxConstructionCollider collider, double posX, double posY, double angle, double velocity)
 	{
 		super(SIZE, SIZE, posX, posY, angle);
 		this.crashListener = crashListener;
@@ -23,10 +22,10 @@ public class Missile extends Unit {
 	
 	public void frameStep() {
 		DeltaXY delta = new DeltaXY(velX * Game.MODEL_TICK, velY * Game.MODEL_TICK);
-		BoxConstructionCollider<Box>.MoveRotateResult mr = collider.tryMove(this, delta);
+		BoxConstructionCollider.MoveRotateResult mr = collider.tryMove(this, delta);
 		
 		if (!mr.targets.isEmpty()) {
-			crashListener.missileCrashed(this, mr.mostAggressiveIntersectionTarget());
+			crashListener.missileCrashed(this, /*mr.mostAggressiveIntersectionTarget()*/ mr.targets.keySet() );
 		}
 	}
 }

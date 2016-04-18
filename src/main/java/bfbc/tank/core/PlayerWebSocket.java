@@ -85,7 +85,7 @@ public class PlayerWebSocket implements StateUpdateHandler {
     	unitTypes.put(PLAYER_ID_BOT1, Player.UnitType.MEDIUM);
     	unitTypes.put(PLAYER_ID_BOT2, Player.UnitType.MEDIUM);
     	
-    	game = new Game(this, 26, 26, map, playerIds, appearances, unitTypes, spawnConfigs);
+    	game = new Game(this, 26, 26, map, playerIds, appearances, unitTypes, spawnConfigs, 27, 51);
 		
 		synchronized (controlledPlayers) {
 			for (String id : playerIds) {

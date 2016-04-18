@@ -71,7 +71,7 @@ public class Player {
 	}
 	
 	private MissileCrashListener missileCrashListener;
-	private BoxConstructionCollider<Box> collider;
+	private BoxConstructionCollider collider;
 	
 	@Expose
 	private PlayerUnit unit;
@@ -99,7 +99,7 @@ public class Player {
 	}
 
 
-	public Player(MissileCrashListener missileCrashListener, BoxConstructionCollider<Box> collider, Appearance appearance, UnitType unitType) {
+	public Player(MissileCrashListener missileCrashListener, BoxConstructionCollider collider, Appearance appearance, UnitType unitType) {
 		this.missileCrashListener = missileCrashListener;
 		this.collider = collider;
 		this.frags = 0;

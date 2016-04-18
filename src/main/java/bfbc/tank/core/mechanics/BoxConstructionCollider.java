@@ -8,16 +8,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BoxConstructionCollider<T extends Box> {
+public class BoxConstructionCollider {
 
-	public interface CollisionFriendship<T extends Box> {
-		boolean canCollide(BoxConstruction<T> con1, BoxConstruction<T> con2);
+	public interface CollisionFriendship {
+		boolean canCollide(BoxConstruction<?> con1, BoxConstruction<?> con2);
 	}
 	
 	public class CollisionResult {
-		public final Map<BoxConstruction<T>, IntersectionResult> targets;
-		public CollisionResult(Map<BoxConstruction<T>, IntersectionResult> targets) {
-			this.targets = new LinkedHashMap<BoxConstruction<T>, IntersectionResult>(targets);
+		public final Map<BoxConstruction<?>, IntersectionResult> targets;
+		public CollisionResult(Map<BoxConstruction<?>, IntersectionResult> targets) {
+			this.targets = new LinkedHashMap<BoxConstruction<?>, IntersectionResult>(targets);
 		}
 
 		public CollisionResult(CollisionResult other) {
@@ -30,7 +30,7 @@ public class BoxConstructionCollider<T extends Box> {
 		}
 		
 		public void subtract(CollisionResult other) {
-			for (BoxConstruction<T> key : other.targets.keySet()) {
+			for (BoxConstruction<?> key : other.targets.keySet()) {
 				targets.remove(key);
 			}
 		}
@@ -39,21 +39,21 @@ public class BoxConstructionCollider<T extends Box> {
 	public class MoveRotateResult {
 		public final boolean success;
 		public final DeltaXY delta;
-		public final Map<BoxConstruction<T>, IntersectionResult> targets;
-		public MoveRotateResult(boolean success, DeltaXY delta, Map<BoxConstruction<T>, IntersectionResult> targets) {
+		public final Map<BoxConstruction<?>, IntersectionResult> targets;
+		public MoveRotateResult(boolean success, DeltaXY delta, Map<BoxConstruction<?>, IntersectionResult> targets) {
 			this.success = success;
 			this.delta = delta;
-			this.targets = Collections.unmodifiableMap(new LinkedHashMap<BoxConstruction<T>, IntersectionResult>(targets));
+			this.targets = Collections.unmodifiableMap(new LinkedHashMap<BoxConstruction<?>, IntersectionResult>(targets));
 		}
 
-		public BoxConstruction<T> mostAggressiveIntersectionTarget() {
+		public BoxConstruction<?> mostAggressiveIntersectionTarget() {
 			if (targets.isEmpty()) return null;
 			return targets.keySet().iterator().next();
 		}
 	}
 	
-	private List<BoxConstruction<? extends T>> agents = new ArrayList<>();
-	private CollisionFriendship<T> friendship;
+	private List<BoxConstruction<?>> agents = new ArrayList<>();
+	private CollisionFriendship friendship;
 	
 	public BoxConstructionCollider() {
 		
@@ -63,24 +63,23 @@ public class BoxConstructionCollider<T extends Box> {
 		agents.clear();
 	}
 	
-	public boolean containsAgent(BoxConstruction<? extends T> agent) {
+	public boolean containsAgent(BoxConstruction<?> agent) {
 		return agents.contains(agent);
 	}
 	
-	public synchronized void addAgent(BoxConstruction<? extends T> agent) {
+	public synchronized void addAgent(BoxConstruction<?> agent) {
 		agents.add(agent);
 	}
 	
-	public void removeAgent(BoxConstruction<? extends T> agent) {
+	public void removeAgent(BoxConstruction<?> agent) {
 		agents.remove(agent);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public synchronized CollisionResult getIntersectionDepth(BoxConstruction<T> con) {
+	public synchronized CollisionResult getIntersectionDepth(BoxConstruction<?> con) {
 		//IntersectionResult res = null; 
-		BoxConstruction<T>[] agArr = agents.toArray(new BoxConstruction[] { });
+		BoxConstruction<?>[] agArr = agents.toArray(new BoxConstruction[] { });
 		
-		HashMap<BoxConstruction<T>, IntersectionResult> targets = new HashMap<>();
+		HashMap<BoxConstruction<?>, IntersectionResult> targets = new HashMap<>();
 		for (int i = 0; i < agArr.length; i++) {
 			if (agArr[i] != con && (friendship == null || friendship.canCollide(agArr[i], con))) {
 				IntersectionResult d = BoxConstruction.getIntersectionDepth(agArr[i], con);
@@ -97,24 +96,24 @@ public class BoxConstructionCollider<T extends Box> {
 		}
 		
 		// Sorting targets by area lowering criteria
-		List<BoxConstruction<T>> boxCons = new ArrayList<>(targets.keySet());
+		List<BoxConstruction<?>> boxCons = new ArrayList<>(targets.keySet());
 		
-		boxCons.sort(new Comparator<BoxConstruction<T>>() {
+		boxCons.sort(new Comparator<BoxConstruction<?>>() {
 			@Override
-			public int compare(BoxConstruction<T> o1, BoxConstruction<T> o2) {
+			public int compare(BoxConstruction<?> o1, BoxConstruction<?> o2) {
 				return targets.get(o1).area < targets.get(o2).area ? 1 : -1; 
 			}
 		});
 		
-		LinkedHashMap<BoxConstruction<T>, IntersectionResult> sortedTargets = new LinkedHashMap<>();
-		for (BoxConstruction<T> boxCon : boxCons) {
+		LinkedHashMap<BoxConstruction<?>, IntersectionResult> sortedTargets = new LinkedHashMap<>();
+		for (BoxConstruction<?> boxCon : boxCons) {
 			sortedTargets.put(boxCon, targets.get(boxCon));
 		}
 		
 		return new CollisionResult(sortedTargets);
 	}
 	
-	private MoveRotateResult tryRotateSingle(BoxConstruction<T> con, DeltaAngle delta) {
+	private MoveRotateResult tryRotateSingle(BoxConstruction<?> con, DeltaAngle delta) {
 		CollisionResult before = getIntersectionDepth(con);
 		con.rotate(delta);
 		CollisionResult after = getIntersectionDepth(con);
@@ -172,7 +171,7 @@ public class BoxConstructionCollider<T extends Box> {
 		return new MoveRotateResult(deltaRes != null, deltaRes, modAfter.targets);
 	}
 	
-	public MoveRotateResult tryRotate(BoxConstruction<T> con, DeltaAngle delta) {
+	public MoveRotateResult tryRotate(BoxConstruction<?> con, DeltaAngle delta) {
 		MoveRotateResult mrr;
 		if (delta != DeltaAngle.ZERO) {
 			if (delta == DeltaAngle.PI) {
@@ -192,7 +191,7 @@ public class BoxConstructionCollider<T extends Box> {
 		return mrr;
 	}
 	
-	public synchronized MoveRotateResult tryMove(BoxConstruction<T> con, DeltaXY delta) {
+	public synchronized MoveRotateResult tryMove(BoxConstruction<?> con, DeltaXY delta) {
 		CollisionResult before = getIntersectionDepth(con);
 		
 		//if (before.targets.size() > 0) throw new RuntimeException("Invalid state before movement");
@@ -221,7 +220,7 @@ public class BoxConstructionCollider<T extends Box> {
 	}
 	
 	
-	public synchronized void setFriendship(CollisionFriendship<T> friendship) {
+	public synchronized void setFriendship(CollisionFriendship friendship) {
 		this.friendship = friendship;
 	}
 }

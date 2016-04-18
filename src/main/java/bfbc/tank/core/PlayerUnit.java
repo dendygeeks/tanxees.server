@@ -1,10 +1,10 @@
 package bfbc.tank.core;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import com.google.gson.annotations.Expose;
 
-import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.BoxConstructionCollider.MoveRotateResult;
@@ -53,7 +53,7 @@ public class PlayerUnit extends Unit {
 
 	private double dragVelocity = 1.0 * velocity;	// From the ceiling
 
-	private BoxConstructionCollider<Box> collider;
+	private BoxConstructionCollider collider;
 	private MissileCrashListener crashListener;
 	
 	public boolean isMoving() {
@@ -83,7 +83,7 @@ public class PlayerUnit extends Unit {
 		return (dirV ^ isY) ? sizeW : sizeL;
 	}
 	
-	public PlayerUnit(Player player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving, Double angle) {
+	public PlayerUnit(Player player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving, Double angle) {
 		super(sizeForDir(false, sizeW, sizeL, spawnConfig.direction), 
 		      sizeForDir(true, sizeW, sizeL, spawnConfig.direction), 
 		      spawnConfig.getPosX(cellSize), 
@@ -97,15 +97,15 @@ public class PlayerUnit extends Unit {
 		this.moving = moving;
 	}
 
-	public PlayerUnit(Player player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider<Box> collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving) {
+	public PlayerUnit(Player player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving) {
 		this(player, sizeW, sizeL, cellSize, collider, crashListener, spawnConfig, activeCommand, moving, null);
 	}
 
 	private void safeMove(DeltaXY dxy) {
-		BoxConstructionCollider<Box>.MoveRotateResult mr = collider.tryMove(this, dxy);
-		for (BoxConstruction<Box> t : mr.targets.keySet()) {
+		BoxConstructionCollider.MoveRotateResult mr = collider.tryMove(this, dxy);
+		for (BoxConstruction<?> t : mr.targets.keySet()) {
 			if (t instanceof Missile) {
-				crashListener.missileCrashed((Missile)t, this);
+				crashListener.missileCrashed((Missile)t, Arrays.asList(new BoxConstruction[] { this }));
 			}
 		}
 	}
