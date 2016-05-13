@@ -2,13 +2,15 @@ package bfbc.tank.core;
 
 import com.google.gson.annotations.Expose;
 
-public class Flag extends Unit {
+import bfbc.tank.core.api.Flag;
+
+public class ServerFlag extends ServerUnit implements Flag {
 	private static final double SIZE = 44;
 	
 	@Expose
 	private boolean isCrashed = false;
 	
-	Flag(double posX, double posY)
+	ServerFlag(double posX, double posY)
 	{
 		super(SIZE, SIZE, posX, posY, 0);
 	}
@@ -25,4 +27,5 @@ public class Flag extends Unit {
 	public boolean isActive() {
 		return !isCrashed;
 	}
+
 }

@@ -7,15 +7,17 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import bfbc.tank.core.api.Cell;
+import bfbc.tank.core.api.CellType;
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.DeltaAngle;
 import bfbc.tank.core.mechanics.DeltaXY;
 
-public class Cell implements Box, BoxConstruction<Cell> {
+public class ServerCell implements Cell, Box, BoxConstruction<ServerCell> {
 
-	static class TypeAdapter extends com.google.gson.TypeAdapter<Cell> {
-		public Cell read(JsonReader reader) throws IOException {
+	static class TypeAdapter extends com.google.gson.TypeAdapter<ServerCell> {
+		public ServerCell read(JsonReader reader) throws IOException {
 			// TODO It can't read
 			/*if (reader.peek() == JsonToken.NULL) {
 				reader.nextNull();
@@ -26,7 +28,7 @@ public class Cell implements Box, BoxConstruction<Cell> {
 			return null;
 		}
 
-		public void write(JsonWriter writer, Cell value) throws IOException {
+		public void write(JsonWriter writer, ServerCell value) throws IOException {
 			if (value == null) {
 				writer.nullValue();
 				return;
@@ -36,7 +38,7 @@ public class Cell implements Box, BoxConstruction<Cell> {
 		}
 	}
 	
-	private Game game;
+	private ServerGame game;
 	
 	@Expose
 	private CellType type;
@@ -81,14 +83,14 @@ public class Cell implements Box, BoxConstruction<Cell> {
 
 	}
 	
-	public Cell(Game game, int i, int j, CellType type) {
+	public ServerCell(ServerGame game, int i, int j, CellType type) {
 		this.game = game;
 		this.i = i;
 		this.j = j;
 		this.type = type; //CellType.E;
 	}
 
-	public Cell(Game game, int i, int j) {
+	public ServerCell(ServerGame game, int i, int j) {
 		this(game, i, j, CellType.EMPTY);
 	}
 
@@ -106,15 +108,15 @@ public class Cell implements Box, BoxConstruction<Cell> {
 	}
 	
 	@Override
-	public Iterator<Cell> iterator() {
-		Iterator<Cell> res = new Iterator<Cell>() {
+	public Iterator<ServerCell> iterator() {
+		Iterator<ServerCell> res = new Iterator<ServerCell>() {
 			
 			private boolean hasNext = true;
 			
 			@Override
-			public Cell next() {
+			public ServerCell next() {
 				hasNext = false;
-				return Cell.this;
+				return ServerCell.this;
 			}
 			
 			@Override

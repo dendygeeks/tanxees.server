@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import com.google.gson.annotations.Expose;
 
+import bfbc.tank.core.api.Unit;
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.DeltaAngle;
@@ -12,7 +13,7 @@ import bfbc.tank.core.mechanics.DeltaXY;
 /**
  * Something that can move and rotate
  */
-public class Unit implements Box, BoxConstruction<Box> {
+public class ServerUnit implements Unit, Box, BoxConstruction<Box> {
 	
 	@Expose
 	protected double sizeX, sizeY;
@@ -23,7 +24,7 @@ public class Unit implements Box, BoxConstruction<Box> {
 	@Expose
 	protected double angle;
 	
-	public Unit(double sizeX, double sizeY, double posX, double posY, double angle) {
+	public ServerUnit(double sizeX, double sizeY, double posX, double posY, double angle) {
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
 		this.posX = posX;
@@ -110,7 +111,7 @@ public class Unit implements Box, BoxConstruction<Box> {
 			@Override
 			public Box next() {
 				hasNext = false;
-				return Unit.this;
+				return ServerUnit.this;
 			}
 			
 			@Override
@@ -119,5 +120,15 @@ public class Unit implements Box, BoxConstruction<Box> {
 			}
 		};
 		return res;
+	}
+
+	@Override
+	public double getSizeX() {
+		return sizeX;
+	}
+
+	@Override
+	public double getSizeY() {
+		return sizeY;
 	}
 }

@@ -1,4 +1,4 @@
-package bfbc.tank.core;
+package bfbc.tank.core.api;
 
 public enum CellType {
 	EMPTY("E"), 

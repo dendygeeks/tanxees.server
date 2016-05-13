@@ -5,13 +5,14 @@ import java.util.HashMap;
 
 import com.google.gson.annotations.Expose;
 
+import bfbc.tank.core.api.PlayerUnit;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.BoxConstructionCollider.MoveRotateResult;
 import bfbc.tank.core.mechanics.DeltaAngle;
 import bfbc.tank.core.mechanics.DeltaXY;
 
-public class PlayerUnit extends Unit {
+public class ServerPlayerUnit extends ServerUnit implements PlayerUnit {
 	
 	public static class SpawnConfig {
 		public final Direction direction;
@@ -64,7 +65,7 @@ public class PlayerUnit extends Unit {
 	
 	private Direction direction;
 
-	private Player player;
+	private ServerPlayer player;
 
 	public Direction getDirection() {
 		return direction;
@@ -83,7 +84,7 @@ public class PlayerUnit extends Unit {
 		return (dirV ^ isY) ? sizeW : sizeL;
 	}
 	
-	public PlayerUnit(Player player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving, Double angle) {
+	public ServerPlayerUnit(ServerPlayer player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving, Double angle) {
 		super(sizeForDir(false, sizeW, sizeL, spawnConfig.direction), 
 		      sizeForDir(true, sizeW, sizeL, spawnConfig.direction), 
 		      spawnConfig.getPosX(cellSize), 
@@ -97,15 +98,15 @@ public class PlayerUnit extends Unit {
 		this.moving = moving;
 	}
 
-	public PlayerUnit(Player player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving) {
+	public ServerPlayerUnit(ServerPlayer player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving) {
 		this(player, sizeW, sizeL, cellSize, collider, crashListener, spawnConfig, activeCommand, moving, null);
 	}
 
 	private void safeMove(DeltaXY dxy) {
 		BoxConstructionCollider.MoveRotateResult mr = collider.tryMove(this, dxy);
 		for (BoxConstruction<?> t : mr.targets.keySet()) {
-			if (t instanceof Missile) {
-				crashListener.missileCrashed((Missile)t, Arrays.asList(new BoxConstruction[] { this }));
+			if (t instanceof ServerMissile) {
+				crashListener.missileCrashed((ServerMissile)t, Arrays.asList(new BoxConstruction[] { this }));
 			}
 		}
 	}
@@ -155,10 +156,10 @@ public class PlayerUnit extends Unit {
 		boolean notRotating = false;
 		double angleSmall = angleVel / 50;
 		if (visualAngleDelta > angleSmall) {
-			angle += angleVel * Game.MODEL_TICK;
+			angle += angleVel * ServerGame.MODEL_TICK;
 			moving = true;
 		} else if (visualAngleDelta < -angleSmall) {
-			angle -= angleVel * Game.MODEL_TICK;
+			angle -= angleVel * ServerGame.MODEL_TICK;
 			moving = true;
 		} else {
 			angle = DIRECTION_ANGLES.get(direction);
@@ -187,8 +188,8 @@ public class PlayerUnit extends Unit {
 				       velY = dragVelocity * targetFactor * oldDirY * rotationFactor;
 	
 				DeltaXY dxy = new DeltaXY(
-						velX * Game.MODEL_TICK,
-						velY * Game.MODEL_TICK
+						velX * ServerGame.MODEL_TICK,
+						velY * ServerGame.MODEL_TICK
 				);
 				safeMove(dxy);
 			//}
@@ -197,9 +198,9 @@ public class PlayerUnit extends Unit {
 
 		double displacement;
 		if (!moveBackwards) { 
-			displacement = velocity * Game.MODEL_TICK;
+			displacement = velocity * ServerGame.MODEL_TICK;
 		} else {
-			displacement = backVelocity * Game.MODEL_TICK;
+			displacement = backVelocity * ServerGame.MODEL_TICK;
 		}
 		
 		if (notRotating && wantToFire) {
@@ -209,7 +210,7 @@ public class PlayerUnit extends Unit {
 			}
 			
 			if (player.getMissilesCount() == 0) {
-				Missile newMissile = new Missile(crashListener, collider, posX, posY, angle, missileVelocity);
+				ServerMissile newMissile = new ServerMissile(crashListener, collider, posX, posY, angle, missileVelocity);
 				player.addMissile(newMissile);
 			}
 			wantToFire = false;
@@ -221,6 +222,11 @@ public class PlayerUnit extends Unit {
 					displacement * Math.sin(angle / 180 * Math.PI));
 			safeMove(dxy);
 		}
+	}
+
+	@Override
+	public boolean getMoving() {
+		return moving;
 	}
 	
 }

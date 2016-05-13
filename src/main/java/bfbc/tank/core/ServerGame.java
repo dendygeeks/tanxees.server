@@ -2,16 +2,20 @@ package bfbc.tank.core;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.gson.annotations.Expose;
 
-import bfbc.tank.core.mechanics.Box;
+import bfbc.tank.core.api.Cell;
+import bfbc.tank.core.api.CellType;
+import bfbc.tank.core.api.Flag;
+import bfbc.tank.core.api.Game;
+import bfbc.tank.core.api.Player;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.BoxConstructionCollider.CollisionFriendship;
 
-public class Game extends Thread implements MissileCrashListener {
+public class ServerGame extends Thread implements Game, MissileCrashListener {
 	
 	public static double MODEL_TICK = 1.0 / 120;	// 2 * 60FPS
 	public static double FRONTEND_TICK = 1.0 / 30;	// 30FPS
@@ -28,12 +32,12 @@ public class Game extends Thread implements MissileCrashListener {
 	public boolean isOver = false;
 	
 	public static interface StateUpdateHandler {
-		void gameStateUpdated(Game state);
+		void gameStateUpdated(ServerGame state);
 	}
 	
 	private StateUpdateHandler stateUpdateHandler;
 	
-	private HashMap<String, PlayerUnit.SpawnConfig> spawnConfigs; 
+	private HashMap<String, ServerPlayerUnit.SpawnConfig> spawnConfigs; 
 	
 	private BoxConstructionCollider collider = new BoxConstructionCollider();
 	//private ArrayList<CellBoxConstruction> cells = new ArrayList<>();
@@ -41,10 +45,10 @@ public class Game extends Thread implements MissileCrashListener {
 	@Expose
 	private volatile HashMap<String, Player> players;
 	@Expose
-	private volatile Flag flag;
+	private volatile ServerFlag flag;
 	
 	@Expose
-	private volatile Cell[] field;// = new Cell[fieldWidth * fieldHeight];
+	private volatile ServerCell[] field;// = new Cell[fieldWidth * fieldHeight];
 	
 	private double time;
 	private double deltaTime() {
@@ -54,23 +58,23 @@ public class Game extends Thread implements MissileCrashListener {
 		time += ticks * MODEL_TICK;
 	}
 	
-	String findPlayerId(Player player) {
-		for (Map.Entry<String, Player> e : players.entrySet()) {
+	String findPlayerId(ServerPlayer player) {
+		for (Entry<String, Player> e : players.entrySet()) {
 			if (e.getValue() == player) return e.getKey();
 		}
 		return null;
 	}
 
-	String findPlayerIdByTank(PlayerUnit tank) {
-		for (Map.Entry<String, Player> e : players.entrySet()) {
+	String findPlayerIdByTank(ServerPlayerUnit tank) {
+		for (Entry<String, Player> e : players.entrySet()) {
 			if (e.getValue().getUnit() == tank) return e.getKey();
 		}
 		return null;
 	}
 	
-	Player findMissileOwner(Missile missile) {
+	ServerPlayer findMissileOwner(ServerMissile missile) {
 		for (Player p : players.values()) {
-			if (p.ownsMissile(missile)) return p;
+			if (((ServerPlayer)p).ownsMissile(missile)) return (ServerPlayer)p;
 		}
 		return null;
 	}
@@ -80,22 +84,22 @@ public class Game extends Thread implements MissileCrashListener {
 	}
 	
 	private void createPlayerUnit(String id) {
-		players.get(id).respawnUnit(cellSize, spawnConfigs.get(id));
+		((ServerPlayer)players.get(id)).respawnUnit(cellSize, spawnConfigs.get(id));
 	}
 	
-	public Game(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, Player.Appearance> appearances, HashMap<String, Player.UnitType> unitTypes, HashMap<String, PlayerUnit.SpawnConfig> spawnConfigs, int flagI, int flagJ) {
+	public ServerGame(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, ServerPlayer.Appearance> appearances, HashMap<String, ServerPlayer.UnitType> unitTypes, HashMap<String, ServerPlayerUnit.SpawnConfig> spawnConfigs, int flagI, int flagJ) {
 		this.spawnConfigs = new HashMap<>(spawnConfigs);
 		
 		if (map == null) throw new IllegalArgumentException("Map shouldn't be null");
 		if (map.length != mapWidth * mapHeight) throw new IllegalArgumentException("Invalid map size");
 		this.fieldWidth = mapWidth * 2 + 2;
 		this.fieldHeight = mapHeight * 2 + 2;
-		field = new Cell[fieldWidth * fieldHeight];
+		field = new ServerCell[fieldWidth * fieldHeight];
 		
 		// Initializing the field
 		for (int j = 0; j < fieldHeight; j++) {
 			for (int i = 0; i < fieldWidth; i++) {
-				field[j * fieldWidth + i] = new Cell(this, i, j);
+				field[j * fieldWidth + i] = new ServerCell(this, i, j);
 				//cells.add(field[j * fieldWidth + i]);
 				collider.addAgent(field[j * fieldWidth + i]);
 			}
@@ -135,25 +139,25 @@ public class Game extends Thread implements MissileCrashListener {
 		time = (double)System.currentTimeMillis() / 1000;
 
 		players = new HashMap<String, Player>();
-		flag = new Flag(cellSize * flagI, cellSize * flagJ);
+		flag = new ServerFlag(cellSize * flagI, cellSize * flagJ);
 		collider.addAgent(flag);
 		
 		for (String id : playerIds) {
-			players.put(id, new Player(this, collider, appearances.get(id), unitTypes.get(id)));
+			players.put(id, new ServerPlayer(this, collider, appearances.get(id), unitTypes.get(id)));
 			createPlayerUnit(id);
 		}
 		
 		collider.setFriendship(new CollisionFriendship() {
 			@Override
 			public boolean canCollide(BoxConstruction<?> con1, BoxConstruction<?> con2) {
-				PlayerUnit t = null;
-				Missile m = null;
-				if ((con1 instanceof PlayerUnit) && (con2 instanceof Missile)) {
-					t = (PlayerUnit) con1;
-					m = (Missile) con2;
-				} else if ((con2 instanceof PlayerUnit) && (con1 instanceof Missile)) {
-					t = (PlayerUnit) con2;
-					m = (Missile) con1;
+				ServerPlayerUnit t = null;
+				ServerMissile m = null;
+				if ((con1 instanceof ServerPlayerUnit) && (con2 instanceof ServerMissile)) {
+					t = (ServerPlayerUnit) con1;
+					m = (ServerMissile) con2;
+				} else if ((con2 instanceof ServerPlayerUnit) && (con1 instanceof ServerMissile)) {
+					t = (ServerPlayerUnit) con2;
+					m = (ServerMissile) con1;
 				}
 				
 				if (t != null && m != null) {
@@ -169,9 +173,9 @@ public class Game extends Thread implements MissileCrashListener {
 	}
 	
 	public synchronized void frameStep() {
-		HashMap<String, Player> playersClone = new HashMap<>(players);
+		HashMap<String,Player> playersClone = new HashMap<>(players);
 		for (Player p : playersClone.values()) {
-			p.frameStep();
+			((ServerPlayer)p).frameStep();
 		}
 	}
 	
@@ -200,12 +204,12 @@ public class Game extends Thread implements MissileCrashListener {
 
 	}
 	
-	public void setDebugData(String id, DebugData debugData) {
-		this.players.get(id).setDebugData(debugData);
+	public void setDebugData(String id, ServerDebugData debugData) {
+		((ServerPlayer)players.get(id)).setDebugData(debugData);
 	}
 	
 	public synchronized void setPlayerKeys(String id, PlayerKeys playerCommand) {
-		this.players.get(id).setPlayerKeys(playerCommand);
+		((ServerPlayer)players.get(id)).setPlayerKeys(playerCommand);
 	}
 	
 	public synchronized String toJson() {
@@ -245,26 +249,26 @@ public class Game extends Thread implements MissileCrashListener {
 	}
 	
 	@Override
-	public void missileCrashed(Missile missile, Collection<BoxConstruction<?>> targets) {
-		Player missileOwner = findMissileOwner(missile);
+	public void missileCrashed(ServerMissile missile, Collection<BoxConstruction<?>> targets) {
+		ServerPlayer missileOwner = findMissileOwner(missile);
 		for (BoxConstruction<?> target : targets) {
-			if (target instanceof PlayerUnit) {
-				PlayerUnit t = (PlayerUnit)target;
+			if (target instanceof ServerPlayerUnit) {
+				ServerPlayerUnit t = (ServerPlayerUnit)target;
 				if (missileOwner.getUnit() != t) {
 					String id = findPlayerIdByTank(t);
 					String myId = findPlayerId(missileOwner);
 					System.out.println("Player " + id + " is killed by player " + myId);
-					players.get(myId).incrementFrags();
+					((ServerPlayer)players.get(myId)).incrementFrags();
 					createPlayerUnit(id);
 				}
-			} else if (target instanceof Missile) {
+			} else if (target instanceof ServerMissile) {
 				// If to missiles collide they both are destroyed
-				Missile targetMissile = (Missile)target;
-				Player targetOwner = findMissileOwner(targetMissile);
+				ServerMissile targetMissile = (ServerMissile)target;
+				ServerPlayer targetOwner = findMissileOwner(targetMissile);
 				targetOwner.removeMissile(targetMissile);
-			} else if (target instanceof Cell) {
+			} else if (target instanceof ServerCell) {
 				// A missile hit a brick wall
-				Cell c = (Cell)target;
+				ServerCell c = (ServerCell)target;
 				if (c.getType().isBrick()) {
 					
 					// Destroying the brick instantly ^_^
@@ -297,12 +301,36 @@ public class Game extends Thread implements MissileCrashListener {
 						if (!removeBricksAfterCrash(i, j, upI, upJ, rightI, rightJ)) break;
 					}
 				}
-			} else if (target instanceof Flag) {
-				((Flag) target).setCrashed(true);
+			} else if (target instanceof ServerFlag) {
+				((ServerFlag) target).setCrashed(true);
 				isOver = true;
 				
 			}
 		}
 		missileOwner.removeMissile(missile);
+	}
+	@Override
+	public double getCellSize() {
+		return cellSize;
+	}
+	@Override
+	public int getFieldWidth() {
+		return fieldWidth;
+	}
+	@Override
+	public int getFieldHeight() {
+		return fieldHeight;
+	}
+	@Override
+	public HashMap<String, Player> getPlayers() {
+		return players;
+	}
+	@Override
+	public Flag getFlag() {
+		return flag;
+	}
+	@Override
+	public Cell[] getField() {
+		return field;
 	}
 }

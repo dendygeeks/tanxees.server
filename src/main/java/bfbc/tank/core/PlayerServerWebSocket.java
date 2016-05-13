@@ -16,18 +16,19 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
 import com.google.gson.annotations.Expose;
 
-import bfbc.tank.core.Game.StateUpdateHandler;
-import bfbc.tank.core.PlayerUnit.SpawnConfig;
+import bfbc.tank.core.ServerGame.StateUpdateHandler;
+import bfbc.tank.core.ServerPlayerUnit.SpawnConfig;
+import bfbc.tank.core.api.CellType;
 
 @WebSocket(maxTextMessageSize = 1024 * 1024 * 10, maxBinaryMessageSize = 1024 * 1024 * 100)
-public class PlayerWebSocket implements StateUpdateHandler {
+public class PlayerServerWebSocket implements StateUpdateHandler {
 
 	// Store sessions if you want to, for example, broadcast a message to all users
     private static final Queue<Session> sessions = new ConcurrentLinkedQueue<>();
     
     private Map<String, Session> controlledPlayers = new HashMap<>();
     
-    private Game game;
+    private ServerGame game;
     
     private static final String PLAYER_ID_PLAYER1 = "player1";
     private static final String PLAYER_ID_PLAYER2 = "player2";
@@ -35,7 +36,7 @@ public class PlayerWebSocket implements StateUpdateHandler {
     private static final String PLAYER_ID_BOT2 = "bot2";
 	private String[] playerIds = new String[] { PLAYER_ID_PLAYER1, PLAYER_ID_PLAYER2, PLAYER_ID_BOT1, PLAYER_ID_BOT2 };
     
-    public PlayerWebSocket() {
+    public PlayerServerWebSocket() {
     	// Walls
     	CellType __ = CellType.EMPTY, _C = CellType.CONCRETE, _B = CellType.BRICKS, DB = CellType.DARK_BRICKS;
     	CellType[] map = new CellType[] {
@@ -67,25 +68,25 @@ public class PlayerWebSocket implements StateUpdateHandler {
     		__, __, __, __, __, __, __, __, __, __, __, _B, DB, DB, _B, __, __, __, __, __, __, __, __, __, __, __
     	};
     	
-    	HashMap<String, PlayerUnit.SpawnConfig> spawnConfigs = new HashMap<>();
+    	HashMap<String, ServerPlayerUnit.SpawnConfig> spawnConfigs = new HashMap<>();
     	spawnConfigs.put(PLAYER_ID_PLAYER1, new SpawnConfig(new PointIJ(19, 50), Direction.UP));
     	spawnConfigs.put(PLAYER_ID_PLAYER2, new SpawnConfig(new PointIJ(33, 50), Direction.UP));
     	spawnConfigs.put(PLAYER_ID_BOT1, new SpawnConfig(new PointIJ(2, 2), Direction.UP));
     	spawnConfigs.put(PLAYER_ID_BOT2, new SpawnConfig(new PointIJ(50, 2), Direction.UP));
     	
-    	HashMap<String, Player.Appearance> appearances = new HashMap<>();
-    	appearances.put(PLAYER_ID_PLAYER1, Player.Appearance.GREEN);
-    	appearances.put(PLAYER_ID_PLAYER2, Player.Appearance.YELLOW);
-    	appearances.put(PLAYER_ID_BOT1, Player.Appearance.GRAY);
-    	appearances.put(PLAYER_ID_BOT2, Player.Appearance.GRAY);
+    	HashMap<String, ServerPlayer.Appearance> appearances = new HashMap<>();
+    	appearances.put(PLAYER_ID_PLAYER1, ServerPlayer.Appearance.GREEN);
+    	appearances.put(PLAYER_ID_PLAYER2, ServerPlayer.Appearance.YELLOW);
+    	appearances.put(PLAYER_ID_BOT1, ServerPlayer.Appearance.GRAY);
+    	appearances.put(PLAYER_ID_BOT2, ServerPlayer.Appearance.GRAY);
     	
-    	HashMap<String, Player.UnitType> unitTypes = new HashMap<>();
-    	unitTypes.put(PLAYER_ID_PLAYER1, Player.UnitType.MEDIUM);
-    	unitTypes.put(PLAYER_ID_PLAYER2, Player.UnitType.SMALL);
-    	unitTypes.put(PLAYER_ID_BOT1, Player.UnitType.MEDIUM);
-    	unitTypes.put(PLAYER_ID_BOT2, Player.UnitType.MEDIUM);
+    	HashMap<String, ServerPlayer.UnitType> unitTypes = new HashMap<>();
+    	unitTypes.put(PLAYER_ID_PLAYER1, ServerPlayer.UnitType.MEDIUM);
+    	unitTypes.put(PLAYER_ID_PLAYER2, ServerPlayer.UnitType.SMALL);
+    	unitTypes.put(PLAYER_ID_BOT1, ServerPlayer.UnitType.MEDIUM);
+    	unitTypes.put(PLAYER_ID_BOT2, ServerPlayer.UnitType.MEDIUM);
     	
-    	game = new Game(this, 26, 26, map, playerIds, appearances, unitTypes, spawnConfigs, 27, 51);
+    	game = new ServerGame(this, 26, 26, map, playerIds, appearances, unitTypes, spawnConfigs, 27, 51);
 		
 		synchronized (controlledPlayers) {
 			for (String id : playerIds) {
@@ -96,11 +97,11 @@ public class PlayerWebSocket implements StateUpdateHandler {
 
     private static class TheState {
     	@Expose
-    	private final Game game;
+    	private final ServerGame game;
     	@Expose
     	private final String activePlayerId;
 
-    	public TheState(Game game, String activePlayerId) {
+    	public TheState(ServerGame game, String activePlayerId) {
 			this.game = game;
 			this.activePlayerId = activePlayerId;
 		}
@@ -111,7 +112,7 @@ public class PlayerWebSocket implements StateUpdateHandler {
     }
     
     @Override
-    public void gameStateUpdated(Game state) {
+    public void gameStateUpdated(ServerGame state) {
     	synchronized (this) {
     		List<Session> sessionsToRemove = new ArrayList<>();
 

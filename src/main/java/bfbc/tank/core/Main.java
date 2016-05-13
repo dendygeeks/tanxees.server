@@ -23,7 +23,7 @@ public class Main {
     	port(9876);
     	staticFileLocation(STATIC_ROOT);
 
-    	webSocket("/player", PlayerWebSocket.class);
+    	webSocket("/player", PlayerServerWebSocket.class);
     	 	
 		get("/image/:name", (request, response) -> {
 			

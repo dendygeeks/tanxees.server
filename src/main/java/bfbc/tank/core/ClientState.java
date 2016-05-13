@@ -7,9 +7,9 @@ public class ClientState {
 	private final PlayerKeys keys;
 	
 	@Expose
-	private final DebugData debugData;
+	private final ServerDebugData debugData;
 
-	public ClientState(PlayerKeys keys, DebugData debug) {
+	public ClientState(PlayerKeys keys, ServerDebugData debug) {
 		this.keys = keys;
 		this.debugData = debug;
 	}
@@ -18,7 +18,7 @@ public class ClientState {
 		return keys;
 	}
 	
-	public DebugData getDebugData() {
+	public ServerDebugData getDebugData() {
 		return debugData;
 	}
 	
