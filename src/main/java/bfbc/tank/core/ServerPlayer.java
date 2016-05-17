@@ -1,18 +1,13 @@
 package bfbc.tank.core;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 
-import bfbc.tank.core.ServerPlayerUnit.SpawnConfig;
 import bfbc.tank.core.api.DebugData;
 import bfbc.tank.core.api.Missile;
 import bfbc.tank.core.api.Player;
-import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 
 public class ServerPlayer implements Player {

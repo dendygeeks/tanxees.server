@@ -1,11 +1,8 @@
 package bfbc.tank.core;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import com.google.gson.annotations.Expose;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 
 import bfbc.tank.core.api.Cell;
 import bfbc.tank.core.api.CellType;
@@ -16,28 +13,6 @@ import bfbc.tank.core.mechanics.DeltaXY;
 
 public class ServerCell implements Cell, Box, BoxConstruction<ServerCell> {
 
-	static class TypeAdapter extends com.google.gson.TypeAdapter<ServerCell> {
-		public ServerCell read(JsonReader reader) throws IOException {
-			// TODO It can't read
-			/*if (reader.peek() == JsonToken.NULL) {
-				reader.nextNull();
-				return null;
-			}
-			String name = reader.nextString();
-			return Cell.valueOf(name);*/
-			return null;
-		}
-
-		public void write(JsonWriter writer, ServerCell value) throws IOException {
-			if (value == null) {
-				writer.nullValue();
-				return;
-			}
-			String name = value.getType().code;
-			writer.value(name);
-		}
-	}
-	
 	private ServerGame game;
 	
 	@Expose
