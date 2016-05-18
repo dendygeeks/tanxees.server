@@ -1,6 +1,6 @@
-package bfbc.tank.core;
+package bfbc.tank.core.controllers;
 
-import bfbc.tank.core.model.TheStateModel;
+import bfbc.tank.api.model.TheStateModel;
 
 public class TheStateController {
 	private ServerGameController gameController;
@@ -16,6 +16,6 @@ public class TheStateController {
 	}
 	
 	public synchronized String toJson() {
-		return GlobalServices.getGson().toJson(theStateModel);
+		return theStateModel.toJson();
 	}
 }

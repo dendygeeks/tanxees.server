@@ -7,9 +7,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import bfbc.tank.core.api.Appearance;
-import bfbc.tank.core.api.UnitType;
-import bfbc.tank.core.model.CellModel;
+import bfbc.tank.api.interfaces.Appearance;
+import bfbc.tank.api.interfaces.UnitType;
+import bfbc.tank.api.model.CellModel;
 
 public class GlobalServices {
 	private static Gson gson;

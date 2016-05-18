@@ -1,12 +1,15 @@
-package bfbc.tank.core;
+package bfbc.tank.core.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import bfbc.tank.core.api.Appearance;
-import bfbc.tank.core.api.UnitType;
+import bfbc.tank.api.interfaces.Appearance;
+import bfbc.tank.api.interfaces.UnitType;
+import bfbc.tank.api.model.PlayerModel;
+import bfbc.tank.core.MissileCrashListener;
+import bfbc.tank.core.PlayerKeys;
+import bfbc.tank.core.SpawnConfig;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
-import bfbc.tank.core.model.PlayerModel;
 
 public class ServerPlayerController {
 
@@ -26,7 +29,7 @@ public class ServerPlayerController {
 /*	private PointIJ spawnPoint;
 	private Direction spawnDir;*/
 
-	public ServerPlayerController(MissileCrashListener missileCrashListener, BoxConstructionCollider collider, UnitType unitType, Appearance appearance, double cellSize, ServerPlayerUnitController.SpawnConfig spawnConfig) {
+	public ServerPlayerController(MissileCrashListener missileCrashListener, BoxConstructionCollider collider, UnitType unitType, Appearance appearance, double cellSize, SpawnConfig spawnConfig) {
 		this.playerModel = new PlayerModel(unitType, appearance, 0);
 		this.missileCrashListener = missileCrashListener;
 		this.collider = collider;

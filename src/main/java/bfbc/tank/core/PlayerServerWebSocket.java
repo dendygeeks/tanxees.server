@@ -14,14 +14,12 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
-import com.google.gson.annotations.Expose;
-
-import bfbc.tank.core.ServerGameController.StateUpdateHandler;
-import bfbc.tank.core.ServerPlayerUnitController.SpawnConfig;
-import bfbc.tank.core.api.Appearance;
-import bfbc.tank.core.api.CellType;
-import bfbc.tank.core.api.UnitType;
-import bfbc.tank.core.model.GameModel;
+import bfbc.tank.api.interfaces.Appearance;
+import bfbc.tank.api.interfaces.CellType;
+import bfbc.tank.api.interfaces.UnitType;
+import bfbc.tank.core.controllers.ServerGameController;
+import bfbc.tank.core.controllers.TheStateController;
+import bfbc.tank.core.controllers.ServerGameController.StateUpdateHandler;
 
 @WebSocket(maxTextMessageSize = 1024 * 1024 * 10, maxBinaryMessageSize = 1024 * 1024 * 100)
 public class PlayerServerWebSocket implements StateUpdateHandler {
@@ -71,7 +69,7 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
     		__, __, __, __, __, __, __, __, __, __, __, _B, DB, DB, _B, __, __, __, __, __, __, __, __, __, __, __
     	};
     	
-    	HashMap<String, ServerPlayerUnitController.SpawnConfig> spawnConfigs = new HashMap<>();
+    	HashMap<String, SpawnConfig> spawnConfigs = new HashMap<>();
     	spawnConfigs.put(PLAYER_ID_PLAYER1, new SpawnConfig(new PointIJ(19, 50), Direction.UP));
     	spawnConfigs.put(PLAYER_ID_PLAYER2, new SpawnConfig(new PointIJ(33, 50), Direction.UP));
     	spawnConfigs.put(PLAYER_ID_BOT1, new SpawnConfig(new PointIJ(2, 2), Direction.UP));

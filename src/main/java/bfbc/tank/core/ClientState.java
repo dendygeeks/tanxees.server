@@ -2,6 +2,8 @@ package bfbc.tank.core;
 
 import com.google.gson.annotations.Expose;
 
+import bfbc.tank.core.controllers.ServerDebugDataController;
+
 public class ClientState {
 	@Expose
 	private final PlayerKeys keys;

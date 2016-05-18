@@ -1,8 +1,9 @@
-package bfbc.tank.core;
+package bfbc.tank.core.controllers;
 
+import bfbc.tank.api.model.MissileModel;
+import bfbc.tank.core.MissileCrashListener;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.DeltaXY;
-import bfbc.tank.core.model.MissileModel;
 
 public class ServerMissileController extends ServerUnitController {
 	private static final double SIZE = 10;

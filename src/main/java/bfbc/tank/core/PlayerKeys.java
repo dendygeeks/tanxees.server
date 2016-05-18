@@ -2,7 +2,7 @@ package bfbc.tank.core;
 
 import com.google.gson.annotations.Expose;
 
-class PlayerKeys {
+public class PlayerKeys {
 	@Expose
 	private boolean right;
 	@Expose

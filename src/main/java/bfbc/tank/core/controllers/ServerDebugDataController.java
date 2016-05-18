@@ -1,6 +1,6 @@
-package bfbc.tank.core;
+package bfbc.tank.core.controllers;
 
-import bfbc.tank.core.model.DebugDataModel;
+import bfbc.tank.api.model.DebugDataModel;
 
 public class ServerDebugDataController {
 	private DebugDataModel debugDataModel;

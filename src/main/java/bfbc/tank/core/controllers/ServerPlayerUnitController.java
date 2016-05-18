@@ -1,35 +1,22 @@
-package bfbc.tank.core;
+package bfbc.tank.core.controllers;
 
 import java.util.Arrays;
 import java.util.HashMap;
 
-import com.google.gson.annotations.Expose;
-
-import bfbc.tank.core.api.PlayerUnit;
+import bfbc.tank.api.model.PlayerUnitModel;
+import bfbc.tank.core.Direction;
+import bfbc.tank.core.MissileCrashListener;
+import bfbc.tank.core.PlayerKeys;
+import bfbc.tank.core.SpawnConfig;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
-import bfbc.tank.core.mechanics.BoxConstructionCollider.MoveRotateResult;
 import bfbc.tank.core.mechanics.DeltaAngle;
 import bfbc.tank.core.mechanics.DeltaXY;
-import bfbc.tank.core.model.PlayerUnitModel;
+import bfbc.tank.core.mechanics.BoxConstructionCollider.MoveRotateResult;
 
 public class ServerPlayerUnitController extends ServerUnitController {
 	
-	public static class SpawnConfig {
-		public final Direction direction;
-		public final PointIJ spawnPoint;
-		public SpawnConfig(PointIJ spawnPoint, Direction direction) {
-			this.spawnPoint = spawnPoint;
-			this.direction = direction;
-		}
-		public double getPosX(double cellSize) {
-			return cellSize * (spawnPoint.i + 0.5);
-		}
-		public double getPosY(double cellSize) {
-			return cellSize * (spawnPoint.j + 0.5);
-		}
-		
-	}
+
 	
 	//private static final double SIZE = 34;
 	

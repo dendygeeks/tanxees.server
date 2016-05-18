@@ -1,6 +1,6 @@
-package bfbc.tank.core;
+package bfbc.tank.core.controllers;
 
-import bfbc.tank.core.model.FlagModel;
+import bfbc.tank.api.model.FlagModel;
 
 public class ServerFlagController extends ServerUnitController {
 	private static final double SIZE = 44;

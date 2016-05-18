@@ -1,4 +1,4 @@
-package bfbc.tank.core;
+package bfbc.tank.core.controllers;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -6,14 +6,18 @@ import java.util.Map.Entry;
 
 import com.google.gson.annotations.Expose;
 
-import bfbc.tank.core.api.Appearance;
-import bfbc.tank.core.api.CellType;
-import bfbc.tank.core.api.UnitType;
+import bfbc.tank.api.interfaces.Appearance;
+import bfbc.tank.api.interfaces.CellType;
+import bfbc.tank.api.interfaces.UnitType;
+import bfbc.tank.api.model.CellModel;
+import bfbc.tank.api.model.GameModel;
+import bfbc.tank.core.GlobalServices;
+import bfbc.tank.core.MissileCrashListener;
+import bfbc.tank.core.PlayerKeys;
+import bfbc.tank.core.SpawnConfig;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.BoxConstructionCollider.CollisionFriendship;
-import bfbc.tank.core.model.CellModel;
-import bfbc.tank.core.model.GameModel;
 
 public class ServerGameController extends Thread implements MissileCrashListener {
 	
@@ -35,7 +39,7 @@ public class ServerGameController extends Thread implements MissileCrashListener
 	
 	private StateUpdateHandler stateUpdateHandler;
 	
-	private HashMap<String, ServerPlayerUnitController.SpawnConfig> spawnConfigs; 
+	private HashMap<String, SpawnConfig> spawnConfigs; 
 	
 	private BoxConstructionCollider collider = new BoxConstructionCollider();
 	//private ArrayList<CellBoxConstruction> cells = new ArrayList<>();
@@ -85,7 +89,7 @@ public class ServerGameController extends Thread implements MissileCrashListener
 		playerControllers.get(id).respawnUnit();
 	}
 	
-	public ServerGameController(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, Appearance> appearances, HashMap<String, UnitType> unitTypes, HashMap<String, ServerPlayerUnitController.SpawnConfig> spawnConfigs, int flagI, int flagJ) {
+	public ServerGameController(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, Appearance> appearances, HashMap<String, UnitType> unitTypes, HashMap<String, SpawnConfig> spawnConfigs, int flagI, int flagJ) {
 		
 		this.spawnConfigs = new HashMap<>(spawnConfigs);
 		

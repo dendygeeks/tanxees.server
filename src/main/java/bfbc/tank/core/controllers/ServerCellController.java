@@ -1,15 +1,13 @@
-package bfbc.tank.core;
+package bfbc.tank.core.controllers;
 
 import java.util.Iterator;
 
-import com.google.gson.annotations.Expose;
-
-import bfbc.tank.core.api.CellType;
+import bfbc.tank.api.interfaces.CellType;
+import bfbc.tank.api.model.CellModel;
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.DeltaAngle;
 import bfbc.tank.core.mechanics.DeltaXY;
-import bfbc.tank.core.model.CellModel;
 
 public class ServerCellController implements Box, BoxConstruction<ServerCellController> {
 
