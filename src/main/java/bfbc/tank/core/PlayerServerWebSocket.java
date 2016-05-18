@@ -16,9 +16,12 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
 import com.google.gson.annotations.Expose;
 
-import bfbc.tank.core.ServerGame.StateUpdateHandler;
-import bfbc.tank.core.ServerPlayerUnit.SpawnConfig;
+import bfbc.tank.core.ServerGameController.StateUpdateHandler;
+import bfbc.tank.core.ServerPlayerUnitController.SpawnConfig;
+import bfbc.tank.core.api.Appearance;
 import bfbc.tank.core.api.CellType;
+import bfbc.tank.core.api.UnitType;
+import bfbc.tank.core.model.GameModel;
 
 @WebSocket(maxTextMessageSize = 1024 * 1024 * 10, maxBinaryMessageSize = 1024 * 1024 * 100)
 public class PlayerServerWebSocket implements StateUpdateHandler {
@@ -28,7 +31,7 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
     
     private Map<String, Session> controlledPlayers = new HashMap<>();
     
-    private ServerGame game;
+    private ServerGameController game;
     
     private static final String PLAYER_ID_PLAYER1 = "player1";
     private static final String PLAYER_ID_PLAYER2 = "player2";
@@ -68,25 +71,25 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
     		__, __, __, __, __, __, __, __, __, __, __, _B, DB, DB, _B, __, __, __, __, __, __, __, __, __, __, __
     	};
     	
-    	HashMap<String, ServerPlayerUnit.SpawnConfig> spawnConfigs = new HashMap<>();
+    	HashMap<String, ServerPlayerUnitController.SpawnConfig> spawnConfigs = new HashMap<>();
     	spawnConfigs.put(PLAYER_ID_PLAYER1, new SpawnConfig(new PointIJ(19, 50), Direction.UP));
     	spawnConfigs.put(PLAYER_ID_PLAYER2, new SpawnConfig(new PointIJ(33, 50), Direction.UP));
     	spawnConfigs.put(PLAYER_ID_BOT1, new SpawnConfig(new PointIJ(2, 2), Direction.UP));
     	spawnConfigs.put(PLAYER_ID_BOT2, new SpawnConfig(new PointIJ(50, 2), Direction.UP));
     	
-    	HashMap<String, ServerPlayer.Appearance> appearances = new HashMap<>();
-    	appearances.put(PLAYER_ID_PLAYER1, ServerPlayer.Appearance.GREEN);
-    	appearances.put(PLAYER_ID_PLAYER2, ServerPlayer.Appearance.YELLOW);
-    	appearances.put(PLAYER_ID_BOT1, ServerPlayer.Appearance.GRAY);
-    	appearances.put(PLAYER_ID_BOT2, ServerPlayer.Appearance.GRAY);
+    	HashMap<String, Appearance> appearances = new HashMap<>();
+    	appearances.put(PLAYER_ID_PLAYER1, Appearance.GREEN);
+    	appearances.put(PLAYER_ID_PLAYER2, Appearance.YELLOW);
+    	appearances.put(PLAYER_ID_BOT1, Appearance.GRAY);
+    	appearances.put(PLAYER_ID_BOT2, Appearance.GRAY);
     	
-    	HashMap<String, ServerPlayer.UnitType> unitTypes = new HashMap<>();
-    	unitTypes.put(PLAYER_ID_PLAYER1, ServerPlayer.UnitType.MEDIUM);
-    	unitTypes.put(PLAYER_ID_PLAYER2, ServerPlayer.UnitType.SMALL);
-    	unitTypes.put(PLAYER_ID_BOT1, ServerPlayer.UnitType.MEDIUM);
-    	unitTypes.put(PLAYER_ID_BOT2, ServerPlayer.UnitType.MEDIUM);
+    	HashMap<String, UnitType> unitTypes = new HashMap<>();
+    	unitTypes.put(PLAYER_ID_PLAYER1, UnitType.MEDIUM);
+    	unitTypes.put(PLAYER_ID_PLAYER2, UnitType.SMALL);
+    	unitTypes.put(PLAYER_ID_BOT1, UnitType.MEDIUM);
+    	unitTypes.put(PLAYER_ID_BOT2, UnitType.MEDIUM);
     	
-    	game = new ServerGame(this, 26, 26, map, playerIds, appearances, unitTypes, spawnConfigs, 27, 51);
+    	game = new ServerGameController(this, 26, 26, map, playerIds, appearances, unitTypes, spawnConfigs, 27, 51);
 		
 		synchronized (controlledPlayers) {
 			for (String id : playerIds) {
@@ -95,24 +98,8 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
 		}
 	}
 
-    private static class TheState {
-    	@Expose
-    	private final ServerGame game;
-    	@Expose
-    	private final String activePlayerId;
-
-    	public TheState(ServerGame game, String activePlayerId) {
-			this.game = game;
-			this.activePlayerId = activePlayerId;
-		}
-    	
-    	public synchronized String toJson() {
-    		return GlobalServices.getGson().toJson(this);
-    	}
-    }
-    
     @Override
-    public void gameStateUpdated(ServerGame state) {
+    public void gameStateUpdated(ServerGameController state) {
     	synchronized (this) {
     		List<Session> sessionsToRemove = new ArrayList<>();
 
@@ -123,7 +110,7 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
     	    	}
     			
 	    		try {
-					s.getRemote().sendString(new TheState(game, controlledPlayerId).toJson());
+					s.getRemote().sendString(new TheStateController(game, controlledPlayerId).toJson());
 				} catch (Exception e) {
 					sessionsToRemove.add(s);
 					e.printStackTrace();
@@ -166,7 +153,7 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
 		
     	synchronized (this) {
 			try {
-				session.getRemote().sendString(new TheState(game, playerId).toJson());
+				session.getRemote().sendString(new TheStateController(game, playerId).toJson());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

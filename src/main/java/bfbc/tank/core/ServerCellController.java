@@ -4,20 +4,18 @@ import java.util.Iterator;
 
 import com.google.gson.annotations.Expose;
 
-import bfbc.tank.core.api.Cell;
 import bfbc.tank.core.api.CellType;
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.DeltaAngle;
 import bfbc.tank.core.mechanics.DeltaXY;
+import bfbc.tank.core.model.CellModel;
 
-public class ServerCell implements Cell, Box, BoxConstruction<ServerCell> {
+public class ServerCellController implements Box, BoxConstruction<ServerCellController> {
 
-	private ServerGame game;
+	private ServerGameController game;
+	private CellModel cellModel;
 	
-	@Expose
-	private CellType type;
-
 	private int i, j;
 	
 	@Override
@@ -27,29 +25,29 @@ public class ServerCell implements Cell, Box, BoxConstruction<ServerCell> {
 	
 	@Override
 	public double getLeft() {
-		return (i - 0.5) * game.cellSize;
+		return (i - 0.5) * game.getGameModel().getCellSize();
 	}
 
 	@Override
 	public double getTop() {
-		return (j - 0.5) * game.cellSize;
+		return (j - 0.5) * game.getGameModel().getCellSize();
 	}
 
 	@Override
 	public double getRight() {
-		return (i + 0.5) * game.cellSize;
+		return (i + 0.5) * game.getGameModel().getCellSize();
 	}
 
 	@Override
 	public double getBottom() {
-		return (j + 0.5) * game.cellSize;
+		return (j + 0.5) * game.getGameModel().getCellSize();
 	}
 	
 	public double getX() {
-		return i * game.cellSize;
+		return i * game.getGameModel().getCellSize();
 	}
 	public double getY() {
-		return j * game.cellSize;
+		return j * game.getGameModel().getCellSize();
 	}
 
 	@Override
@@ -58,40 +56,36 @@ public class ServerCell implements Cell, Box, BoxConstruction<ServerCell> {
 
 	}
 	
-	public ServerCell(ServerGame game, int i, int j, CellType type) {
+	public ServerCellController(ServerGameController game, int i, int j, CellModel cellModel) {
 		this.game = game;
 		this.i = i;
 		this.j = j;
-		this.type = type; //CellType.E;
+		this.cellModel = cellModel;
 	}
 
-	public ServerCell(ServerGame game, int i, int j) {
-		this(game, i, j, CellType.EMPTY);
+	public ServerCellController(ServerGameController game, int i, int j) {
+		this(game, i, j, new CellModel(CellType.EMPTY));
 	}
 
-	public void setType(CellType type) {
-		this.type = type;
-	}
-	
-	public CellType getType() {
-		return type;
+	public CellModel getCellModel() {
+		return cellModel;
 	}
 
 	@Override
 	public boolean isActive() {
-		return type.isWall();
+		return cellModel.getType().isWall();
 	}
 	
 	@Override
-	public Iterator<ServerCell> iterator() {
-		Iterator<ServerCell> res = new Iterator<ServerCell>() {
+	public Iterator<ServerCellController> iterator() {
+		Iterator<ServerCellController> res = new Iterator<ServerCellController>() {
 			
 			private boolean hasNext = true;
 			
 			@Override
-			public ServerCell next() {
+			public ServerCellController next() {
 				hasNext = false;
-				return ServerCell.this;
+				return ServerCellController.this;
 			}
 			
 			@Override

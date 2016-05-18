@@ -11,8 +11,9 @@ import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.BoxConstructionCollider.MoveRotateResult;
 import bfbc.tank.core.mechanics.DeltaAngle;
 import bfbc.tank.core.mechanics.DeltaXY;
+import bfbc.tank.core.model.PlayerUnitModel;
 
-public class ServerPlayerUnit extends ServerUnit implements PlayerUnit {
+public class ServerPlayerUnitController extends ServerUnitController {
 	
 	public static class SpawnConfig {
 		public final Direction direction;
@@ -42,9 +43,7 @@ public class ServerPlayerUnit extends ServerUnit implements PlayerUnit {
 	}
 	
 	private double cellSize;
-	
-	@Expose
-	private boolean moving;
+
 	
 	private boolean wantToFire;
 	
@@ -57,15 +56,11 @@ public class ServerPlayerUnit extends ServerUnit implements PlayerUnit {
 	private BoxConstructionCollider collider;
 	private MissileCrashListener crashListener;
 	
-	public boolean isMoving() {
-		return moving;
-	}
-
 	private PlayerKeys activeCommand;
 	
 	private Direction direction;
 
-	private ServerPlayer player;
+	private ServerPlayerController player;
 
 	public Direction getDirection() {
 		return direction;
@@ -84,35 +79,63 @@ public class ServerPlayerUnit extends ServerUnit implements PlayerUnit {
 		return (dirV ^ isY) ? sizeW : sizeL;
 	}
 	
-	public ServerPlayerUnit(ServerPlayer player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving, Double angle) {
-		super(sizeForDir(false, sizeW, sizeL, spawnConfig.direction), 
+	private SpawnConfig spawnConfig;
+	private double sizeW, sizeL;
+	
+	public void respawnUnit() {
+		getPlayerUnitModel().setSizeX(sizeForDir(false, sizeW, sizeL, spawnConfig.direction));
+		getPlayerUnitModel().setSizeY(sizeForDir(true, sizeW, sizeL, spawnConfig.direction));
+		getPlayerUnitModel().setPosX(spawnConfig.getPosX(cellSize));
+		getPlayerUnitModel().setPosY(spawnConfig.getPosY(cellSize));
+		getPlayerUnitModel().setAngle(DIRECTION_ANGLES.get(spawnConfig.direction));
+	}
+	
+	public ServerPlayerUnitController(ServerPlayerController player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving, Double angle) {
+		super(new PlayerUnitModel(sizeForDir(false, sizeW, sizeL, spawnConfig.direction), 
 		      sizeForDir(true, sizeW, sizeL, spawnConfig.direction), 
 		      spawnConfig.getPosX(cellSize), 
-		      spawnConfig.getPosY(cellSize), angle != null ? angle : DIRECTION_ANGLES.get(spawnConfig.direction));
+		      spawnConfig.getPosY(cellSize), 
+		      angle != null ? angle : DIRECTION_ANGLES.get(spawnConfig.direction), false));
 		this.player = player;
 		this.cellSize = cellSize;
 		this.collider = collider;
 		this.crashListener = crashListener;
 		this.activeCommand = activeCommand;
 		this.direction = spawnConfig.direction;
-		this.moving = moving;
+		this.spawnConfig = spawnConfig;
+		this.sizeW = sizeW;
+		this.sizeL = sizeL;
 	}
 
-	public ServerPlayerUnit(ServerPlayer player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving) {
+	public PlayerUnitModel getPlayerUnitModel() {
+		return (PlayerUnitModel)getUnitModel();
+	}
+	
+	public ServerPlayerUnitController(
+			ServerPlayerController player, 
+			double sizeW, double sizeL, 
+			double cellSize, 
+			BoxConstructionCollider collider, 
+			MissileCrashListener crashListener, 
+			SpawnConfig spawnConfig, 
+			PlayerKeys activeCommand, 
+			boolean moving) {
 		this(player, sizeW, sizeL, cellSize, collider, crashListener, spawnConfig, activeCommand, moving, null);
 	}
 
 	private void safeMove(DeltaXY dxy) {
 		BoxConstructionCollider.MoveRotateResult mr = collider.tryMove(this, dxy);
 		for (BoxConstruction<?> t : mr.targets.keySet()) {
-			if (t instanceof ServerMissile) {
-				crashListener.missileCrashed((ServerMissile)t, Arrays.asList(new BoxConstruction[] { this }));
+			if (t instanceof ServerMissileController) {
+				crashListener.missileCrashed((ServerMissileController)t, Arrays.asList(new BoxConstruction[] { this }));
 			}
 		}
 	}
 	
 	public void frameStep() {
-		moving = false;
+		boolean moving = false;
+		double angle = getPlayerUnitModel().getAngle();
+		
 		boolean moveBackwards = false;
 		Direction newDir = direction;
 		if (activeCommand.isDown()) {
@@ -149,17 +172,17 @@ public class ServerPlayerUnit extends ServerUnit implements PlayerUnit {
 			wantToFire = true;
 		}
 
-		double visualAngleDelta = DIRECTION_ANGLES.get(direction) - getAngle();
+		double visualAngleDelta = DIRECTION_ANGLES.get(direction) - angle;
 		if (visualAngleDelta < -180) visualAngleDelta += 360;
 		if (visualAngleDelta > 180) visualAngleDelta -= 360;
 		
 		boolean notRotating = false;
 		double angleSmall = angleVel / 50;
 		if (visualAngleDelta > angleSmall) {
-			angle += angleVel * ServerGame.MODEL_TICK;
+			angle += angleVel * ServerGameController.MODEL_TICK;
 			moving = true;
 		} else if (visualAngleDelta < -angleSmall) {
-			angle -= angleVel * ServerGame.MODEL_TICK;
+			angle -= angleVel * ServerGameController.MODEL_TICK;
 			moving = true;
 		} else {
 			angle = DIRECTION_ANGLES.get(direction);
@@ -169,8 +192,8 @@ public class ServerPlayerUnit extends ServerUnit implements PlayerUnit {
 		// Dragging. A small hack that makes driving around corners easier for the user 
 		if (!notRotating) {
 			double cs = cellSize;
-			double dx = ((posX - cs/2) % cs) / cs;
-			double dy = ((posY - cs/2) % cs) / cs;
+			double dx = ((getPlayerUnitModel().getPosX() - cs/2) % cs) / cs;
+			double dy = ((getPlayerUnitModel().getPosY() - cs/2) % cs) / cs;
 			if (dx > 0.5d) dx -= 1.0d;
 			if (dy > 0.5d) dy -= 1.0d;
 			
@@ -188,8 +211,8 @@ public class ServerPlayerUnit extends ServerUnit implements PlayerUnit {
 				       velY = dragVelocity * targetFactor * oldDirY * rotationFactor;
 	
 				DeltaXY dxy = new DeltaXY(
-						velX * ServerGame.MODEL_TICK,
-						velY * ServerGame.MODEL_TICK
+						velX * ServerGameController.MODEL_TICK,
+						velY * ServerGameController.MODEL_TICK
 				);
 				safeMove(dxy);
 			//}
@@ -198,9 +221,9 @@ public class ServerPlayerUnit extends ServerUnit implements PlayerUnit {
 
 		double displacement;
 		if (!moveBackwards) { 
-			displacement = velocity * ServerGame.MODEL_TICK;
+			displacement = velocity * ServerGameController.MODEL_TICK;
 		} else {
-			displacement = backVelocity * ServerGame.MODEL_TICK;
+			displacement = backVelocity * ServerGameController.MODEL_TICK;
 		}
 		
 		if (notRotating && wantToFire) {
@@ -210,7 +233,7 @@ public class ServerPlayerUnit extends ServerUnit implements PlayerUnit {
 			}
 			
 			if (player.getMissilesCount() == 0) {
-				ServerMissile newMissile = new ServerMissile(crashListener, collider, posX, posY, angle, missileVelocity);
+				ServerMissileController newMissile = new ServerMissileController(crashListener, collider, getPlayerUnitModel().getPosX(), getPlayerUnitModel().getPosY(), angle, missileVelocity);
 				player.addMissile(newMissile);
 			}
 			wantToFire = false;
@@ -222,11 +245,9 @@ public class ServerPlayerUnit extends ServerUnit implements PlayerUnit {
 					displacement * Math.sin(angle / 180 * Math.PI));
 			safeMove(dxy);
 		}
+		
+		getPlayerUnitModel().setMoving(moving);
+		getPlayerUnitModel().setAngle(angle);
 	}
 
-	@Override
-	public boolean getMoving() {
-		return moving;
-	}
-	
 }

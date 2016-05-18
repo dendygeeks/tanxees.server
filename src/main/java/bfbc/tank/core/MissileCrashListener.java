@@ -5,5 +5,5 @@ import java.util.Collection;
 import bfbc.tank.core.mechanics.BoxConstruction;
 
 public interface MissileCrashListener {
-	void missileCrashed(ServerMissile missile, Collection<BoxConstruction<?>> targets);
+	void missileCrashed(ServerMissileController missile, Collection<BoxConstruction<?>> targets);
 }

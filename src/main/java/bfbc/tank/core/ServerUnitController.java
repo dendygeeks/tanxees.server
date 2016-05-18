@@ -2,49 +2,34 @@ package bfbc.tank.core;
 
 import java.util.Iterator;
 
-import com.google.gson.annotations.Expose;
-
-import bfbc.tank.core.api.Unit;
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.DeltaAngle;
 import bfbc.tank.core.mechanics.DeltaXY;
+import bfbc.tank.core.model.UnitModel;
 
 /**
  * Something that can move and rotate
  */
-public class ServerUnit implements Unit, Box, BoxConstruction<Box> {
+public class ServerUnitController implements Box, BoxConstruction<Box> {
 	
-	@Expose
-	protected double sizeX, sizeY;
-	@Expose
-	protected double posX;
-	@Expose
-	protected double posY;
-	@Expose
-	protected double angle;
+	private UnitModel unitModel;
 	
-	public ServerUnit(double sizeX, double sizeY, double posX, double posY, double angle) {
-		this.sizeX = sizeX;
-		this.sizeY = sizeY;
-		this.posX = posX;
-		this.posY = posY;
-		this.angle = angle;
+	public ServerUnitController() {
+		
 	}
 
-	public double getPosX() {
-		return posX;
+	public ServerUnitController(UnitModel unitModel) {
+		this.unitModel = unitModel;
 	}
-	public double getPosY() {
-		return posY;
-	}
-	public double getAngle() {
-		return angle;
+	
+	public UnitModel getUnitModel() {
+		return unitModel;
 	}
 	
 	@Override
 	public double getExcentricity() {
-		return Math.abs(sizeX - sizeY) / 2;
+		return Math.abs(unitModel.getSizeX() - unitModel.getSizeY()) / 2;
 	}
 	
 	public String toJson() {
@@ -52,28 +37,28 @@ public class ServerUnit implements Unit, Box, BoxConstruction<Box> {
 	}
 	@Override
 	public double getBottom() {
-		return posY + sizeY / 2;
+		return unitModel.getPosY() + unitModel.getSizeY() / 2;
 	}
 	
 	@Override
 	public double getLeft() {
-		return posX - sizeX / 2;
+		return unitModel.getPosX() - unitModel.getSizeX() / 2;
 	}
 	
 	@Override
 	public double getRight() {
-		return posX + sizeX / 2;
+		return unitModel.getPosX() + unitModel.getSizeX() / 2;
 	}
 	
 	@Override
 	public double getTop() {
-		return posY - sizeY / 2;
+		return unitModel.getPosY() - unitModel.getSizeY() / 2;
 	}
 	
 	@Override
 	public void move(DeltaXY delta) {
-		posX += delta.x;
-		posY += delta.y;
+		unitModel.setPosX(unitModel.getPosX() + delta.x);
+		unitModel.setPosY(unitModel.getPosY() + delta.y);
 	}
 	
 	@Override
@@ -82,16 +67,12 @@ public class ServerUnit implements Unit, Box, BoxConstruction<Box> {
 		case ZERO:
 			break; 	
 		case PI_BY_2:
-			double t = sizeX;
-			sizeX = sizeY;
-			sizeY = t;
+		case THREE_PI_BY_2:
+			double t = unitModel.getSizeX();
+			unitModel.setSizeX(unitModel.getSizeY());
+			unitModel.setSizeY(t);
 			break;
 		case PI:
-			break;
-		case THREE_PI_BY_2:
-			t = sizeX;
-			sizeX = sizeY;
-			sizeY = t;
 			break;
 		}
 	}
@@ -111,7 +92,7 @@ public class ServerUnit implements Unit, Box, BoxConstruction<Box> {
 			@Override
 			public Box next() {
 				hasNext = false;
-				return ServerUnit.this;
+				return ServerUnitController.this;
 			}
 			
 			@Override
@@ -121,14 +102,6 @@ public class ServerUnit implements Unit, Box, BoxConstruction<Box> {
 		};
 		return res;
 	}
-
-	@Override
-	public double getSizeX() {
-		return sizeX;
-	}
-
-	@Override
-	public double getSizeY() {
-		return sizeY;
-	}
+	
+	
 }

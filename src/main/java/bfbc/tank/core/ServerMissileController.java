@@ -1,10 +1,10 @@
 package bfbc.tank.core;
 
-import bfbc.tank.core.api.Missile;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 import bfbc.tank.core.mechanics.DeltaXY;
+import bfbc.tank.core.model.MissileModel;
 
-public class ServerMissile extends ServerUnit implements Missile {
+public class ServerMissileController extends ServerUnitController {
 	private static final double SIZE = 10;
 	
 	private double velX, velY;
@@ -12,9 +12,13 @@ public class ServerMissile extends ServerUnit implements Missile {
 	private BoxConstructionCollider collider;
 	private MissileCrashListener crashListener;
 
-	ServerMissile(MissileCrashListener crashListener, BoxConstructionCollider collider, double posX, double posY, double angle, double velocity)
+	public MissileModel getMissileModel() {
+		return (MissileModel)getUnitModel();
+	}
+	
+	ServerMissileController(MissileCrashListener crashListener, BoxConstructionCollider collider, double posX, double posY, double angle, double velocity)
 	{
-		super(SIZE, SIZE, posX, posY, angle);
+		super(new MissileModel(SIZE, SIZE, posX, posY, angle, false));
 		this.crashListener = crashListener;
 		this.collider = collider;
 		this.velX = velocity * Math.cos(angle * Math.PI / 180.0);
@@ -22,7 +26,7 @@ public class ServerMissile extends ServerUnit implements Missile {
 	}
 	
 	public void frameStep() {
-		DeltaXY delta = new DeltaXY(velX * ServerGame.MODEL_TICK, velY * ServerGame.MODEL_TICK);
+		DeltaXY delta = new DeltaXY(velX * ServerGameController.MODEL_TICK, velY * ServerGameController.MODEL_TICK);
 		BoxConstructionCollider.MoveRotateResult mr = collider.tryMove(this, delta);
 		
 		if (!mr.targets.isEmpty()) {

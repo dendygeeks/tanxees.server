@@ -7,8 +7,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import bfbc.tank.core.api.Player.Appearance;
-import bfbc.tank.core.api.Player.UnitType;
+import bfbc.tank.core.api.Appearance;
+import bfbc.tank.core.api.UnitType;
+import bfbc.tank.core.model.CellModel;
 
 public class GlobalServices {
 	private static Gson gson;
@@ -18,9 +19,9 @@ public class GlobalServices {
     	builder.excludeFieldsWithoutExposeAnnotation();
     	//builder.setPrettyPrinting();
     	
-    	builder.registerTypeAdapter(ServerCell.class, new ServerCellTypeAdapter());
-    	builder.registerTypeAdapter(ServerPlayer.Appearance.class, new AppearanceTypeAdapter());
-    	builder.registerTypeAdapter(ServerPlayer.UnitType.class, new UnitTypeTypeAdapter());
+    	builder.registerTypeAdapter(CellModel.class, new CellTypeAdapter());
+    	builder.registerTypeAdapter(Appearance.class, new AppearanceTypeAdapter());
+    	builder.registerTypeAdapter(UnitType.class, new UnitTypeTypeAdapter());
     	
     	gson = builder.create();
 	}
@@ -57,8 +58,8 @@ public class GlobalServices {
 		}
 	}
 	
-	static class ServerCellTypeAdapter extends com.google.gson.TypeAdapter<ServerCell> {
-		public ServerCell read(JsonReader reader) throws IOException {
+	static class CellTypeAdapter extends com.google.gson.TypeAdapter<CellModel> {
+		public CellModel read(JsonReader reader) throws IOException {
 			// TODO It can't read
 			/*if (reader.peek() == JsonToken.NULL) {
 				reader.nextNull();
@@ -69,7 +70,7 @@ public class GlobalServices {
 			return null;
 		}
 
-		public void write(JsonWriter writer, ServerCell value) throws IOException {
+		public void write(JsonWriter writer, CellModel value) throws IOException {
 			if (value == null) {
 				writer.nullValue();
 				return;
