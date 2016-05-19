@@ -15,9 +15,7 @@ import bfbc.tank.core.mechanics.DeltaXY;
 import bfbc.tank.core.mechanics.BoxConstructionCollider.MoveRotateResult;
 
 public class ServerPlayerUnitController extends ServerUnitController {
-	
 
-	
 	//private static final double SIZE = 34;
 	
 	private static final HashMap<Direction, Double> DIRECTION_ANGLES;
@@ -31,7 +29,6 @@ public class ServerPlayerUnitController extends ServerUnitController {
 	
 	private double cellSize;
 
-	
 	private boolean wantToFire;
 	
 	private double velocity = 85.0d;
@@ -75,6 +72,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		getPlayerUnitModel().setPosX(spawnConfig.getPosX(cellSize));
 		getPlayerUnitModel().setPosY(spawnConfig.getPosY(cellSize));
 		getPlayerUnitModel().setAngle(DIRECTION_ANGLES.get(spawnConfig.direction));
+		this.direction = spawnConfig.direction;
 	}
 	
 	public ServerPlayerUnitController(ServerPlayerController player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeysModel activeCommand, boolean moving, Double angle) {
