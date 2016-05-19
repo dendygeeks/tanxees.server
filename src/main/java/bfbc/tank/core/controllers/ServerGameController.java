@@ -116,14 +116,17 @@ public class ServerGameController extends Thread implements MissileCrashListener
 			fieldCellModels[i] = fieldCellControllers[i].getCellModel();
 		}
 		
-		flagController = new ServerFlagController(CELL_SIZE * flagI, CELL_SIZE * flagJ);
-		collider.addAgent(flagController);
+		// No flag for demo
+		//flagController = new ServerFlagController(CELL_SIZE * (flagI - 0.5), CELL_SIZE * (flagJ - 0.5));
+		//collider.addAgent(flagController);
+		flagController = null;
+		
 
 		gameModel = new GameModel(
 				fieldWidth,
 				fieldHeight, 
 				false, 
-				flagController.getFlagModel(), 
+				null, // [No flag for demo] flagController.getFlagModel(), 
 				fieldCellModels,
 				CELL_SIZE
 		);
