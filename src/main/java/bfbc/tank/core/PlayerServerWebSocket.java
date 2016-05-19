@@ -17,6 +17,8 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import bfbc.tank.api.interfaces.Appearance;
 import bfbc.tank.api.interfaces.CellType;
 import bfbc.tank.api.interfaces.UnitType;
+import bfbc.tank.api.model.ClientStateModel;
+import bfbc.tank.api.model.DebugDataModel;
 import bfbc.tank.core.controllers.ServerGameController;
 import bfbc.tank.core.controllers.TheStateController;
 import bfbc.tank.core.controllers.ServerGameController.StateUpdateHandler;
@@ -178,7 +180,7 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
 		synchronized (controlledPlayers) {
 	        for (String playerId : controlledPlayers.keySet()) {
 				if (controlledPlayers.get(playerId) == session) {
-					ClientState cs = ClientState.fromJson(message);
+					ClientStateModel<DebugDataModel> cs = ClientStateModel.fromJson(DebugDataModel.class, message);
 					game.setDebugData(playerId, cs.getDebugData());
 	        		game.setPlayerKeys(playerId, cs.getKeys());
 	        	}

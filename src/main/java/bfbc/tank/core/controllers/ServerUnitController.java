@@ -3,7 +3,6 @@ package bfbc.tank.core.controllers;
 import java.util.Iterator;
 
 import bfbc.tank.api.model.UnitModel;
-import bfbc.tank.core.GlobalServices;
 import bfbc.tank.core.mechanics.Box;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.DeltaAngle;
@@ -32,10 +31,7 @@ public class ServerUnitController implements Box, BoxConstruction<Box> {
 	public double getExcentricity() {
 		return Math.abs(unitModel.getSizeX() - unitModel.getSizeY()) / 2;
 	}
-	
-	public String toJson() {
-		return GlobalServices.getGson().toJson(this);
-	}
+
 	@Override
 	public double getBottom() {
 		return unitModel.getPosY() + unitModel.getSizeY() / 2;

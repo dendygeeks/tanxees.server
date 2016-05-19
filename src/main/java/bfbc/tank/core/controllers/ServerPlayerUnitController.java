@@ -3,10 +3,10 @@ package bfbc.tank.core.controllers;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import bfbc.tank.api.model.PlayerKeysModel;
 import bfbc.tank.api.model.PlayerUnitModel;
 import bfbc.tank.core.Direction;
 import bfbc.tank.core.MissileCrashListener;
-import bfbc.tank.core.PlayerKeys;
 import bfbc.tank.core.SpawnConfig;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
@@ -43,7 +43,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 	private BoxConstructionCollider collider;
 	private MissileCrashListener crashListener;
 	
-	private PlayerKeys activeCommand;
+	private PlayerKeysModel activeCommand;
 	
 	private Direction direction;
 
@@ -53,11 +53,11 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		return direction;
 	}
 	
-	public PlayerKeys getActiveCommand() {
+	public PlayerKeysModel getActiveCommand() {
 		return activeCommand;
 	}
 	
-	public void setActiveCommand(PlayerKeys activeCommand) {
+	public void setActiveCommand(PlayerKeysModel activeCommand) {
 		this.activeCommand = activeCommand;
 	}
 	
@@ -77,7 +77,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		getPlayerUnitModel().setAngle(DIRECTION_ANGLES.get(spawnConfig.direction));
 	}
 	
-	public ServerPlayerUnitController(ServerPlayerController player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeys activeCommand, boolean moving, Double angle) {
+	public ServerPlayerUnitController(ServerPlayerController player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeysModel activeCommand, boolean moving, Double angle) {
 		super(new PlayerUnitModel(sizeForDir(false, sizeW, sizeL, spawnConfig.direction), 
 		      sizeForDir(true, sizeW, sizeL, spawnConfig.direction), 
 		      spawnConfig.getPosX(cellSize), 
@@ -105,7 +105,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 			BoxConstructionCollider collider, 
 			MissileCrashListener crashListener, 
 			SpawnConfig spawnConfig, 
-			PlayerKeys activeCommand, 
+			PlayerKeysModel activeCommand, 
 			boolean moving) {
 		this(player, sizeW, sizeL, cellSize, collider, crashListener, spawnConfig, activeCommand, moving, null);
 	}

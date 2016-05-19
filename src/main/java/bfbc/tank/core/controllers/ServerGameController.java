@@ -10,10 +10,10 @@ import bfbc.tank.api.interfaces.Appearance;
 import bfbc.tank.api.interfaces.CellType;
 import bfbc.tank.api.interfaces.UnitType;
 import bfbc.tank.api.model.CellModel;
+import bfbc.tank.api.model.DebugDataModel;
 import bfbc.tank.api.model.GameModel;
-import bfbc.tank.core.GlobalServices;
+import bfbc.tank.api.model.PlayerKeysModel;
 import bfbc.tank.core.MissileCrashListener;
-import bfbc.tank.core.PlayerKeys;
 import bfbc.tank.core.SpawnConfig;
 import bfbc.tank.core.mechanics.BoxConstruction;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
@@ -226,16 +226,12 @@ public class ServerGameController extends Thread implements MissileCrashListener
 
 	}
 	
-	public void setDebugData(String id, ServerDebugDataController debugData) {
-		((ServerPlayerController)playerControllers.get(id)).setDebugData(debugData);
+	public void setDebugData(String id, DebugDataModel debugData) {
+		playerControllers.get(id).setDebugData(debugData);
 	}
 	
-	public synchronized void setPlayerKeys(String id, PlayerKeys playerCommand) {
-		((ServerPlayerController)playerControllers.get(id)).setPlayerKeys(playerCommand);
-	}
-	
-	public synchronized String toJson() {
-		return GlobalServices.getGson().toJson(this);
+	public synchronized void setPlayerKeys(String id, PlayerKeysModel playerCommand) {
+		playerControllers.get(id).setPlayerKeys(playerCommand);
 	}
 	
 	public synchronized void putFieldCellType(int x, int y, CellType cell) {

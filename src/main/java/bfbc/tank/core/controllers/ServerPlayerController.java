@@ -5,9 +5,10 @@ import java.util.List;
 
 import bfbc.tank.api.interfaces.Appearance;
 import bfbc.tank.api.interfaces.UnitType;
+import bfbc.tank.api.model.DebugDataModel;
+import bfbc.tank.api.model.PlayerKeysModel;
 import bfbc.tank.api.model.PlayerModel;
 import bfbc.tank.core.MissileCrashListener;
-import bfbc.tank.core.PlayerKeys;
 import bfbc.tank.core.SpawnConfig;
 import bfbc.tank.core.mechanics.BoxConstructionCollider;
 
@@ -19,7 +20,7 @@ public class ServerPlayerController {
 	private PlayerModel playerModel;
 	
 	private ServerPlayerUnitController unit;
-	private ServerDebugDataController debugData;
+	private DebugDataModel debugData;
 	private List<ServerMissileController> missileControllers = new ArrayList<>();
 
 	public PlayerModel getPlayerModel() {
@@ -37,8 +38,8 @@ public class ServerPlayerController {
 		
 		this.missileControllers = new ArrayList<>();
 		
-		debugData = new ServerDebugDataController();
-		playerModel.setDebugData(debugData.getDebugDataModel());
+		debugData = new DebugDataModel("");
+		playerModel.setDebugData(debugData);
 		
 		unit = new ServerPlayerUnitController(this, 
 				playerModel.getUnitType().sizeW,
@@ -47,7 +48,7 @@ public class ServerPlayerController {
 				collider, 
 				missileCrashListener, 
 				spawnConfig, 
-				new PlayerKeys(), 
+				new PlayerKeysModel(), 
 				false
 				/*, cellSize * (spawnPoint.i + 0.5), 
 				cellSize * (spawnPoint.j + 0.5)*/
@@ -64,11 +65,11 @@ public class ServerPlayerController {
 		}
 	}
 
-	public void setDebugData(ServerDebugDataController debugData) {
+	public void setDebugData(DebugDataModel debugData) {
 		this.debugData = debugData;
 	}
 
-	public void setPlayerKeys(PlayerKeys playerKeys) {
+	public void setPlayerKeys(PlayerKeysModel playerKeys) {
 		unit.setActiveCommand(playerKeys);
 	}
 
