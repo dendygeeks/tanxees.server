@@ -5,10 +5,10 @@ version = '0.1'
 
 mainClassName = "bfbc.tank.core.Main"
 
-task fatJar(type: Jar) {
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
 }
 
 repositories {
