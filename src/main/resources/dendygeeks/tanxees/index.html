@@ -1,0 +1,513 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="main.css" />
+
+	<script type="text/javascript" src="/js/tools.js"></script>
+	<script type="text/javascript" src="/js/pixi.js"></script>
+
+	<script type="text/javascript" src="http://gabelerner.github.io/canvg/rgbcolor.js"></script> 
+	<script type="text/javascript" src="http://gabelerner.github.io/canvg/StackBlur.js"></script>
+	<script type="text/javascript" src="http://gabelerner.github.io/canvg/canvg.js"></script>
+
+	<title>Tanks proto</title>
+	
+	<script>
+	
+		// WebSockets
+		var websocket;
+		var webSocketAddress;
+		
+		// Game state
+		var activePlayerIndex;
+		var playersState;
+
+		// Client state
+		var firstUpdate = true;
+		var caterpillarFrame = 0;
+
+		// Nodes
+		var fieldNode;
+		var fragsNode;
+		var debugSvgNode;
+
+		// PIXI objects
+		var renderer, fieldStage;
+		var missileSprites = []; 
+		var missileSpritesContainer;
+		var cellSprites = [];
+		var playerSprites = [];
+		
+		// Preloading
+		new Image().src = "img/small_tank/tank-shadow.svg"; 
+		
+		// Caterpillars textures preloading
+		var caterpillarsImages = [];
+		var caterpillarsTextures = [];
+		caterpillarsImages[0] = new Image();
+		caterpillarsImages[0].src = "img/small_tank/tank-caterpillars-frame1.svg"; 
+		caterpillarsImages[1] = new Image();
+		caterpillarsImages[1].src = "img/small_tank/tank-caterpillars-frame2.svg"; 
+		for (var i = 0; i < 2; i++) {
+			caterpillarsImages[i].tag = i;
+			caterpillarsImages[i].addEventListener("load", function() {
+				var ii = this.tag;
+				var bt = new PIXI.BaseTexture(caterpillarsImages[ii]);
+				caterpillarsTextures[ii] = new PIXI.Texture(bt);
+			});
+		}
+
+		// Tank full body texture preloading
+		var tankFullBodyTexture;
+		var tankFullBodyImage = new Image();
+		tankFullBodyImage.src = "img/small_tank/tank-full-body.svg"; 
+		tankFullBodyImage.addEventListener("load", function() {
+			var bt = new PIXI.BaseTexture(tankFullBodyImage);
+			tankFullBodyTexture = new PIXI.Texture(bt);
+		});
+		
+		var skins = [ "yellow", "boring" ]; //[ "yellow", "green", "pinkie", "boring" ]
+
+		// Tank caterpillars overlay preloading
+		var caterpillarsOverlayImages = [];
+		var caterpillarsOverlayTextures = [];
+		
+		for (var s in skins) {
+			caterpillarsOverlayImages[s] = [];
+			caterpillarsOverlayTextures[s] = [];
+			for (var i = 0; i < 2; i++) {
+				caterpillarsOverlayImages[s][i] = new Image();
+				caterpillarsOverlayImages[s][i].src = "img/small_tank/" + skins[s] + "/tank-caterpillars-frame" + (i+1) + "-overlay.svg";
+				caterpillarsOverlayImages[s][i].skinTag = s;
+				caterpillarsOverlayImages[s][i].tag = i;
+				caterpillarsOverlayImages[s][i].addEventListener("load", function() {
+					var ss = this.skinTag;
+					var ii = this.tag;
+					var bt = new PIXI.BaseTexture(caterpillarsOverlayImages[ss][ii]);
+					caterpillarsOverlayTextures[ss][ii] = new PIXI.Texture(bt);
+				});
+			}
+		}
+
+		// Tank full body overlay preloading
+		var fullBodyOverlayImages = [];
+		var fullBodyOverlayTextures = [];
+		
+		for (var s in skins) {
+			fullBodyOverlayImages[s] = new Image();
+			fullBodyOverlayImages[s].src = "img/small_tank/" + skins[s] + "/tank-full-body-overlay.svg";
+			fullBodyOverlayImages[s].skinTag = s;
+			fullBodyOverlayImages[s].addEventListener("load", function() {
+				var ss = this.skinTag;
+				var bt = new PIXI.BaseTexture(fullBodyOverlayImages[ss]);
+				fullBodyOverlayTextures[ss] = new PIXI.Texture(bt);
+			});
+		}
+
+		// Missile preloading
+		var missileImage = new Image();
+		missileImage.src = "img/missile/missile.svg";
+
+		var missileTexture;
+		missileImage.addEventListener("load", function() {
+			missileTexture = [];
+			var baseTex = new PIXI.BaseTexture(missileImage);
+			missileTexture = new PIXI.Texture(baseTex);
+		});
+		
+		// Missile overlay preloading
+		var missileOverlayImages = [];
+		var missileOverlayTextures = [];
+		
+		for (var s in skins) {
+			missileOverlayImages[s] = new Image();
+			missileOverlayImages[s].src = "img/missile/" + skins[s] + "/missile-overlay.svg";
+			missileOverlayImages[s].skinTag = s;
+			missileOverlayImages[s].addEventListener("load", function() {
+				var ss = this.skinTag;
+				var bt = new PIXI.BaseTexture(missileOverlayImages[ss]);
+				missileOverlayTextures[ss] = new PIXI.Texture(bt);
+			});
+		}
+		
+		
+		// Tile textures preloading		
+		
+		var cellImage = new Image();
+		cellImage.src = "img/tiles.svg";
+		var cellImageTexture = new PIXI.BaseTexture(cellImage);
+
+		var cellTextures = [];
+		cellImage.addEventListener("load", function() {
+			var deltaX = 0;
+			var tileTexMap = ["B", "C", "DC", "E"];
+			for (var k in tileTexMap) {
+				kk = tileTexMap[k];
+				cellTextures[kk] = [];
+
+				for (var i = 0; i < 2; i++) {
+					for (var j = 0; j < 2; j++) {
+						cellTextures[kk][i + j * 2] = new PIXI.Texture(cellImageTexture, new PIXI.Rectangle(i*11 + deltaX, j*11, 11, 11));
+					}					
+				}
+ 				deltaX += 24; // Moving to the next tile
+			}
+		});
+		
+		
+		function updateTanks(gameState) {
+
+			if (firstUpdate) {
+				
+				for (var i = 0; i < gameState.players.length; i++) {
+					var skinIndex = i;
+					if (skinIndex >= skins.length) skinIndex = skins.length - 1;
+				
+					var container = new PIXI.Container();
+
+					var caterpillars = new PIXI.Sprite(caterpillarsTextures[caterpillarFrame]);
+					caterpillars.pivot = new PIXI.Point(caterpillars.width / 2, caterpillars.height / 2);
+					container.addChild(caterpillars);
+
+					var caterpillarsOverlay = new PIXI.Sprite(caterpillarsOverlayTextures[skinIndex][caterpillarFrame]);
+					caterpillarsOverlay.pivot = new PIXI.Point(caterpillarsOverlay.width / 2, caterpillarsOverlay.height / 2);
+					caterpillarsOverlay.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+					container.addChild(caterpillarsOverlay);
+
+					var tankFullBody = new PIXI.Sprite(tankFullBodyTexture);
+					tankFullBody.pivot = new PIXI.Point(tankFullBody.width / 2, tankFullBody.height / 2);
+					container.addChild(tankFullBody);
+					
+					var fullBodyOverlay = new PIXI.Sprite(fullBodyOverlayTextures[skinIndex]);
+					fullBodyOverlay.pivot = new PIXI.Point(fullBodyOverlay.width / 2, fullBodyOverlay.height / 2);
+					fullBodyOverlay.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+					container.addChild(fullBodyOverlay);
+
+					fieldStage.addChild(container);
+					
+					playerSprites[i] = container;
+					playerSprites[i].caterpillars = caterpillars;
+				}
+			}
+			
+			for (var i = 0; i < gameState.players.length; i++) {
+				playerSprites[i].x = playersState[i].posX + gameState.cellSize / 2;
+				playerSprites[i].y = playersState[i].posY + gameState.cellSize / 2;
+				playerSprites[i].rotation = 3.14159 / 180 * playersState[i].angle;
+				if (window.frame % 40 == 0) {
+					playerSprites[i].caterpillars.texture = caterpillarsTextures[caterpillarFrame];
+					caterpillarFrame = (caterpillarFrame + 1) % 2;
+				}
+
+			}
+
+		}
+		
+		
+		function updateMissiles(gameState) {
+			var missiles = gameState.missiles;
+			var recreateMissiles = false;
+			if (missileSprites.length != missiles.length) {
+				recreateMissiles = true;
+			} else {
+				for (var i = 0; i < playersState.length; i++) {
+					if (missileSprites[i].length != missiles[i].length) {
+						recreateMissiles = true;
+					}
+				}
+			}
+			
+			if (recreateMissiles) {
+				// Removing all missiles for all players
+				if (missileSpritesContainer == null) {
+					missileSpritesContainer = new PIXI.Container();
+					fieldStage.addChild(missileSpritesContainer);
+				}
+				missileSpritesContainer.removeChildren();
+				missileSprites = [];
+				for (var i = 0; i < playersState.length; i++) {
+					missileSprites[i] = [];
+					for (var j = 0; j < missiles[i].length; j++) {
+
+						var skinIndex = missiles[i][j].ownerPlayerId;
+						if (skinIndex >= skins.length) skinIndex = skins.length - 1;
+
+						missileSprites[i][j] = new PIXI.Container();
+											
+						missileSprites[i][j].base = new PIXI.Sprite(missileTexture);
+						missileSprites[i][j].addChild(missileSprites[i][j].base);
+
+						missileSprites[i][j].overlay = new PIXI.Sprite(missileOverlayTextures[skinIndex]);
+						missileSprites[i][j].overlay.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+						missileSprites[i][j].addChild(missileSprites[i][j].overlay);
+						
+						missileSprites[i][j].pivot = new PIXI.Point(missileSprites[i][j].width / 2, missileSprites[i][j].height / 2);
+						missileSpritesContainer.addChild(missileSprites[i][j]);
+
+					}
+
+				}
+			} 
+			for (var i = 0; i < playersState.length; i++) {
+				for (var j = 0; j < missiles[i].length; j++) {
+					missileSprites[i][j].x = missiles[i][j].posX + gameState.cellSize / 2;
+					missileSprites[i][j].y = missiles[i][j].posY + gameState.cellSize / 2;
+					missileSprites[i][j].rotation = 3.14159 / 180 * missiles[i][j].angle;
+				}
+
+			}
+		}
+		
+		function updateScore(frags) {
+		
+			if (firstUpdate) {
+				for (var i = 0; i < frags.length; i++) {
+			
+					var fragsPlayer = document.createElement("div");
+					fragsPlayer.classList.add("frags-player");
+	
+					var fragsPlayerText = document.createTextNode("Player " + (i+1) + ": ");
+					var playerFrags = document.createElement("span");
+					playerFrags.setAttribute("id", "player" + (i+1) + "-frags");
+					
+					fragsPlayer.appendChild(fragsPlayerText);
+					fragsPlayer.appendChild(playerFrags);
+					
+					fragsNode.appendChild(fragsPlayer);
+				}
+			}
+
+			for (var i = 0; i < frags.length; i++) {
+				var playerFragsNode = document.getElementById("player" + (i+1) + "-frags");
+				playerFragsNode.innerHTML = frags[i];
+			}
+		}
+		
+		function openStatusSocket() {
+		    websocket = new WebSocket(webSocketAddress);
+		    
+		    websocket.onopen = function(evt) {
+		    };
+		    
+		    websocket.onmessage = function(evt) {
+		    	var state = JSON.parse(evt.data);
+		    	var gameState = state.game;
+		    	
+				// Active player index
+				activePlayerIndex = state.activePlayerIndex;
+
+				playersState = gameState.players;
+
+				// Missiles
+				updateMissiles(gameState);
+
+				// Players
+				updateTanks(gameState);
+
+				// Field
+				updateField(gameState);
+
+				
+				// Score
+				updateScore(gameState.frags);
+				
+				// Debug SVG
+				var svgCollect = "";
+				for (var i = 0; i < playersState.length; i++) {
+					if (gameState.debugData[i] != null) {
+						svgCollect += gameState.debugData[i].svg;
+					}
+				}
+				debugSvgNode.innerHTML = svgCollect;
+				
+				if (firstUpdate) {
+					window.frame = 0;
+					window.setInterval(function() {
+						window.frame ++;
+						for (var i = 0; i < playersState.length; i++) {
+							
+							if (window.frame % 4 == 0) {
+								for (var i = 0; i < gameState.players.length; i++) {
+									if (playersState[i].moving) {
+										playerSprites[i].caterpillars.texture = caterpillarsTextures[caterpillarFrame];
+									}
+								}
+								caterpillarFrame = (caterpillarFrame + 1) % 2;
+							}
+						}
+						
+						/*var missilesNodeElements = missilesNode.childNodes;
+						for (var i = 0; i < missilesNodeElements.length; i++) {
+							
+							for (var j = 0; j < missilesNodeElements[i].childNodes.length; j++) {
+								positionUnit(missilesNodeElements[i].childNodes[j], gameState.cellSize);
+							}
+						}*/
+						
+						renderer.render(fieldStage);
+					}, 1000 / 50/*fps*/);
+				}
+				
+				firstUpdate = false;
+		    };
+		    websocket.onerror = function(evt) {
+		    };
+		    websocket.onclose = function(evt) {
+		    };
+		}
+	
+		function updateField(gameState) {
+
+			if (firstUpdate) {
+				cellSprites = [];
+			
+				fieldNode.style.width = (gameState.fieldWidth * gameState.cellSize) + "px";
+				fieldNode.style.height = (gameState.fieldHeight * gameState.cellSize) + "px";
+				
+				var container = new PIXI.ParticleContainer(10000, { uvs: true });
+				for (var j = 0; j < gameState.fieldHeight; j++) {
+					for (var i = 0; i < gameState.fieldWidth; i++) {
+						var cellSpriteIndex = ((j+1)%2)*2 + ((i+1)%2);
+						var fieldCell = gameState.field[j * gameState.fieldWidth + i];
+						var cell = new PIXI.Sprite(cellTextures[fieldCell][cellSpriteIndex]);
+						
+						var blockWidth = gameState.cellSize;
+						var blockHeight = gameState.cellSize;
+						
+						cell.x = gameState.cellSize * i;
+						cell.y = gameState.cellSize * j;
+						
+						container.addChild(cell);
+						cellSprites[j * gameState.fieldWidth + i] = cell;
+					};
+				};
+				fieldStage.addChild(container);
+			
+			} else {
+			
+				for (var j = 0; j < gameState.fieldHeight; j++) {
+					for (var i = 0; i < gameState.fieldWidth; i++) {
+						var cell = cellSprites[j * gameState.fieldWidth + i];
+						var cellSpriteIndex = ((j+1)%2)*2 + ((i+1)%2);
+						
+						var fieldCell = gameState.field[j * gameState.fieldWidth + i];
+						cell.texture = cellTextures[fieldCell][cellSpriteIndex];
+					}
+				}
+			}
+			
+		}
+
+		// Setting events
+		
+		window.addEventListener("load", function() {
+		
+			fieldNode = document.getElementById("field");
+			missilesNode = document.getElementById("missiles");
+			debugSvgNode = document.getElementById("debug-svg");
+			fragsNode = document.getElementById("frags-pane");
+		
+			webSocketAddress = buildWebSocketAddress("player");
+			openStatusSocket();
+			
+			renderer = PIXI.autoDetectRenderer(650, 650, { transparent: true });
+			fieldNode.appendChild(renderer.view);
+			fieldStage = new PIXI.Container();
+		});
+	
+		var keysDown = {
+			up: false,
+			down: false,
+			left: false,
+			right: false,
+			fire: false
+		};
+
+		function sendCommands() {
+			var clientState = {};
+			clientState.keys = keysDown;
+			
+			// <DEMO> Demonstrating debug SVG feature. Remove this ASAP
+			if (activePlayerIndex > -1) {
+				clientState.debugData = {};
+				clientState.debugData.svg = "";
+			}
+			// </DEMO>
+			
+			websocket.send(JSON.stringify(clientState));
+		}
+		
+		window.addEventListener("keydown", function(e) {
+
+			e = e || window.event;
+
+			if (e.keyCode == '38') {
+				// up arrow
+				keysDown.up = true;
+			}
+			else if (e.keyCode == '40') {
+				// down arrow
+				keysDown.down = true;
+			}
+			else if (e.keyCode == '37') {
+				// left arrow
+				keysDown.left = true;
+			}
+			else if (e.keyCode == '39') {
+				// right arrow
+				keysDown.right = true;
+			}
+			else if (e.keyCode == '32') {
+				// spacebar
+				keysDown.fire = true;
+			}
+			
+			sendCommands();
+		});
+		
+		window.addEventListener("keyup", function(e) {
+
+			e = e || window.event;
+
+			if (e.keyCode == '38') {
+				// up arrow
+				keysDown.up = false;
+			}
+			else if (e.keyCode == '40') {
+				// down arrow
+				keysDown.down = false;
+			}
+			else if (e.keyCode == '37') {
+				// left arrow
+				keysDown.left = false;
+			}
+			else if (e.keyCode == '39') {
+				// right arrow
+				keysDown.right = false;
+			}
+			else if (e.keyCode == '32') {
+				// spacebar
+				keysDown.fire = false;
+			}
+			
+			sendCommands();
+		});
+
+	</script>
+</head>
+
+<body>
+	
+	<div class="root">
+		<div class="game">
+			<div id="field" class="field" style="position: relative; width: 100px; height: 100px; margin: 0;"></div>
+			
+			<div id="debug-svg" style="position: absolute; left: 5.5px; top: 5.5px;"></div>
+			<div class="field-inset"></div>
+		</div>
+		<div id="frags-pane" class="frags-pane">
+			<h2 class="frags">Frags</h2>
+			<!-- Adding player frags here -->
+		</div>
+	</div>
+</body>
+</html>
