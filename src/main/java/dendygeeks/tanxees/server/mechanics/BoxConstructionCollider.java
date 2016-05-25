@@ -8,6 +8,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import dendygeeks.tanxees.api.java.interfaces.Cell;
+import dendygeeks.tanxees.server.controllers.ServerCellController;
+import dendygeeks.tanxees.server.controllers.ServerFlagController;
+import dendygeeks.tanxees.server.mechanics.Box.BoxActivityCriterion;
+
 public class BoxConstructionCollider {
 
 	public interface CollisionFriendship {
@@ -75,14 +80,14 @@ public class BoxConstructionCollider {
 		agents.remove(agent);
 	}
 	
-	public synchronized CollisionResult getIntersectionDepth(BoxConstruction<?> con) {
+	public synchronized CollisionResult getIntersectionDepth(BoxConstruction<?> con, BoxActivityCriterion activityCriterion) {
 		//IntersectionResult res = null; 
 		BoxConstruction<?>[] agArr = agents.toArray(new BoxConstruction[] { });
 		
 		HashMap<BoxConstruction<?>, IntersectionResult> targets = new HashMap<>();
 		for (int i = 0; i < agArr.length; i++) {
 			if (agArr[i] != con && (friendship == null || friendship.canCollide(agArr[i], con))) {
-				IntersectionResult d = BoxConstruction.getIntersectionDepth(agArr[i], con);
+				IntersectionResult d = BoxConstruction.getIntersectionDepth(agArr[i], con, activityCriterion);
 				if (d != null) {
 					targets.put(agArr[i], d);
 				}
@@ -112,11 +117,28 @@ public class BoxConstructionCollider {
 		
 		return new CollisionResult(sortedTargets);
 	}
+
+	private BoxActivityCriterion defaultActivityCriterion = new BoxActivityCriterion() {
+		
+		@Override
+		public boolean isActive(Box box) {
+			if (box instanceof ServerCellController) {
+				ServerCellController cellController = (ServerCellController)box;
+				return cellController.getType().isWall();
+			} else if (box instanceof ServerFlagController) {
+				ServerFlagController flagController = (ServerFlagController)box;
+				return !flagController.isCrashed();
+			} else {
+				return true;
+			}
+		}
+	};
 	
 	private MoveRotateResult tryRotateSingle(BoxConstruction<?> con, DeltaAngle delta) {
-		CollisionResult before = getIntersectionDepth(con);
+		
+		CollisionResult before = getIntersectionDepth(con, defaultActivityCriterion);
 		con.rotate(delta);
-		CollisionResult after = getIntersectionDepth(con);
+		CollisionResult after = getIntersectionDepth(con, defaultActivityCriterion);
 
 		CollisionResult modAfter = new CollisionResult(after);
 		modAfter.subtract(before);
@@ -142,7 +164,7 @@ public class BoxConstructionCollider {
 					if (i != 0 || j != 0) {
 						DeltaXY dr = new DeltaXY(maxDepthX * i, maxDepthY * j);
 						con.move(dr);
-						CollisionResult wentAway = getIntersectionDepth(con);
+						CollisionResult wentAway = getIntersectionDepth(con, defaultActivityCriterion);
 						wentAway.subtract(before);
 						if (wentAway.targets.size() == 0) {
 							if (minDelta == null) { 
@@ -192,11 +214,11 @@ public class BoxConstructionCollider {
 	}
 	
 	public synchronized MoveRotateResult tryMove(BoxConstruction<?> con, DeltaXY delta) {
-		CollisionResult before = getIntersectionDepth(con);
+		CollisionResult before = getIntersectionDepth(con, defaultActivityCriterion);
 		
 		//if (before.targets.size() > 0) throw new RuntimeException("Invalid state before movement");
 		con.move(delta);
-		CollisionResult after = getIntersectionDepth(con);
+		CollisionResult after = getIntersectionDepth(con, defaultActivityCriterion);
 		
 		CollisionResult modAfter = new CollisionResult(after);
 		modAfter.subtract(before);

@@ -75,12 +75,6 @@ public class ServerUnitController implements Box, BoxConstruction<Box> {
 	}
 	
 	@Override
-	public boolean isActive() {
-		return true;
-	}
-	
-
-	@Override
 	public Iterator<Box> iterator() {
 		Iterator<Box> res = new Iterator<Box>() {
 			

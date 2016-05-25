@@ -6,12 +6,14 @@ public interface Box {
 	double getRight();
 	double getBottom();
 	
-	boolean isActive();
-	
 	void move(DeltaXY delta);
 	
-	public static IntersectionResult getIntersectionDepth(Box box1, Box box2) {
-		if (!box1.isActive() || !box2.isActive()) return null;
+	public interface BoxActivityCriterion {
+		boolean isActive(Box box);
+	}
+	
+	public static IntersectionResult getIntersectionDepth(Box box1, Box box2, BoxActivityCriterion activityCriterion) {
+		if (!activityCriterion.isActive(box1) || !activityCriterion.isActive(box2)) return null;
 		
 		double c1x = (box1.getLeft() + box1.getRight()) / 2;
 		double c1y = (box1.getTop() + box1.getBottom()) / 2;

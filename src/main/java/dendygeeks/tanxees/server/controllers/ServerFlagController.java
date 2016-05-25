@@ -14,9 +14,7 @@ public class ServerFlagController extends ServerUnitController {
 		return (FlagModel)getUnitModel();
 	}
 	
-	@Override
-	public boolean isActive() {
-		return !getFlagModel().isCrashed();
+	public boolean isCrashed() {
+		return getFlagModel().isCrashed();
 	}
-
 }

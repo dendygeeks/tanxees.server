@@ -68,11 +68,6 @@ public class ServerCellController implements Box, BoxConstruction<ServerCellCont
 	public CellModel getCellModel() {
 		return cellModel;
 	}
-
-	@Override
-	public boolean isActive() {
-		return cellModel.getType().isWall();
-	}
 	
 	@Override
 	public Iterator<ServerCellController> iterator() {
@@ -100,6 +95,10 @@ public class ServerCellController implements Box, BoxConstruction<ServerCellCont
 	
 	public int getJ() {
 		return j;
+	}
+	
+	public CellType getType() {
+		return cellModel.getType();
 	}
 
 	@Override
