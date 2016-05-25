@@ -44,7 +44,9 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
 
     public PlayerServerWebSocket() {
     	// Walls
-    	CellType __ = CellType.EMPTY, _C = CellType.CONCRETE, _B = CellType.BRICKS, DB = CellType.DARK_BRICKS;
+    	CellType __ = CellType.EMPTY, _C = CellType.CONCRETE,
+    			 _B = CellType.BRICKS, DB = CellType.DARK_BRICKS,
+    			 _T = CellType.TREE;
     	/*CellType[] map = new CellType[] {
    			__, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
    			__, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
@@ -116,8 +118,8 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
        			__, __, __, __, __, __, __, __, _C, _C, __, __, _B, _B, __, __, _B, _B, _C, _C, __, __, __, __, __, __,
        			__, __, __, __, _C, _C, __, __, __, __, __, __, __, __, __, __, __, __, __, __, _C, _C, __, __, __, __,
         		__, __, __, __, _C, _C, __, __, __, __, __, __, __, __, __, __, __, __, __, __, _C, _C, __, __, __, __,
-        		__, __, __, __, _B, _B, __, __, __, _B, _B, _B, _C, _C, _B, _B, _B, __, __, __, _B, _B, __, __, __, __,
-        		__, __, __, __, _B, _B, __, __, __, _B, _B, _B, _C, _C, _B, _B, _B, __, __, __, _B, _B, __, __, __, __,
+        		__, __, __, __, _B, _B, __, __, __, _B, _T, _T, _C, _C, _T, _T, _B, __, __, __, _B, _B, __, __, __, __,
+        		__, __, __, __, _B, _B, __, __, __, _B, _T, _T, _C, _C, _T, _T, _B, __, __, __, _B, _B, __, __, __, __,
         		_B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __, __, __, __, __, _B, _B, __, __, _B, _B,
         		_B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __, __, __, __, __, _B, _B, __, __, _B, _B
         	};

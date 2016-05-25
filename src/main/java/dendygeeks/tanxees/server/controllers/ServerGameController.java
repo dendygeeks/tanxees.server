@@ -21,8 +21,8 @@ import dendygeeks.tanxees.server.mechanics.BoxConstructionCollider.CollisionFrie
 
 public class ServerGameController extends Thread implements MissileCrashListener {
 	
-	public static final double MODEL_TICK = 1.0 / 120;	// 2 * 60FPS
-	public static final double FRONTEND_TICK = 1.0 / 30;	// 30FPS
+	public static final double MODEL_TICK = 1.0 / 60;	// 2 * 60FPS
+	public static final double FRONTEND_TICK = 1.0 / 25;	// 30FPS
 	public static final int FRONTEND_DELAY = (int)(1000 * FRONTEND_TICK);
 			
 	public static final int CELL_SIZE = 11;
