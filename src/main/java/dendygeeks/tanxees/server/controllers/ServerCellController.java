@@ -105,4 +105,8 @@ public class ServerCellController implements Box, BoxConstruction<ServerCellCont
 	public void rotate(DeltaAngle delta) {
 		throw new RuntimeException("Not supported");
 	}
+
+	public void setMovementTouchMoment(long touched) {
+		getCellModel().setMovementTouchMoment(touched);
+	}
 }

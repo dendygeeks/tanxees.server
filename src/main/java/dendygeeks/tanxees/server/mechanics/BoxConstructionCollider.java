@@ -118,7 +118,7 @@ public class BoxConstructionCollider {
 		return new CollisionResult(sortedTargets);
 	}
 
-	private BoxActivityCriterion defaultActivityCriterion = new BoxActivityCriterion() {
+	private BoxActivityCriterion obstacleBoxActivityCriterion = new BoxActivityCriterion() {
 		
 		@Override
 		public boolean isActive(Box box) {
@@ -136,9 +136,9 @@ public class BoxConstructionCollider {
 	
 	private MoveRotateResult tryRotateSingle(BoxConstruction<?> con, DeltaAngle delta) {
 		
-		CollisionResult before = getIntersectionDepth(con, defaultActivityCriterion);
+		CollisionResult before = getIntersectionDepth(con, obstacleBoxActivityCriterion);
 		con.rotate(delta);
-		CollisionResult after = getIntersectionDepth(con, defaultActivityCriterion);
+		CollisionResult after = getIntersectionDepth(con, obstacleBoxActivityCriterion);
 
 		CollisionResult modAfter = new CollisionResult(after);
 		modAfter.subtract(before);
@@ -164,7 +164,7 @@ public class BoxConstructionCollider {
 					if (i != 0 || j != 0) {
 						DeltaXY dr = new DeltaXY(maxDepthX * i, maxDepthY * j);
 						con.move(dr);
-						CollisionResult wentAway = getIntersectionDepth(con, defaultActivityCriterion);
+						CollisionResult wentAway = getIntersectionDepth(con, obstacleBoxActivityCriterion);
 						wentAway.subtract(before);
 						if (wentAway.targets.size() == 0) {
 							if (minDelta == null) { 
@@ -214,11 +214,11 @@ public class BoxConstructionCollider {
 	}
 	
 	public synchronized MoveRotateResult tryMove(BoxConstruction<?> con, DeltaXY delta) {
-		CollisionResult before = getIntersectionDepth(con, defaultActivityCriterion);
+		CollisionResult before = getIntersectionDepth(con, obstacleBoxActivityCriterion);
 		
 		//if (before.targets.size() > 0) throw new RuntimeException("Invalid state before movement");
 		con.move(delta);
-		CollisionResult after = getIntersectionDepth(con, defaultActivityCriterion);
+		CollisionResult after = getIntersectionDepth(con, obstacleBoxActivityCriterion);
 		
 		CollisionResult modAfter = new CollisionResult(after);
 		modAfter.subtract(before);

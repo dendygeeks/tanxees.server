@@ -3,15 +3,18 @@ package dendygeeks.tanxees.server.controllers;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import dendygeeks.tanxees.api.java.interfaces.CellType;
 import dendygeeks.tanxees.api.java.model.PlayerKeysModel;
 import dendygeeks.tanxees.api.java.model.PlayerUnitModel;
 import dendygeeks.tanxees.server.Direction;
 import dendygeeks.tanxees.server.MissileCrashListener;
 import dendygeeks.tanxees.server.SpawnConfig;
+import dendygeeks.tanxees.server.mechanics.Box;
 import dendygeeks.tanxees.server.mechanics.BoxConstruction;
 import dendygeeks.tanxees.server.mechanics.BoxConstructionCollider;
 import dendygeeks.tanxees.server.mechanics.DeltaAngle;
 import dendygeeks.tanxees.server.mechanics.DeltaXY;
+import dendygeeks.tanxees.server.mechanics.BoxConstructionCollider.CollisionResult;
 import dendygeeks.tanxees.server.mechanics.BoxConstructionCollider.MoveRotateResult;
 
 public class ServerPlayerUnitController extends ServerUnitController {
@@ -229,6 +232,24 @@ public class ServerPlayerUnitController extends ServerUnitController {
 			DeltaXY dxy = new DeltaXY(displacement * Math.cos(angle / 180 * Math.PI),
 					displacement * Math.sin(angle / 180 * Math.PI));
 			safeMove(dxy);
+		}
+		
+		if (moving) {
+			CollisionResult treesCollisionResult = collider.getIntersectionDepth(player.getUnit(), new BoxActivityCriterion() {
+				
+				@Override
+				public boolean isActive(Box box) {
+					if (box instanceof ServerCellController) {
+						return ((ServerCellController)box).getCellModel().getType() == CellType.TREE;
+					} else {
+						return false;
+					}
+				}
+			});
+			
+			for (BoxConstruction<?> tree : treesCollisionResult.targets.keySet()) {
+				((ServerCellController)tree).setMovementTouchMoment(System.currentTimeMillis());
+			}
 		}
 		
 		getPlayerUnitModel().setMoving(moving);
