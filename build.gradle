@@ -3,7 +3,7 @@ apply plugin: 'application'
 
 version = '0.1'
 
-mainClassName = "bfbc.tank.core.Main"
+mainClassName = "dendygeeks.tanxees.server.Main"
 
 jar {
     manifest {
