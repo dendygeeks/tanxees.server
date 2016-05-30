@@ -13,6 +13,7 @@ import dendygeeks.tanxees.api.java.model.CellModel;
 import dendygeeks.tanxees.api.java.model.DebugDataModel;
 import dendygeeks.tanxees.api.java.model.GameModel;
 import dendygeeks.tanxees.api.java.model.PlayerKeysModel;
+import dendygeeks.tanxees.server.GameSetup;
 import dendygeeks.tanxees.server.MissileCrashListener;
 import dendygeeks.tanxees.server.SpawnConfig;
 import dendygeeks.tanxees.server.mechanics.BoxConstruction;
@@ -27,10 +28,15 @@ public class ServerGameController extends Thread implements MissileCrashListener
 			
 	public static final int CELL_SIZE = 11;
 	
+	private GameSetup gameSetup; 
 	private GameModel gameModel;
 	
 	public GameModel getGameModel() {
 		return gameModel;
+	}
+	
+	public GameSetup getGameSetup() {
+		return gameSetup;
 	}
 	
 	public static interface StateUpdateHandler {
@@ -39,7 +45,6 @@ public class ServerGameController extends Thread implements MissileCrashListener
 	
 	private StateUpdateHandler stateUpdateHandler;
 	
-	private HashMap<String, SpawnConfig> spawnConfigs; 
 	
 	private BoxConstructionCollider collider = new BoxConstructionCollider();
 	//private ArrayList<CellBoxConstruction> cells = new ArrayList<>();
@@ -89,12 +94,12 @@ public class ServerGameController extends Thread implements MissileCrashListener
 		playerControllers.get(id).respawnUnit();
 	}
 	
-	public ServerGameController(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, CellType[] map, String[] playerIds, HashMap<String, Appearance> appearances, HashMap<String, UnitType> unitTypes, HashMap<String, SpawnConfig> spawnConfigs, int flagI, int flagJ) {
+	public ServerGameController(StateUpdateHandler stateUpdateHandler, int mapWidth, int mapHeight, GameSetup gameSetup, int flagI, int flagJ) {
 		
-		this.spawnConfigs = new HashMap<>(spawnConfigs);
+		this.gameSetup = gameSetup;
 		
-		if (map == null) throw new IllegalArgumentException("Map shouldn't be null");
-		if (map.length != mapWidth * mapHeight) throw new IllegalArgumentException("Invalid map size");
+		if (gameSetup.getMap() == null) throw new IllegalArgumentException("Map shouldn't be null");
+		if (gameSetup.getMap().length != mapWidth * mapHeight) throw new IllegalArgumentException("Invalid map size");
 		
 		int fieldWidth = mapWidth * 2 + 2;
 		int fieldHeight = mapHeight * 2 + 2;
@@ -148,11 +153,11 @@ public class ServerGameController extends Thread implements MissileCrashListener
     	// Map
 		for (int i = 1; i < fieldWidth - 1; i++) {
 			for (int j = 1; j < fieldHeight - 1; j++) {
-				fieldCellControllers[i + j * fieldWidth].getCellModel().setType(map[((i-1)/2) + ((j-1)/2)*mapWidth]);
+				fieldCellControllers[i + j * fieldWidth].getCellModel().setType(gameSetup.getMap()[((i-1)/2) + ((j-1)/2)*mapWidth]);
 			}
 		}
 
-		if (spawnConfigs == null) throw new IllegalArgumentException("spawnConfigs shouldn't be null");
+		if (gameSetup.getSpawnConfigs() == null) throw new IllegalArgumentException("spawnConfigs shouldn't be null");
 		
 		// TODO Validation
 		//if (playersCount != spawnPoints.length) throw new IllegalArgumentException("Players and spawn points count differ");
@@ -166,8 +171,8 @@ public class ServerGameController extends Thread implements MissileCrashListener
 
 		playerControllers = new HashMap<String, ServerPlayerController>();
 		
-		for (String id : playerIds) {
-			ServerPlayerController newPlayerController = new ServerPlayerController(this, collider, unitTypes.get(id), appearances.get(id), CELL_SIZE, spawnConfigs.get(id));
+		for (String id : gameSetup.getPlayerIds()) {
+			ServerPlayerController newPlayerController = new ServerPlayerController(this, collider, gameSetup.getUnitTypes().get(id), gameSetup.getAppearances().get(id), CELL_SIZE, this.gameSetup.getSpawnConfigs().get(id));
 			playerControllers.put(id, newPlayerController);
 			gameModel.getPlayers().put(id, newPlayerController.getPlayerModel());
 			createPlayerUnit(id);

@@ -1,5 +1,6 @@
 package dendygeeks.tanxees.server.mechanics;
 
+import dendygeeks.tanxees.api.java.interfaces.DeltaAngle;
 import dendygeeks.tanxees.server.mechanics.Box.BoxActivityCriterion;
 
 public interface BoxConstruction<T extends Box> extends Iterable<T> {

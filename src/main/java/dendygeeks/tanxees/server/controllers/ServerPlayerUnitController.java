@@ -4,15 +4,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import dendygeeks.tanxees.api.java.interfaces.CellType;
+import dendygeeks.tanxees.api.java.interfaces.DeltaAngle;
+import dendygeeks.tanxees.api.java.interfaces.Direction;
 import dendygeeks.tanxees.api.java.model.PlayerKeysModel;
 import dendygeeks.tanxees.api.java.model.PlayerUnitModel;
-import dendygeeks.tanxees.server.Direction;
 import dendygeeks.tanxees.server.MissileCrashListener;
 import dendygeeks.tanxees.server.SpawnConfig;
 import dendygeeks.tanxees.server.mechanics.Box;
 import dendygeeks.tanxees.server.mechanics.BoxConstruction;
 import dendygeeks.tanxees.server.mechanics.BoxConstructionCollider;
-import dendygeeks.tanxees.server.mechanics.DeltaAngle;
 import dendygeeks.tanxees.server.mechanics.DeltaXY;
 import dendygeeks.tanxees.server.mechanics.BoxConstructionCollider.CollisionResult;
 import dendygeeks.tanxees.server.mechanics.BoxConstructionCollider.MoveRotateResult;

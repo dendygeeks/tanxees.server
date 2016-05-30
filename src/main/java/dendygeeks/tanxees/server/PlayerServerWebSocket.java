@@ -1,6 +1,10 @@
 package dendygeeks.tanxees.server;
 import java.io.IOException;
 import java.lang.Thread.State;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,14 +18,13 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
-import dendygeeks.tanxees.api.java.interfaces.Appearance;
 import dendygeeks.tanxees.api.java.interfaces.CellType;
-import dendygeeks.tanxees.api.java.interfaces.UnitType;
 import dendygeeks.tanxees.api.java.model.ClientStateModel;
 import dendygeeks.tanxees.api.java.model.DebugDataModel;
 import dendygeeks.tanxees.server.controllers.ServerGameController;
-import dendygeeks.tanxees.server.controllers.TheStateController;
 import dendygeeks.tanxees.server.controllers.ServerGameController.StateUpdateHandler;
+import dendygeeks.tanxees.server.controllers.TheStateController;
+import dendygeeks.tanxees.utils.GlobalServices;
 
 @WebSocket(maxTextMessageSize = 1024 * 1024 * 10, maxBinaryMessageSize = 1024 * 1024 * 100)
 public class PlayerServerWebSocket implements StateUpdateHandler {
@@ -33,21 +36,29 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
     
     private ServerGameController game;
     
-    private static final String PLAYER_ID_PLAYER1 = "player1";
+    /*private static final String PLAYER_ID_PLAYER1 = "player1";
     private static final String PLAYER_ID_PLAYER2 = "player2";
     private static final String PLAYER_ID_BOT1 = "bot1";
     private static final String PLAYER_ID_BOT2 = "bot2";
-    private static final String PLAYER_ID_BOT3 = "bot3";
+    private static final String PLAYER_ID_BOT3 = "bot3";*/
 
     //private String[] playerIds = new String[] { PLAYER_ID_PLAYER1, PLAYER_ID_PLAYER2, PLAYER_ID_BOT1, PLAYER_ID_BOT2 };
-    private String[] playerIds = new String[] { PLAYER_ID_PLAYER1, PLAYER_ID_BOT1, PLAYER_ID_BOT2, PLAYER_ID_BOT3 };
+    //private String[] playerIds = new String[] { PLAYER_ID_PLAYER1, PLAYER_ID_BOT1, PLAYER_ID_BOT2, PLAYER_ID_BOT3 };
 
-    public PlayerServerWebSocket() {
+    
+	private static String readFile(String path, Charset encoding) throws IOException {
+		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		return new String(encoded, encoding);
+	}
+
+    public PlayerServerWebSocket() throws IOException {
     	// Walls
-    	CellType __ = CellType.EMPTY, _C = CellType.CONCRETE,
+    	/*CellType __ = CellType.EMPTY, _C = CellType.CONCRETE,
     			 _B = CellType.BRICKS, DB = CellType.DARK_BRICKS,
-    			 _T = CellType.TREE;
-    	/*CellType[] map = new CellType[] {
+    			 _T = CellType.TREE;*/
+    	/* VER1
+    	 * 
+    	 * CellType[] map = new CellType[] {
    			__, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
    			__, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
    			__, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __, _B, _B, __, __,
@@ -95,6 +106,9 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
     	unitTypes.put(PLAYER_ID_BOT2, UnitType.MEDIUM);
     	*/
     	
+    	/* VER 2
+    	 * 
+    	 * 
     	CellType[] map = new CellType[] {
        			_B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, _B, _B,
        			_B, _B, __, __, _B, _B, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, _B, _B,
@@ -141,11 +155,19 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
     	unitTypes.put(PLAYER_ID_BOT1, UnitType.MEDIUM);
     	unitTypes.put(PLAYER_ID_BOT2, UnitType.MEDIUM);
     	unitTypes.put(PLAYER_ID_BOT3, UnitType.MEDIUM);
+
+    	GameSetup gameSetup = new GameSetup(playerIds, map, spawnConfigs, appearances, unitTypes);
+		*/
+
+    	String gameSetupJson = readFile(Main.getGameSetupFilePath(), StandardCharsets.UTF_8);
+    	GameSetup gameSetup = GlobalServices.getGson().fromJson(gameSetupJson, GameSetup.class);
     	
-    	game = new ServerGameController(this, 26, 26, map, playerIds, appearances, unitTypes, spawnConfigs, 27, 51);
+    	System.out.println("Game setup: " + GlobalServices.getGson().toJson(gameSetup));
+    	
+    	game = new ServerGameController(this, 26, 26, gameSetup, 27, 51);
 		
 		synchronized (controlledPlayers) {
-			for (String id : playerIds) {
+			for (String id : gameSetup.getPlayerIds()) {
 				controlledPlayers.put(id, null);
 			}
 		}
@@ -158,7 +180,7 @@ public class PlayerServerWebSocket implements StateUpdateHandler {
 
     		for (Session s : sessions) {
     			String controlledPlayerId = null;
-    			for (String id : playerIds) {
+    			for (String id : game.getGameSetup().getPlayerIds()) {
     	    		if (s == controlledPlayers.get(id)) controlledPlayerId = id;
     	    	}
     			

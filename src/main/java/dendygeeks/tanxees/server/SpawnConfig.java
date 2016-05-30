@@ -1,8 +1,15 @@
 package dendygeeks.tanxees.server;
 
+import com.google.gson.annotations.Expose;
+
+import dendygeeks.tanxees.api.java.interfaces.Direction;
+
 public class SpawnConfig {
+	@Expose
 	public final Direction direction;
+	@Expose
 	public final PointIJ spawnPoint;
+	
 	public SpawnConfig(PointIJ spawnPoint, Direction direction) {
 		this.spawnPoint = spawnPoint;
 		this.direction = direction;

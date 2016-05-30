@@ -17,9 +17,18 @@ import javax.servlet.http.HttpServletResponse;
 public class Main {
 	private static final String STATIC_ROOT = "/" + Main.class.getPackage().getName().replace('.', '/') + "/root";
 	
-	
+	private static String gameSetupFilePath;
+	public static String getGameSetupFilePath() {
+		return gameSetupFilePath;
+	}
 	
     public static void main(String[] args) {
+    	if (args.length == 0) {
+    		gameSetupFilePath = "gamesetup.json";
+    	} else {
+    		gameSetupFilePath = args[0];
+    	}
+    	
     	port(9876);
     	staticFileLocation(STATIC_ROOT);
 

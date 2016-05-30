@@ -2,10 +2,10 @@ package dendygeeks.tanxees.server.controllers;
 
 import java.util.Iterator;
 
+import dendygeeks.tanxees.api.java.interfaces.DeltaAngle;
 import dendygeeks.tanxees.api.java.model.UnitModel;
 import dendygeeks.tanxees.server.mechanics.Box;
 import dendygeeks.tanxees.server.mechanics.BoxConstruction;
-import dendygeeks.tanxees.server.mechanics.DeltaAngle;
 import dendygeeks.tanxees.server.mechanics.DeltaXY;
 
 /**
