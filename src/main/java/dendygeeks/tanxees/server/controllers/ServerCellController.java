@@ -3,10 +3,10 @@ package dendygeeks.tanxees.server.controllers;
 import java.util.Iterator;
 
 import dendygeeks.tanxees.api.java.interfaces.CellType;
+import dendygeeks.tanxees.api.java.interfaces.DeltaAngle;
 import dendygeeks.tanxees.api.java.model.CellModel;
 import dendygeeks.tanxees.server.mechanics.Box;
 import dendygeeks.tanxees.server.mechanics.BoxConstruction;
-import dendygeeks.tanxees.server.mechanics.DeltaAngle;
 import dendygeeks.tanxees.server.mechanics.DeltaXY;
 
 public class ServerCellController implements Box, BoxConstruction<ServerCellController> {

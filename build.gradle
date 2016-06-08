@@ -11,6 +11,14 @@ jar {
     }
 }
 
+run {
+	if (project.hasProperty("gameSetup")) {
+		args(gameSetup);
+	} else {
+		args("../config/gamesetup.json");
+	}
+}
+
 repositories {
     mavenCentral()
 }

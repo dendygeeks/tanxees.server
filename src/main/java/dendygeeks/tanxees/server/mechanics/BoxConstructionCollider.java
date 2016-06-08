@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import dendygeeks.tanxees.api.java.interfaces.Cell;
+import dendygeeks.tanxees.api.java.interfaces.DeltaAngle;
 import dendygeeks.tanxees.server.controllers.ServerCellController;
 import dendygeeks.tanxees.server.controllers.ServerFlagController;
 import dendygeeks.tanxees.server.mechanics.Box.BoxActivityCriterion;
