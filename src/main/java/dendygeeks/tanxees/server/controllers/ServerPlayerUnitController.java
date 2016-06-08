@@ -242,7 +242,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 					if (box instanceof ServerCellController) {
 						return ((ServerCellController)box).getCellModel().getType() == CellType.TREE;
 					} else {
-						return false;
+						return box.equals(player.getUnit());
 					}
 				}
 			});
