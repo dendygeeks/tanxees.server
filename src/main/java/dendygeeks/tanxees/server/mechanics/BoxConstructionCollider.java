@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 import dendygeeks.tanxees.api.java.interfaces.Cell;
+import dendygeeks.tanxees.api.java.interfaces.CellType;
 import dendygeeks.tanxees.api.java.interfaces.DeltaAngle;
+import dendygeeks.tanxees.api.java.interfaces.PlayerUnit;
 import dendygeeks.tanxees.api.java.interfaces.Unit;
 import dendygeeks.tanxees.server.controllers.ServerCellController;
 import dendygeeks.tanxees.server.controllers.ServerFlagController;
@@ -75,11 +77,12 @@ public class BoxConstructionCollider {
 		public boolean isActive(Box box) {
 			if (box instanceof ServerCellController) {
 				ServerCellController cellController = (ServerCellController)box;
-				if (mainUnit != null) {
-					return !cellController.getType().isPassableFor(mainUnit);
-				} else {
-					return cellController.getType().isWall();
+				boolean active = cellController.getType().isWall();
+				if (mainUnit != null && mainUnit instanceof PlayerUnit) {
+					// force WATER cells to collide with tanks only
+					if (cellController.getType() == CellType.WATER) active = true;
 				}
+				return active;
 			} else if (box instanceof ServerFlagController) {
 				ServerFlagController flagController = (ServerFlagController)box;
 				return !flagController.isCrashed();
