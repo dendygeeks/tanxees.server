@@ -217,6 +217,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		if (notRotating && wantToFire) {
 			double missileVelocity = velocity * 1.2; // Missile is a bit faster than tank
 			if (moving) {
+				// FIXME: this will increse missle speed even if a tank is stuck to a wall :D
 				missileVelocity += velocity;
 			}
 			

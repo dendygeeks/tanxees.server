@@ -10,8 +10,10 @@ import java.util.Map;
 
 import dendygeeks.tanxees.api.java.interfaces.Cell;
 import dendygeeks.tanxees.api.java.interfaces.DeltaAngle;
+import dendygeeks.tanxees.api.java.interfaces.Unit;
 import dendygeeks.tanxees.server.controllers.ServerCellController;
 import dendygeeks.tanxees.server.controllers.ServerFlagController;
+import dendygeeks.tanxees.server.controllers.ServerUnitController;
 import dendygeeks.tanxees.server.mechanics.Box.BoxActivityCriterion;
 
 public class BoxConstructionCollider {
@@ -55,6 +57,35 @@ public class BoxConstructionCollider {
 		public BoxConstruction<?> mostAggressiveIntersectionTarget() {
 			if (targets.isEmpty()) return null;
 			return targets.keySet().iterator().next();
+		}
+	}
+	
+	private class OwnedBoxActivityCriterion implements BoxActivityCriterion {
+		private final Unit mainUnit;
+		
+		public OwnedBoxActivityCriterion(BoxConstruction<?> con) {
+			if (con instanceof ServerUnitController) {
+				mainUnit = ((ServerUnitController)con).getUnitModel();
+			} else {
+				mainUnit = null;
+			}
+		}
+		
+		@Override
+		public boolean isActive(Box box) {
+			if (box instanceof ServerCellController) {
+				ServerCellController cellController = (ServerCellController)box;
+				if (mainUnit != null) {
+					return !cellController.getType().isPassableFor(mainUnit);
+				} else {
+					return cellController.getType().isWall();
+				}
+			} else if (box instanceof ServerFlagController) {
+				ServerFlagController flagController = (ServerFlagController)box;
+				return !flagController.isCrashed();
+			} else {
+				return true;
+			}
 		}
 	}
 	
@@ -119,23 +150,8 @@ public class BoxConstructionCollider {
 		return new CollisionResult(sortedTargets);
 	}
 
-	private BoxActivityCriterion obstacleBoxActivityCriterion = new BoxActivityCriterion() {
-		
-		@Override
-		public boolean isActive(Box box) {
-			if (box instanceof ServerCellController) {
-				ServerCellController cellController = (ServerCellController)box;
-				return cellController.getType().isWall();
-			} else if (box instanceof ServerFlagController) {
-				ServerFlagController flagController = (ServerFlagController)box;
-				return !flagController.isCrashed();
-			} else {
-				return true;
-			}
-		}
-	};
-	
 	private MoveRotateResult tryRotateSingle(BoxConstruction<?> con, DeltaAngle delta) {
+		OwnedBoxActivityCriterion obstacleBoxActivityCriterion = new OwnedBoxActivityCriterion(con);
 		
 		CollisionResult before = getIntersectionDepth(con, obstacleBoxActivityCriterion);
 		con.rotate(delta);
@@ -191,6 +207,7 @@ public class BoxConstructionCollider {
 				con.rotate(delta.inverse());
 			}
 		}
+
 		return new MoveRotateResult(deltaRes != null, deltaRes, modAfter.targets);
 	}
 	
@@ -215,6 +232,8 @@ public class BoxConstructionCollider {
 	}
 	
 	public synchronized MoveRotateResult tryMove(BoxConstruction<?> con, DeltaXY delta) {
+		OwnedBoxActivityCriterion obstacleBoxActivityCriterion = new OwnedBoxActivityCriterion(con);
+
 		CollisionResult before = getIntersectionDepth(con, obstacleBoxActivityCriterion);
 		
 		//if (before.targets.size() > 0) throw new RuntimeException("Invalid state before movement");
