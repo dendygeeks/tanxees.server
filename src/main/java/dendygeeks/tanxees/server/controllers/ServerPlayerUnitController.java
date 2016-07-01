@@ -19,6 +19,7 @@ import dendygeeks.tanxees.server.mechanics.BoxConstructionCollider.MoveRotateRes
 
 public class ServerPlayerUnitController extends ServerUnitController {
 
+	private static final double gravity = 9.81;
 	//private static final double SIZE = 34;
 	
 	private static final HashMap<Direction, Double> DIRECTION_ANGLES;
@@ -34,6 +35,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 
 	private boolean wantToFire;
 	
+	private double missileVelocity = 85.0 * 1.2;
 	private double velocity = 85.0d;
 	private double backVelocity = -50.0d;
 	private double angleVel = 500;
@@ -68,6 +70,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 	
 	private SpawnConfig spawnConfig;
 	private double sizeW, sizeL;
+	private double mass, midship, forwardPower, backwardPower;
 	
 	public void respawnUnit() {
 		getPlayerUnitModel().setSizeX(sizeForDir(false, sizeW, sizeL, spawnConfig.direction));
@@ -76,9 +79,13 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		getPlayerUnitModel().setPosY(spawnConfig.getPosY(cellSize));
 		getPlayerUnitModel().setAngle(DIRECTION_ANGLES.get(spawnConfig.direction));
 		this.direction = spawnConfig.direction;
+		this.velocity = 0.0;
 	}
 	
-	public ServerPlayerUnitController(ServerPlayerController player, double sizeW, double sizeL, double cellSize, BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, PlayerKeysModel activeCommand, boolean moving, Double angle) {
+	public ServerPlayerUnitController(ServerPlayerController player, double sizeW, double sizeL,
+					double mass, double midship, double forwardPower, double backwardPower, double cellSize, 
+					BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, 
+					PlayerKeysModel activeCommand, boolean moving, Double angle) {
 		super(new PlayerUnitModel(sizeForDir(false, sizeW, sizeL, spawnConfig.direction), 
 		      sizeForDir(true, sizeW, sizeL, spawnConfig.direction), 
 		      spawnConfig.getPosX(cellSize), 
@@ -93,6 +100,11 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		this.spawnConfig = spawnConfig;
 		this.sizeW = sizeW;
 		this.sizeL = sizeL;
+		this.mass = mass;
+		this.midship = midship;
+		this.forwardPower = forwardPower;
+		this.backwardPower = backwardPower;
+		this.velocity = 0.0;
 	}
 
 	public PlayerUnitModel getPlayerUnitModel() {
@@ -101,14 +113,14 @@ public class ServerPlayerUnitController extends ServerUnitController {
 	
 	public ServerPlayerUnitController(
 			ServerPlayerController player, 
-			double sizeW, double sizeL, 
+			double sizeW, double sizeL, double mass, double midship, double forwardPower, double backwardPower,
 			double cellSize, 
 			BoxConstructionCollider collider, 
 			MissileCrashListener crashListener, 
 			SpawnConfig spawnConfig, 
 			PlayerKeysModel activeCommand, 
 			boolean moving) {
-		this(player, sizeW, sizeL, cellSize, collider, crashListener, spawnConfig, activeCommand, moving, null);
+		this(player, sizeW, sizeL, mass, midship, forwardPower, backwardPower, cellSize, collider, crashListener, spawnConfig, activeCommand, moving, null);
 	}
 
 	private void safeMove(DeltaXY dxy) {
@@ -116,9 +128,30 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		for (BoxConstruction<?> t : mr.targets.keySet()) {
 			if (t instanceof ServerMissileController) {
 				crashListener.missileCrashed((ServerMissileController)t, Arrays.asList(new BoxConstruction[] { this }));
+			} else {
+				velocity = 0.0;
 			}
 		}
 	}
+	
+	/*
+	 * New physics idea:
+	 		m * a = F_eng - F_dry - F_air
+			F_dry = mu * m * g
+			F_air = nu * S * v
+			F_eng = F0 * mu 				// completely unphysical, but might be better to look at
+		
+		Parameters:
+			tank-specific: m - mass, S - midship, F0 - effective engine power
+			world-fixed: g - gravity
+			cell-specific: mu - dry friction coefficient, nu - air friction coefficient
+		Outcome:
+			v - speed, a - acceleration
+		
+		For now use Euler integration:
+			v1 = v0 + a * dt
+			x1 = x0 + v0 * dt
+	 */
 	
 	public void frameStep() {
 		boolean moving = false;
@@ -177,7 +210,8 @@ public class ServerPlayerUnitController extends ServerUnitController {
 			notRotating = true;
 		}
 		
-		// Dragging. A small hack that makes driving around corners easier for the user 
+		// Dragging. A small hack that makes driving around corners easier for the user
+		
 		if (!notRotating) {
 			double cs = cellSize;
 			double dx = ((getPlayerUnitModel().getPosX() - cs/2) % cs) / cs;
@@ -207,15 +241,49 @@ public class ServerPlayerUnitController extends ServerUnitController {
 			
 		}
 
+		/*
+ 		m * a = F_eng - F_dry - F_air
+		F_dry = mu * m * g
+		F_air = nu * S * v
+		F_eng = F0 * mu 				// completely unphysical, but might be better to look at
+		*/
 		double displacement;
-		if (!moveBackwards) { 
-			displacement = velocity * ServerGameController.MODEL_TICK;
-		} else {
-			displacement = backVelocity * ServerGameController.MODEL_TICK;
+		{
+			int cellX = (int)((getPlayerUnitModel().getPosX() - cellSize/2) / cellSize);
+			int cellY = (int)((getPlayerUnitModel().getPosY() - cellSize/2) / cellSize);
+			CellType cellUnderMe = player.getFieldCellType(cellX, cellY);
+			double oldVelocity = velocity;
+			if (notRotating && (moving || moveBackwards))
+			{
+				// engine is on
+				double engineForce = (moving ? forwardPower : -backwardPower) * cellUnderMe.dryFriction;
+				velocity += engineForce * ServerGameController.MODEL_TICK / mass;
+			}
+
+			// account for the friction
+			double frictionForce = cellUnderMe.airFriction * midship * Math.abs(velocity) + cellUnderMe.dryFriction * mass * gravity;
+			if (!notRotating)
+			{
+				frictionForce *= 100;
+			}
+			double dv = frictionForce * ServerGameController.MODEL_TICK / mass;
+			if (dv >= Math.abs(velocity))
+			{
+				// do a complete stop
+				velocity = 0.0;
+			} else {
+				velocity -= dv * Math.abs(velocity) / velocity;
+			}
+
+			displacement = oldVelocity * ServerGameController.MODEL_TICK;
+			if (Math.abs(velocity) > 1e-3 && !moveBackwards) 
+			{
+				moving = true;
+			}
 		}
 		
 		if (notRotating && wantToFire) {
-			double missileVelocity = velocity * 1.2; // Missile is a bit faster than tank
+			double missileVelocity = this.missileVelocity; // Missile is a bit faster than tank
 			if (moving) {
 				// FIXME: this will increase missile speed even if a tank is stuck to a wall :D
 				missileVelocity += velocity;

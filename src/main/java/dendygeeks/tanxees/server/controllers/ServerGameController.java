@@ -172,7 +172,7 @@ public class ServerGameController extends Thread implements MissileCrashListener
 		playerControllers = new HashMap<String, ServerPlayerController>();
 		
 		for (String id : gameSetup.getPlayerIds()) {
-			ServerPlayerController newPlayerController = new ServerPlayerController(this, collider, gameSetup.getUnitTypes().get(id), gameSetup.getAppearances().get(id), CELL_SIZE, this.gameSetup.getSpawnConfigs().get(id));
+			ServerPlayerController newPlayerController = new ServerPlayerController(this, collider, gameSetup.getUnitTypes().get(id), gameSetup.getAppearances().get(id), this, this.gameSetup.getSpawnConfigs().get(id));
 			playerControllers.put(id, newPlayerController);
 			gameModel.getPlayers().put(id, newPlayerController.getPlayerModel());
 			createPlayerUnit(id);

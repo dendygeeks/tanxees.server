@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dendygeeks.tanxees.api.java.interfaces.Appearance;
+import dendygeeks.tanxees.api.java.interfaces.CellType;
 import dendygeeks.tanxees.api.java.interfaces.UnitType;
 import dendygeeks.tanxees.api.java.model.DebugDataModel;
 import dendygeeks.tanxees.api.java.model.PlayerKeysModel;
@@ -13,6 +14,7 @@ import dendygeeks.tanxees.server.SpawnConfig;
 import dendygeeks.tanxees.server.mechanics.BoxConstructionCollider;
 
 public class ServerPlayerController {
+	private ServerGameController gameController;
 
 	private MissileCrashListener missileCrashListener;
 	private BoxConstructionCollider collider;
@@ -30,11 +32,12 @@ public class ServerPlayerController {
 /*	private PointIJ spawnPoint;
 	private Direction spawnDir;*/
 
-	public ServerPlayerController(MissileCrashListener missileCrashListener, BoxConstructionCollider collider, UnitType unitType, Appearance appearance, double cellSize, SpawnConfig spawnConfig) {
+	public ServerPlayerController(MissileCrashListener missileCrashListener, BoxConstructionCollider collider, UnitType unitType, Appearance appearance, ServerGameController gameController, SpawnConfig spawnConfig) {
 		this.playerModel = new PlayerModel(unitType, appearance, 0);
 		this.missileCrashListener = missileCrashListener;
 		this.collider = collider;
 		this.debugData = null;
+		this.gameController = gameController;
 		
 		this.missileControllers = new ArrayList<>();
 		
@@ -44,7 +47,11 @@ public class ServerPlayerController {
 		unit = new ServerPlayerUnitController(this, 
 				playerModel.getUnitType().sizeW,
 				playerModel.getUnitType().sizeL,
-				cellSize, 
+				playerModel.getUnitType().mass,
+				playerModel.getUnitType().midship,
+				playerModel.getUnitType().forwardPower,
+				playerModel.getUnitType().backwardPower,
+				ServerGameController.CELL_SIZE, 
 				collider, 
 				missileCrashListener, 
 				spawnConfig, 
@@ -110,4 +117,8 @@ public class ServerPlayerController {
 	public ServerPlayerUnitController getUnit() {
 		return unit;
 	}
+	
+	public CellType getFieldCellType(int x, int y) {
+		return gameController.getFieldCellType(x, y);
 	}
+}
