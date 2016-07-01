@@ -36,11 +36,10 @@ public class ServerPlayerUnitController extends ServerUnitController {
 	private boolean wantToFire;
 	
 	private double missileVelocity = 85.0 * 1.2;
-	private double velocity = 85.0d;
-	private double backVelocity = -50.0d;
+	private double velocityX, velocityY;
 	private double angleVel = 500;
 
-	private double dragVelocity = 1.0 * velocity;	// From the ceiling
+	private double dragVelocity = 85.0d;	// From the ceiling
 
 	private BoxConstructionCollider collider;
 	private MissileCrashListener crashListener;
@@ -79,7 +78,8 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		getPlayerUnitModel().setPosY(spawnConfig.getPosY(cellSize));
 		getPlayerUnitModel().setAngle(DIRECTION_ANGLES.get(spawnConfig.direction));
 		this.direction = spawnConfig.direction;
-		this.velocity = 0.0;
+		this.velocityX = 0.0;
+		this.velocityY = 0.0;
 	}
 	
 	public ServerPlayerUnitController(ServerPlayerController player, double sizeW, double sizeL,
@@ -104,7 +104,8 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		this.midship = midship;
 		this.forwardPower = forwardPower;
 		this.backwardPower = backwardPower;
-		this.velocity = 0.0;
+		this.velocityX = 0.0;
+		this.velocityY = 0.0;
 	}
 
 	public PlayerUnitModel getPlayerUnitModel() {
@@ -129,7 +130,8 @@ public class ServerPlayerUnitController extends ServerUnitController {
 			if (t instanceof ServerMissileController) {
 				crashListener.missileCrashed((ServerMissileController)t, Arrays.asList(new BoxConstruction[] { this }));
 			} else {
-				velocity = 0.0;
+				this.velocityX = 0.0;
+				this.velocityY = 0.0;
 			}
 		}
 	}
@@ -247,36 +249,41 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		F_air = nu * S * v
 		F_eng = F0 * mu 				// completely unphysical, but might be better to look at
 		*/
-		double displacement;
+		double displacementX, displacementY;
 		{
 			int cellX = (int)((getPlayerUnitModel().getPosX() - cellSize/2) / cellSize);
 			int cellY = (int)((getPlayerUnitModel().getPosY() - cellSize/2) / cellSize);
 			CellType cellUnderMe = player.getFieldCellType(cellX, cellY);
-			double oldVelocity = velocity;
+			double oldVelocityX = velocityX, oldVelocityY = velocityY;
 			if (notRotating && (moving || moveBackwards))
 			{
 				// engine is on
-				double engineForce = (moving ? forwardPower : -backwardPower) * cellUnderMe.dryFriction;
-				velocity += engineForce * ServerGameController.MODEL_TICK / mass;
+				double engineForce = (!moveBackwards ? forwardPower : -backwardPower) * cellUnderMe.dryFriction;
+				double dv = engineForce * ServerGameController.MODEL_TICK / mass;
+				velocityX += Math.cos(angle / 180.0d * Math.PI) * dv;
+				velocityY += Math.sin(angle / 180.0d * Math.PI) * dv;
 			}
 
 			// account for the friction
-			double frictionForce = cellUnderMe.airFriction * midship * Math.abs(velocity) + cellUnderMe.dryFriction * mass * gravity;
+			double frictionForce = cellUnderMe.airFriction * midship * Math.hypot(velocityX, velocityY) + cellUnderMe.dryFriction * mass * gravity;
 			if (!notRotating)
 			{
-				frictionForce *= 100;
+				frictionForce *= 5.00;
 			}
 			double dv = frictionForce * ServerGameController.MODEL_TICK / mass;
-			if (dv >= Math.abs(velocity))
+			if (dv >= Math.hypot(velocityX, velocityY))
 			{
 				// do a complete stop
-				velocity = 0.0;
+				velocityX = 0.0;
+				velocityY = 0.0;
 			} else {
-				velocity -= dv * Math.abs(velocity) / velocity;
+				velocityX -= dv * velocityX / Math.hypot(velocityX, velocityY);
+				velocityY -= dv * velocityY / Math.hypot(velocityX, velocityY);
 			}
 
-			displacement = oldVelocity * ServerGameController.MODEL_TICK;
-			if (Math.abs(velocity) > 1e-3 && !moveBackwards) 
+			displacementX = oldVelocityX * ServerGameController.MODEL_TICK;
+			displacementY = oldVelocityY * ServerGameController.MODEL_TICK;
+			if (Math.hypot(velocityX, velocityY) > 1e-3) 
 			{
 				moving = true;
 			}
@@ -286,7 +293,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 			double missileVelocity = this.missileVelocity; // Missile is a bit faster than tank
 			if (moving) {
 				// FIXME: this will increase missile speed even if a tank is stuck to a wall :D
-				missileVelocity += velocity;
+				missileVelocity += Math.hypot(velocityX, velocityY);
 			}
 			
 			if (player.getMissilesCount() == 0) {
@@ -298,8 +305,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 
 		// If we are not rotating, we are moving
 		if (notRotating && moving) {
-			DeltaXY dxy = new DeltaXY(displacement * Math.cos(angle / 180 * Math.PI),
-					displacement * Math.sin(angle / 180 * Math.PI));
+			DeltaXY dxy = new DeltaXY(displacementX, displacementY);
 			safeMove(dxy);
 		}
 		
