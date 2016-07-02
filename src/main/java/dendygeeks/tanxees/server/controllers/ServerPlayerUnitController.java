@@ -130,17 +130,26 @@ public class ServerPlayerUnitController extends ServerUnitController {
 	}
 
 	private boolean safeMove(DeltaXY dxy) {
-		BoxConstructionCollider.MoveRotateResult mr = collider.tryMove(this, dxy);
-		for (BoxConstruction<?> t : mr.targets.keySet()) {
+		DeltaXY dx = new DeltaXY(dxy.x, 0);
+		DeltaXY dy = new DeltaXY(0, dxy.y);
+		
+		BoxConstructionCollider.MoveRotateResult mrx = collider.tryMove(this, dx);
+		for (BoxConstruction<?> t : mrx.targets.keySet()) {
 			if (t instanceof ServerMissileController) {
 				crashListener.missileCrashed((ServerMissileController)t, Arrays.asList(new BoxConstruction[] { this }));
 			}
 		}
-		return mr.targets.isEmpty();
+		BoxConstructionCollider.MoveRotateResult mry = collider.tryMove(this, dy);
+		for (BoxConstruction<?> t : mry.targets.keySet()) {
+			if (t instanceof ServerMissileController) {
+				crashListener.missileCrashed((ServerMissileController)t, Arrays.asList(new BoxConstruction[] { this }));
+			}
+		}
+		return mrx.targets.isEmpty() && mry.targets.isEmpty();
 	}
 	
 	/*
-	 * New physics idea:
+	 * A strange physics occuring in this world:
 	 		m * a = F_eng - F_dry - F_air
 			F_dry = mu * m * g
 			F_air = nu * S * v
@@ -216,7 +225,6 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		}
 		
 		// Dragging. A small hack that makes driving around corners easier for the user
-		/*
 		if (!notRotating) {
 			double cs = cellSize;
 			double dx = ((getPlayerUnitModel().getPosX() - cs/2) % cs) / cs;
@@ -233,69 +241,57 @@ public class ServerPlayerUnitController extends ServerUnitController {
 			
 			double rotationFactor = Math.abs(oldDirX*normX + oldDirY*normY);
 			double targetFactor = (-dx)*oldDirX + (-dy)*oldDirY;
-			//if (targetFactor > 0) {	// We are only moving forward
-				double velX = dragVelocity * targetFactor * oldDirX * rotationFactor,
-				       velY = dragVelocity * targetFactor * oldDirY * rotationFactor;
-	
-				DeltaXY dxy = new DeltaXY(
-						velX * ServerGameController.MODEL_TICK,
-						velY * ServerGameController.MODEL_TICK
-				);
-				
-				safeMove(dxy);
-			//}
-			
-		}*/
 
-		/*
- 		m * a = F_eng - F_dry - F_air
-		F_dry = mu * m * g
-		F_air = nu * S * v
-		F_eng = F0 * mu 				// completely unphysical, but might be better to look at
-		*/
+			double velX = dragVelocity * targetFactor * oldDirX * rotationFactor,
+			       velY = dragVelocity * targetFactor * oldDirY * rotationFactor;
+
+			DeltaXY dxy = new DeltaXY(
+					velX * ServerGameController.MODEL_TICK,
+					velY * ServerGameController.MODEL_TICK
+			);
+			
+			safeMove(dxy);
+		}
+
 		double displacementX, displacementY;
 		double oldVelocityX = velocityX, oldVelocityY = velocityY;
 		{
 			double directionAngle = DIRECTION_ANGLES.get(direction) / 180.0d * Math.PI;
-			int cellX = (int)((getPlayerUnitModel().getPosX() - cellSize/2) / cellSize);
-			int cellY = (int)((getPlayerUnitModel().getPosY() - cellSize/2) / cellSize);
+			int cellX = (int) ((getPlayerUnitModel().getPosX() - cellSize / 2) / cellSize);
+			int cellY = (int) ((getPlayerUnitModel().getPosY() - cellSize / 2) / cellSize);
 			CellType cellUnderMe = player.getFieldCellType(cellX, cellY);
-			if (notRotating && (moving || moveBackwards))
-			{
+			if (notRotating && (moving || moveBackwards)) {
 				// engine is on
 				double engineForce = (!moveBackwards ? forwardPower : -backwardPower) * cellUnderMe.dryFriction;
 				double dv = engineForce * ServerGameController.MODEL_TICK / mass;
 				velocityX += Math.cos(directionAngle) * dv;
 				velocityY += Math.sin(directionAngle) * dv;
 			}
-			//System.out.println("[1] velx: " + velocityX + "; vely: " + velocityY);
 
-			// account for the friction
-			double frictionForce = cellUnderMe.airFriction * midship * Math.hypot(velocityX, velocityY) + cellUnderMe.dryFriction * mass * gravity;
-			if (!notRotating)
-			{
-				frictionForce *= 1.0;
+			// Calculating the friction
+			double frictionForce = cellUnderMe.airFriction * midship * Math.hypot(velocityX, velocityY)
+					+ cellUnderMe.dryFriction * mass * gravity;
+			if (!notRotating) {
+				// Additional friction on rotation
+				frictionForce *= 2.0;
 			}
+			
+			// Calculating velocity modification cause of friction
 			double dv = frictionForce * ServerGameController.MODEL_TICK / mass;
-			if (dv * Math.abs(Math.cos(directionAngle)) >= Math.abs(velocityX))
-			{
+			if (dv * Math.abs(Math.cos(directionAngle)) >= Math.abs(velocityX)) {
 				velocityX = 0.0d;
 			} else {
 				velocityX -= dv * velocityX / Math.hypot(velocityX, velocityY);
 			}
-			if (dv * Math.abs(Math.sin(directionAngle)) >= Math.abs(velocityY))
-			{
-				velocityY = 0.0;
+			if (dv * Math.abs(Math.sin(directionAngle)) >= Math.abs(velocityY)) {
+				velocityY = 0.0d;
 			} else {
 				velocityY -= dv * velocityY / Math.hypot(velocityX, velocityY);
 			}
 
 			displacementX = oldVelocityX * ServerGameController.MODEL_TICK;
 			displacementY = oldVelocityY * ServerGameController.MODEL_TICK;
-			if (Math.hypot(velocityX, velocityY) > 1e-3) 
-			{
-				//moving = true;
-			}
+
 		}
 		
 		if (notRotating && wantToFire) {
@@ -312,37 +308,30 @@ public class ServerPlayerUnitController extends ServerUnitController {
 			wantToFire = false;
 		}
 
+		// Saving the actual position as "old"
 		this.oldX = getPlayerUnitModel().getPosX();
 		this.oldY = getPlayerUnitModel().getPosY();
-		// If we are not rotating, we are moving
-		//if (notRotating && moving) {
-			DeltaXY dxy = new DeltaXY(displacementX, displacementY);
-			boolean movedSafely = safeMove(dxy);
-		//}
-			
+
+		// Calculating the movement taking collisions into account
+		DeltaXY dxy = new DeltaXY(displacementX, displacementY);
+		boolean collided = !safeMove(dxy);
+	
+		// Calculating real displacement after all collisions
 		double realDeltaX = Math.abs(getPlayerUnitModel().getPosX() - oldX);
 		double realDeltaY = Math.abs(getPlayerUnitModel().getPosY() - oldY);
-		System.out.print("oldv (" + velocityX + " : " + velocityY + ") mov: " + moving + "; ");
-		if (!movedSafely)
-		{
-			//System.out.println("dis<" + displacementX + ":" + displacementY + ">; rdis<" + realDeltaX + ":" + realDeltaY + "> vel<" + velocityX + ":" + velocityY + ">");
-			if (Math.abs(realDeltaY - Math.abs(displacementY)) > 0)
-			{
-				if (Math.abs(realDeltaX - Math.abs(displacementX)) > Math.abs(realDeltaY - Math.abs(displacementY)))
-				{
+
+		if (collided) {
+			// If we collided, we lose the velocity in this direction
+			if (Math.abs(realDeltaY - Math.abs(displacementY)) > 0) {
+				if (Math.abs(realDeltaX - Math.abs(displacementX)) > Math.abs(realDeltaY - Math.abs(displacementY))) {
 					velocityX = 0.0;
-					//System.out.println("+");
 				} else {
 					velocityY = 0.0;
-					//System.out.println("-");
 				}
-			}
-			else if (Math.abs(realDeltaX - Math.abs(displacementX)) > 0)
-			{
+			} else if (Math.abs(realDeltaX - Math.abs(displacementX)) > 0) {
 				velocityX = 0.0;
 			}
 		}
-		System.out.println("newv (" + velocityX + " : " + velocityY + ") ");
 		
 		if (moving) {
 			CollisionResult treesCollisionResult = collider.getIntersectionDepth(player.getUnit(), new BoxActivityCriterion() {
