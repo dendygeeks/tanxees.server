@@ -37,6 +37,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 	
 	private double missileVelocity = 85.0 * 1.2;
 	private double velocityX, velocityY;
+	private double oldX, oldY;
 	private double angleVel = 500;
 
 	private double dragVelocity = 85.0d;	// From the ceiling
@@ -80,6 +81,8 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		this.direction = spawnConfig.direction;
 		this.velocityX = 0.0;
 		this.velocityY = 0.0;
+		this.oldX = getPlayerUnitModel().getPosX();
+		this.oldY = getPlayerUnitModel().getPosY();
 	}
 	
 	public ServerPlayerUnitController(ServerPlayerController player, double sizeW, double sizeL,
@@ -106,6 +109,8 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		this.backwardPower = backwardPower;
 		this.velocityX = 0.0;
 		this.velocityY = 0.0;
+		this.oldX = getPlayerUnitModel().getPosX();
+		this.oldY = getPlayerUnitModel().getPosY();
 	}
 
 	public PlayerUnitModel getPlayerUnitModel() {
@@ -124,16 +129,14 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		this(player, sizeW, sizeL, mass, midship, forwardPower, backwardPower, cellSize, collider, crashListener, spawnConfig, activeCommand, moving, null);
 	}
 
-	private void safeMove(DeltaXY dxy) {
+	private boolean safeMove(DeltaXY dxy) {
 		BoxConstructionCollider.MoveRotateResult mr = collider.tryMove(this, dxy);
 		for (BoxConstruction<?> t : mr.targets.keySet()) {
 			if (t instanceof ServerMissileController) {
 				crashListener.missileCrashed((ServerMissileController)t, Arrays.asList(new BoxConstruction[] { this }));
-			} else {
-				this.velocityX = 0.0;
-				this.velocityY = 0.0;
 			}
 		}
+		return mr.targets.isEmpty();
 	}
 	
 	/*
@@ -213,7 +216,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		}
 		
 		// Dragging. A small hack that makes driving around corners easier for the user
-		
+		/*
 		if (!notRotating) {
 			double cs = cellSize;
 			double dx = ((getPlayerUnitModel().getPosX() - cs/2) % cs) / cs;
@@ -238,10 +241,11 @@ public class ServerPlayerUnitController extends ServerUnitController {
 						velX * ServerGameController.MODEL_TICK,
 						velY * ServerGameController.MODEL_TICK
 				);
+				
 				safeMove(dxy);
 			//}
 			
-		}
+		}*/
 
 		/*
  		m * a = F_eng - F_dry - F_air
@@ -250,34 +254,39 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		F_eng = F0 * mu 				// completely unphysical, but might be better to look at
 		*/
 		double displacementX, displacementY;
+		double oldVelocityX = velocityX, oldVelocityY = velocityY;
 		{
+			double directionAngle = DIRECTION_ANGLES.get(direction) / 180.0d * Math.PI;
 			int cellX = (int)((getPlayerUnitModel().getPosX() - cellSize/2) / cellSize);
 			int cellY = (int)((getPlayerUnitModel().getPosY() - cellSize/2) / cellSize);
 			CellType cellUnderMe = player.getFieldCellType(cellX, cellY);
-			double oldVelocityX = velocityX, oldVelocityY = velocityY;
 			if (notRotating && (moving || moveBackwards))
 			{
 				// engine is on
 				double engineForce = (!moveBackwards ? forwardPower : -backwardPower) * cellUnderMe.dryFriction;
 				double dv = engineForce * ServerGameController.MODEL_TICK / mass;
-				velocityX += Math.cos(angle / 180.0d * Math.PI) * dv;
-				velocityY += Math.sin(angle / 180.0d * Math.PI) * dv;
+				velocityX += Math.cos(directionAngle) * dv;
+				velocityY += Math.sin(directionAngle) * dv;
 			}
+			//System.out.println("[1] velx: " + velocityX + "; vely: " + velocityY);
 
 			// account for the friction
 			double frictionForce = cellUnderMe.airFriction * midship * Math.hypot(velocityX, velocityY) + cellUnderMe.dryFriction * mass * gravity;
 			if (!notRotating)
 			{
-				frictionForce *= 5.00;
+				frictionForce *= 1.0;
 			}
 			double dv = frictionForce * ServerGameController.MODEL_TICK / mass;
-			if (dv >= Math.hypot(velocityX, velocityY))
+			if (dv * Math.abs(Math.cos(directionAngle)) >= Math.abs(velocityX))
 			{
-				// do a complete stop
-				velocityX = 0.0;
-				velocityY = 0.0;
+				velocityX = 0.0d;
 			} else {
 				velocityX -= dv * velocityX / Math.hypot(velocityX, velocityY);
+			}
+			if (dv * Math.abs(Math.sin(directionAngle)) >= Math.abs(velocityY))
+			{
+				velocityY = 0.0;
+			} else {
 				velocityY -= dv * velocityY / Math.hypot(velocityX, velocityY);
 			}
 
@@ -285,7 +294,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 			displacementY = oldVelocityY * ServerGameController.MODEL_TICK;
 			if (Math.hypot(velocityX, velocityY) > 1e-3) 
 			{
-				moving = true;
+				//moving = true;
 			}
 		}
 		
@@ -303,11 +312,37 @@ public class ServerPlayerUnitController extends ServerUnitController {
 			wantToFire = false;
 		}
 
+		this.oldX = getPlayerUnitModel().getPosX();
+		this.oldY = getPlayerUnitModel().getPosY();
 		// If we are not rotating, we are moving
-		if (notRotating && moving) {
+		//if (notRotating && moving) {
 			DeltaXY dxy = new DeltaXY(displacementX, displacementY);
-			safeMove(dxy);
+			boolean movedSafely = safeMove(dxy);
+		//}
+			
+		double realDeltaX = Math.abs(getPlayerUnitModel().getPosX() - oldX);
+		double realDeltaY = Math.abs(getPlayerUnitModel().getPosY() - oldY);
+		System.out.print("oldv (" + velocityX + " : " + velocityY + ") mov: " + moving + "; ");
+		if (!movedSafely)
+		{
+			//System.out.println("dis<" + displacementX + ":" + displacementY + ">; rdis<" + realDeltaX + ":" + realDeltaY + "> vel<" + velocityX + ":" + velocityY + ">");
+			if (Math.abs(realDeltaY - Math.abs(displacementY)) > 0)
+			{
+				if (Math.abs(realDeltaX - Math.abs(displacementX)) > Math.abs(realDeltaY - Math.abs(displacementY)))
+				{
+					velocityX = 0.0;
+					//System.out.println("+");
+				} else {
+					velocityY = 0.0;
+					//System.out.println("-");
+				}
+			}
+			else if (Math.abs(realDeltaX - Math.abs(displacementX)) > 0)
+			{
+				velocityX = 0.0;
+			}
 		}
+		System.out.println("newv (" + velocityX + " : " + velocityY + ") ");
 		
 		if (moving) {
 			CollisionResult treesCollisionResult = collider.getIntersectionDepth(player.getUnit(), new BoxActivityCriterion() {
