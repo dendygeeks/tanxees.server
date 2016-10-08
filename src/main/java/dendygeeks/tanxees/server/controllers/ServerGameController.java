@@ -172,7 +172,7 @@ public class ServerGameController extends Thread implements MissileCrashListener
 		playerControllers = new HashMap<String, ServerPlayerController>();
 		
 		for (String id : gameSetup.getPlayerIds()) {
-			ServerPlayerController newPlayerController = new ServerPlayerController(this, collider, gameSetup.getUnitTypes().get(id), gameSetup.getAppearances().get(id), this, this.gameSetup.getSpawnConfigs().get(id));
+			ServerPlayerController newPlayerController = new ServerPlayerController(this, collider, gameSetup.getUnitTypes().get(id), gameSetup.getAppearances().get(id), this, time, this.gameSetup.getSpawnConfigs().get(id));
 			playerControllers.put(id, newPlayerController);
 			gameModel.getPlayers().put(id, newPlayerController.getPlayerModel());
 			createPlayerUnit(id);
@@ -193,7 +193,12 @@ public class ServerGameController extends Thread implements MissileCrashListener
 				
 				if (t != null && m != null) {
 					// Missile can't hit the player who has launched it
-					return findMissileOwner(m).getUnit() != t;
+					if (!t.isInvincible()) {
+						return findMissileOwner(m).getUnit() != t;
+					} else {
+						// Invincible units can't collide with missiles
+						return false;
+					}
 				} else {
 					// Everything else can collide
 					return true;

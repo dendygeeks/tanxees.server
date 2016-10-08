@@ -32,7 +32,7 @@ public class ServerPlayerController {
 /*	private PointIJ spawnPoint;
 	private Direction spawnDir;*/
 
-	public ServerPlayerController(MissileCrashListener missileCrashListener, BoxConstructionCollider collider, UnitType unitType, Appearance appearance, ServerGameController gameController, SpawnConfig spawnConfig) {
+	public ServerPlayerController(MissileCrashListener missileCrashListener, BoxConstructionCollider collider, UnitType unitType, Appearance appearance, ServerGameController gameController, double spawnMoment, SpawnConfig spawnConfig) {
 		this.playerModel = new PlayerModel(unitType, appearance, 0);
 		this.missileCrashListener = missileCrashListener;
 		this.collider = collider;
@@ -55,6 +55,7 @@ public class ServerPlayerController {
 				collider, 
 				missileCrashListener, 
 				spawnConfig, 
+				spawnMoment,
 				new PlayerKeysModel(), 
 				false
 				/*, cellSize * (spawnPoint.i + 0.5), 

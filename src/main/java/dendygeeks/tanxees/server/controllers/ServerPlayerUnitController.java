@@ -20,6 +20,7 @@ import dendygeeks.tanxees.server.mechanics.BoxConstructionCollider.MoveRotateRes
 public class ServerPlayerUnitController extends ServerUnitController {
 
 	private static final double gravity = 9.81;
+	private static final double SPAWN_INVINCIBILITY_DURATION = 3.0; // seconds
 	//private static final double SIZE = 34;
 	
 	private static final HashMap<Direction, Double> DIRECTION_ANGLES;
@@ -78,6 +79,7 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		getPlayerUnitModel().setPosX(spawnConfig.getPosX(cellSize));
 		getPlayerUnitModel().setPosY(spawnConfig.getPosY(cellSize));
 		getPlayerUnitModel().setAngle(DIRECTION_ANGLES.get(spawnConfig.direction));
+		getPlayerUnitModel().setSpawnMoment((double)System.currentTimeMillis() / 1000);
 		this.direction = spawnConfig.direction;
 		this.velocityX = 0.0;
 		this.velocityY = 0.0;
@@ -88,12 +90,13 @@ public class ServerPlayerUnitController extends ServerUnitController {
 	public ServerPlayerUnitController(ServerPlayerController player, double sizeW, double sizeL,
 					double mass, double midship, double forwardPower, double backwardPower, double cellSize, 
 					BoxConstructionCollider collider, MissileCrashListener crashListener, SpawnConfig spawnConfig, 
-					PlayerKeysModel activeCommand, boolean moving, Double angle) {
+					double spawnMoment, PlayerKeysModel activeCommand, boolean moving, Double angle) {
+
 		super(new PlayerUnitModel(sizeForDir(false, sizeW, sizeL, spawnConfig.direction), 
 		      sizeForDir(true, sizeW, sizeL, spawnConfig.direction), 
 		      spawnConfig.getPosX(cellSize), 
 		      spawnConfig.getPosY(cellSize), 
-		      angle != null ? angle : DIRECTION_ANGLES.get(spawnConfig.direction), false));
+		      angle != null ? angle : DIRECTION_ANGLES.get(spawnConfig.direction), spawnMoment, false));
 		this.player = player;
 		this.cellSize = cellSize;
 		this.collider = collider;
@@ -123,10 +126,11 @@ public class ServerPlayerUnitController extends ServerUnitController {
 			double cellSize, 
 			BoxConstructionCollider collider, 
 			MissileCrashListener crashListener, 
-			SpawnConfig spawnConfig, 
+			SpawnConfig spawnConfig,
+			double spawnMoment,
 			PlayerKeysModel activeCommand, 
 			boolean moving) {
-		this(player, sizeW, sizeL, mass, midship, forwardPower, backwardPower, cellSize, collider, crashListener, spawnConfig, activeCommand, moving, null);
+		this(player, sizeW, sizeL, mass, midship, forwardPower, backwardPower, cellSize, collider, crashListener, spawnConfig, spawnMoment, activeCommand, moving, null);
 	}
 
 	private boolean safeMove(DeltaXY dxy) {
@@ -353,6 +357,11 @@ public class ServerPlayerUnitController extends ServerUnitController {
 		
 		getPlayerUnitModel().setMoving(moving);
 		getPlayerUnitModel().setAngle(angle);
+	}
+
+	public boolean isInvincible() {
+		double timeSec = (double)System.currentTimeMillis() / 1000;
+		return (timeSec - getPlayerUnitModel().getSpawnMoment()) < SPAWN_INVINCIBILITY_DURATION; 
 	}
 
 }
